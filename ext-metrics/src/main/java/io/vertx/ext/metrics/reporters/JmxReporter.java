@@ -1,19 +1,11 @@
-/*
- * Copyright 2014 Red Hat, Inc.
+/**
+ * A reporter which listens for new metrics and exposes them as namespaced MBeans.
  *
- *  All rights reserved. This program and the accompanying materials
- *  are made available under the terms of the Eclipse Public License v1.0
- *  and Apache License v2.0 which accompanies this distribution.
+ * Copyright 2010-2013 Coda Hale and Yammer, Inc.
  *
- *  The Eclipse Public License is available at
- *  http://www.eclipse.org/legal/epl-v10.html
- *
- *  The Apache License v2.0 is available at
- *  http://www.opensource.org/licenses/apache2.0.php
- *
- *  You may elect to redistribute this code under either of these licenses.
- *
- *  FIXME - dosn't this come from codahale metrics? If so why does it have our copyright header on it?
+ * NOTE: This class has been forked from the http://metrics.codahale.com/ project which is licensed under aslv2.
+ *  -- Changes --
+ *  2014-08-07 nscavell: remove the dependency on slf4j and use the Vert.x logger instead.
  */
 
 package io.vertx.ext.metrics.reporters;
