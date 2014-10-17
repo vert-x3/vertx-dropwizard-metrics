@@ -466,7 +466,7 @@ public class MetricsTest extends MetricsTestBase {
     DatagramSocket datagramSocket = vertx.createDatagramSocket(new DatagramSocketOptions()).listen(1236, "localhost", ar -> {
       assertTrue(ar.succeeded());
       DatagramSocket socket = ar.result();
-      socket.packetHandler(packet -> {
+      socket.handler(packet -> {
         if (complete.getAndSet(true)) {
           testComplete();
         }
