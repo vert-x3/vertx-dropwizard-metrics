@@ -1,6 +1,6 @@
 # Metrics for Vert.x
 
-This is an implementation of core Vert.x metrics which internally uses the Coda Hale metrics library.
+This is an implementation of core Vert.x metrics which internally uses the [Dropwizard metrics](https://github.com/dropwizard/metrics) library.
 
 Vert.x core provides an SPI for recording metrics for various core options in the package `io.vertx.core.metrics.spi`
 . This project provides an implementation of those interfaces.
