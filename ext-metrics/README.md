@@ -56,9 +56,11 @@ If you want JMX too, then you also need to enabled that:
     
 ### Command line
     
-If running Vert.x from the command line
-    
-TODO Currently there is no way to enabled metrics when running on command line
+If running Vert.x from the command line you can enable metrics and JMX by uncommented the JMX_OPTS line in the 
+`vertx` or `vertx.bat` script:
+
+    JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.options.jmxEnabled=true"
+       
 
 ### Enabling remote JMX
 
@@ -66,8 +68,8 @@ If you want the metrics to be exposed remotely over JMX, then you need to set, a
 
     com.sun.management.jmxremote
     
-If running from the command line this can be done by editing the `vertx` or `vertx.bat` script and editing the 
-`JMX_OPTS` variable.
+If running from the command line this can be done by editing the `vertx` or `vertx.bat` and uncommenting the 
+`JMX_OPTS` line.
 
 Please see the [Oracle JMX documentation](http://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html) for more information on configuring JMX
 
