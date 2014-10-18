@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.metrics.impl;
+package io.vertx.ext.metrics;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -25,6 +25,10 @@ import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 /**
+ *
+ * TODO - support listening to more than one Measured
+ *
+ *
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 public class ScheduledMetricsConsumer {

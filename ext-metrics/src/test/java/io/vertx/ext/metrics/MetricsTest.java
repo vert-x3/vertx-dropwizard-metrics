@@ -36,7 +36,6 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
-import io.vertx.ext.metrics.impl.ScheduledMetricsConsumer;
 import io.vertx.test.core.RepeatRule;
 import org.junit.Rule;
 import org.junit.Test;
