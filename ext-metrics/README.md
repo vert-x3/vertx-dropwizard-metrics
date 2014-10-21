@@ -123,6 +123,16 @@ The following metrics are provided:
 * `vertx.cluster-port` - A [Gauge](#gauge) of the cluster-port setting
 * `vertx.verticles` - A [Counter](#counter) of the number of verticles currently deployed
 
+### Event bus metrics
+
+Base name: `vertx.eventbus`
+
+* `handlers` - A [Counter](#counter) of the number of event bus handlers
+* `messages.received` - A [Meter](#meter) representing the rate of which messages are being received
+* `messages.sent` - A [Meter](#meter) representing the rate of which messages are being sent
+* `messages.published` - A [Meter](#meter) representing the rate of which messages are being published
+* `messages.reply-failures` - A [Meter](#meter) representing the rate of reply failures
+
 ### Http server metrics
 
 Base name: `vertx.http.servers.<host>:<port>`
