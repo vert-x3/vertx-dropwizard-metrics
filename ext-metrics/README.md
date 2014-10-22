@@ -5,7 +5,7 @@ This is an implementation of core Vert.x metrics which internally uses the [Drop
 Vert.x core provides an SPI for recording metrics for various core options in the package `io.vertx.core.metrics.spi`.
 This project provides an implementation of those interfaces.
 
-If metrics is enabled in Vert.x then when it starts it will look on its classpath for instances of `io.vertx.core.spi.MetricsVerticleFactory`.
+If metrics is enabled in Vert.x then when it starts it will look on its classpath for instances of `io.vertx.core.spi.VertxMetricsFactory`.
 
 It also provides a reporter which exposes the metrics as JMX MBeans. See the JMX section at the bottom [JMX](#jmx)
 
