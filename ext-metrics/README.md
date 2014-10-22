@@ -2,13 +2,32 @@
 
 This is an implementation of core Vert.x metrics which internally uses the [Dropwizard metrics](https://github.com/dropwizard/metrics) library.
 
-Vert.x core provides an SPI for recording metrics for various core options in the package `io.vertx.core.metrics.spi`
-. This project provides an implementation of those interfaces.
+Vert.x core provides an SPI for recording metrics for various core options in the package `io.vertx.core.metrics.spi`.
+This project provides an implementation of those interfaces.
 
-If metrics is enabled in Vert.x then when it starts it will look on its classpath for instances of `io.vertx.core.spi
-.MetricsVerticleFactory`. This project provides an implementation of that interface.
+If metrics is enabled in Vert.x then when it starts it will look on its classpath for instances of `io.vertx.core.spi.MetricsVerticleFactory`.
 
-It also provides a reporter which exposes the metrics as JMX MBeans. 
+It also provides a reporter which exposes the metrics as JMX MBeans. See the JMX section at the bottom [JMX](#jmx)
+
+## Getting started
+
+To enable metrics first setup maven to include this as a dependency
+
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>ext-metrics</artifactId>
+      <version>${vertx.metrics.version}</version>
+    </dependency>
+
+Then when you create vertx enable metrics using the `VertxOptions` class:
+
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsEnabled(true));
+
+You can also enable JMX
+
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsEnabled(true).setJmxEnabled(true));
+
+To see details about JMX see the [JMX](#jmx) section at the bottom.
 
 ## Naming
 
@@ -183,27 +202,20 @@ Base name: `vertx.datagram`
 * `<host>:<port>.bytes-read` - A [Histogram](#histogram) of the number of bytes read.
   - This metric will only be available if the datagram socket is listening
 
-## Usage
+## JMX
 
-Metrics is disabled by default.
+JMX is disabled by default.
+    
+If you want JMX, then you need to enabled that:
+    
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsEnabled(true).setJMXEnabled(true);
 
-### Embedding
 
-You enable metrics on Vert.x using the `VertxOptions` class you use when creating Vert.x:
-
-    Vertx vertx = Vertx.vertx(new DeploymentOptions().setMetricsEnabled(true));
-    
-If you want JMX too, then you also need to enabled that:
-    
-    Vertx vertx = Vertx.vertx(new DeploymentOptions().setMetricsEnabled(true).setJMXEnabled(true);
-    
-### Command line
-    
 If running Vert.x from the command line you can enable metrics and JMX by uncommented the JMX_OPTS line in the 
 `vertx` or `vertx.bat` script:
 
     JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.options.jmxEnabled=true"
-       
+
 
 ### Enabling remote JMX
 
