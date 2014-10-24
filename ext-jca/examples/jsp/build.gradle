@@ -1,0 +1,17 @@
+
+apply plugin: 'war'
+
+uploadArchives.enabled = false
+install.enabled = false
+
+dependencies {
+  compile project(':ra')
+}
+
+war {
+  manifest {
+    attributes(
+      "Dependencies": "deployment.${modname}-${version}.rar meta-inf"
+    )
+  }
+}

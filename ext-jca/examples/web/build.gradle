@@ -1,0 +1,9 @@
+
+
+uploadArchives.enabled = false
+install.enabled = false
+
+dependencies {
+  compile project(':ra')
+  compile "io.vertx:vertx-platform:$vertxVersion"
+}

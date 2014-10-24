@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+   <title>Vertx JCA Resource Adapter Example</title>
+   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <link type="text/css" rel="stylesheet" href="style.css" />
+   <script src="http:////code.jquery.com/jquery-1.10.2.min.js"></script>
+   <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
+   <script src='vertxbus.js'></script>
+</head>
+<body>
+   <div id="container">
+      <div id="header">
+          <div style="float:left;"><img src="vertx.png" width="300px;" height="128px;" /></div>
+          <div style="float: left; padding-left:80px;"><img src="left.png" />&nbsp;&nbsp;<img src="right.png" /></div>
+          <div style="float:right;"><img src="wildfly.png" width="300px;" height="128px;" /></div>
+      </div>
+      <div id="content">
+         <div id="sidebar">
+            <h3>Find out more</h3>
+            <p>Learn more about Vert.x</p>
+            <ul>
+              <li><a href="http://vertx.io/docs.html">Vertx Documentation</a></li>
+            </ul>
+            <p>Learn more about WildFly</p>
+            <ul>
+              <li><a href="https://docs.jboss.org/author/display/WFLY8/Documentation">WildFly Documentation</a></li>
+            </ul>
+            <p>Learn more about Vertx JCA Resource Adapter</p>
+            <ul>
+              <li><a href="https://github.com/vert-x/jca-adaptor">Vertx Resource Adapter</a></li>
+            </ul>
+         </div>
+      <h1>Welcome to Vertx & WildFly!</h1>
+
+      <p>This example shows how the javascript communicates messages with Message Driven Bean(MDB) </p>
+
+      <h2>Let's Chat:</h2>
+         <table>
+            <tr>
+               <th style="text-align: right;"><label>MDB Address:</label></th>
+               <td><input id="mdb-address" type="text" value="inbound-address" disabled /></td>
+            </tr>
+            <tr>
+               <th style="text-align: right;"><label>SockJS Server Address:</label></th>
+               <td><input id="sockjs-server-address" type="text" value="sockjs-server-address" disabled /></td>
+            </tr>
+            <tr>
+               <th style="text-align: right;"><label>Client Address:</label></th>
+               <td><input id="address" type="text" value="sockjs-address" /></td>
+            </tr>
+            <tr>
+               <th style="text-align: right;"><label>Message:</label></th>
+               <td><input id="message" type="text" size="30" /></td>
+            </tr>
+         </table>
+         <p style="padding-left: 10px;"><input id="connect" type="button" value="Connect" disabled />&nbsp;&nbsp;&nbsp;&nbsp;<input id="disconnect" type="button" value="Disconnect" disabled />&nbsp;&nbsp;&nbsp;&nbsp;<input id="sendToServer" type="button" value="Send To SockJS" disabled />&nbsp;&nbsp;&nbsp;&nbsp;<input id="sendToMDB" type="button" value="Send To MDB" disabled /></p>
+
+       <h2>Messages:</h2>
+       <div style="padding-bottom:10px;">
+         <textarea id="msgList" cols="120" rows="8"></textarea>
+       </div>
+
+      </div>
+      <div id="footer"><img src="logo.png" alt="WildFly logo" />
+      </div>
+   </div>
+
+<script>
+
+  var url = $(document).attr("URL");
+  var eb = new vertx.EventBus(url + "eventbus");
+
+  eb.onopen = function() {
+    $("#connect").removeAttr("disabled");
+  }
+
+  eb.onclose = function() {
+    $("#connect").attr("disabled", "disabled");
+  }
+
+  function connect() {
+    eb.registerHandler($("#address").val(), function(message) {
+         $("#msgList").append("[MSG]: " + JSON.stringify(message) + "\n");
+         document.getElementById("msgList").scrollTop = document.getElementById("msgList").scrollHeight;
+    });
+  }
+
+  function disconnect() {
+    eb.unregisterHandler($("#address").val(), function(message) {});
+  }
+
+  function sendToMDB() {
+    eb.send($("#mdb-address").val(), " " + $("#message").val(), function(message){
+       $("#msgList").append("[MDB]: " + message + "\n");
+    });
+    $("#msgList").append("[ClientJS -> MDB]: " + $("#message").val() + "\n");
+    document.getElementById("msgList").scrollTop = document.getElementById("msgList").scrollHeight;
+  }
+
+  function sendToServer() {
+    eb.send($("#sockjs-server-address").val(), " " + $("#message").val(), function(message){
+       $("#msgList").append("[SockJS Server]: " + message + "\n");
+    });
+    $("#msgList").append("[ClientJS -> SockJSServer]: " + $("#message").val() + "\n");
+    document.getElementById("msgList").scrollTop = document.getElementById("msgList").scrollHeight;
+  }
+
+  $("#connect").click(function() {
+     $("#connect").attr("disabled", "disabled");
+     $("#disconnect").removeAttr("disabled");
+     $("#sendToServer").removeAttr("disabled");
+     $("#sendToMDB").removeAttr("disabled");
+     $("#address").attr("disabled", "disabled");
+     connect();
+  });
+  $("#disconnect").click(function() {
+     $("#disconnect").attr("disabled", "disabled");
+     $("#sendToServer").attr("disabled", "disabled");
+     $("#sendToMDB").attr("disabled", "disabled");
+     $("#connect").removeAttr("disabled");
+     $("#address").removeAttr("disabled");
+     disconnect();
+  });
+  $("#sendToServer").click(function() {
+     sendToServer();
+  });
+  $("#sendToMDB").click(function() {
+     sendToMDB();
+  });
+</script>
+
+ </body>
+</html>

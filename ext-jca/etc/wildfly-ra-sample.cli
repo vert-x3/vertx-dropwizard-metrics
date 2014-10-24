@@ -1,0 +1,3 @@
+/subsystem=resource-adapters/resource-adapter=@VERTXRA@/:add(archive=@VERTXRA@,transaction-support=NoTransaction)
+/subsystem=resource-adapters/resource-adapter=@VERTXRA@/connection-definitions=VertxConnection/:add(class-name=org.vertx.java.resourceadapter.VertxManagedConnectionFactory,jndi-name=java:/eis/VertxConnectionFactory)
+/subsystem=resource-adapters/resource-adapter=@VERTXRA@:activate
