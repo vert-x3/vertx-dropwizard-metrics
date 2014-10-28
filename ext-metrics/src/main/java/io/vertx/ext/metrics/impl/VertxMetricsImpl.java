@@ -184,17 +184,17 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   private static JsonObject toJson(Gauge gauge) {
-    return new JsonObject().putValue("value", gauge.getValue());
+    return new JsonObject().put("value", gauge.getValue());
   }
 
   private static JsonObject toJson(Counter counter) {
-    return new JsonObject().putValue("count", counter.getCount());
+    return new JsonObject().put("count", counter.getCount());
   }
 
   private static JsonObject toJson(Histogram histogram) {
     Snapshot snapshot = histogram.getSnapshot();
     JsonObject json = new JsonObject();
-    json.putNumber("count", histogram.getCount());
+    json.put("count", histogram.getCount());
 
     // Snapshot
     populateSnapshot(json, snapshot, 1);
@@ -224,32 +224,32 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
     // Duration rate
     String duration = durationUnit.toString().toLowerCase();
-    json.putString("durationRate", duration);
+    json.put("durationRate", duration);
 
     return json;
   }
 
   private static void populateMetered(JsonObject json, Metered meter, TimeUnit rateUnit) {
     double factor = rateUnit.toSeconds(1);
-    json.putNumber("count", meter.getCount());
-    json.putNumber("meanRate", meter.getMeanRate() * factor);
-    json.putNumber("oneMinuteRate", meter.getOneMinuteRate() * factor);
-    json.putNumber("fiveMinuteRate", meter.getFiveMinuteRate() * factor);
-    json.putNumber("fifteenMinuteRate", meter.getFifteenMinuteRate() * factor);
+    json.put("count", meter.getCount());
+    json.put("meanRate", meter.getMeanRate() * factor);
+    json.put("oneMinuteRate", meter.getOneMinuteRate() * factor);
+    json.put("fiveMinuteRate", meter.getFiveMinuteRate() * factor);
+    json.put("fifteenMinuteRate", meter.getFifteenMinuteRate() * factor);
     String rate = "events/" + rateUnit.toString().toLowerCase();
-    json.putString("rate", rate);
+    json.put("rate", rate);
   }
 
   private static void populateSnapshot(JsonObject json, Snapshot snapshot, double factor) {
-    json.putNumber("min", snapshot.getMin() * factor);
-    json.putNumber("max", snapshot.getMax() * factor);
-    json.putNumber("mean", snapshot.getMean() * factor);
-    json.putNumber("stddev", snapshot.getStdDev() * factor);
-    json.putNumber("median", snapshot.getMedian() * factor);
-    json.putNumber("75%", snapshot.get75thPercentile() * factor);
-    json.putNumber("95%", snapshot.get95thPercentile() * factor);
-    json.putNumber("98%", snapshot.get98thPercentile() * factor);
-    json.putNumber("99%", snapshot.get99thPercentile() * factor);
-    json.putNumber("99.9%", snapshot.get999thPercentile() * factor);
+    json.put("min", snapshot.getMin() * factor);
+    json.put("max", snapshot.getMax() * factor);
+    json.put("mean", snapshot.getMean() * factor);
+    json.put("stddev", snapshot.getStdDev() * factor);
+    json.put("median", snapshot.getMedian() * factor);
+    json.put("75%", snapshot.get75thPercentile() * factor);
+    json.put("95%", snapshot.get95thPercentile() * factor);
+    json.put("98%", snapshot.get98thPercentile() * factor);
+    json.put("99%", snapshot.get99thPercentile() * factor);
+    json.put("99.9%", snapshot.get999thPercentile() * factor);
   }
 }
