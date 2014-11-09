@@ -1,8 +1,0 @@
-bin
-target
-build
-.classpath
-.project
-.settings
-.gradle
-classes
