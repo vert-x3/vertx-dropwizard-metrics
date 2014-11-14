@@ -57,7 +57,7 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
 
   @Override
   public void requestBegin(HttpClientRequest request) {
-    timings.put(request, time(request.method(), request.uri()));
+    timings.put(request, time(request.method().name(), request.uri()));
   }
 
   @Override
