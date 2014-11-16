@@ -571,7 +571,7 @@ public class MetricsTest extends MetricsTestBase {
   public void testEventBusMetricsReplyRecipientFailure() {
     vertx.eventBus().consumer("foo").handler(msg -> msg.fail(1, "blah"));
 
-    vertx.eventBus().send("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
+    vertx.eventBus().send("foo", "bar", new DeliveryOptions(), ar -> {
       assertTrue(ar.failed());
       testComplete();
     });
