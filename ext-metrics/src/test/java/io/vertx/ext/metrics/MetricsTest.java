@@ -631,6 +631,7 @@ public class MetricsTest extends MetricsTestBase {
       latch.countDown();
     });
     awaitLatch(latch);
+    waitUntil(() -> getCount(vertx.metrics().get("vertx.timers")) == 0);
     assertCount(vertx.metrics().get("vertx.timers"), 0L);
 
     // Periodic
@@ -718,11 +719,16 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   private void assertCount(JsonObject metric, Long expected) {
-    assertNotNull(metric);
-    Long actual = metric.getLong("count");
+    Long actual = getCount(metric);
     String name = metric.getString("name");
     assertNotNull(actual);
     assertEquals(name + " (count)", expected, actual);
+  }
+
+  private Long getCount(JsonObject metric) {
+    assertNotNull(metric);
+    Long actual = metric.getLong("count");
+    return actual;
   }
 
   private void assertMinMax(JsonObject metric, Long min, Long max) {
