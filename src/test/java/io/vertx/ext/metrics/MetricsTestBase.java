@@ -18,6 +18,7 @@ package io.vertx.ext.metrics;
 
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetServer;
 import io.vertx.test.core.VertxTestBase;
@@ -57,6 +58,19 @@ public class MetricsTestBase extends VertxTestBase {
       });
     }
     awaitLatch(latch);
+  }
+
+  protected void assertCount(JsonObject metric, Long expected) {
+    Long actual = getCount(metric);
+    String name = metric.getString("name");
+    assertNotNull(actual);
+    assertEquals(name + " (count)", expected, actual);
+  }
+
+  protected Long getCount(JsonObject metric) {
+    assertNotNull(metric);
+    Long actual = metric.getLong("count");
+    return actual;
   }
 
 }

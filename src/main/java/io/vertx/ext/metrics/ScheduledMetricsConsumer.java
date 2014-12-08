@@ -17,27 +17,24 @@
 package io.vertx.ext.metrics;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.Arguments;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 /**
- *
- * TODO - support listening to more than one Measured
- *
- *
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 public class ScheduledMetricsConsumer {
 
+  private static final BiPredicate<String, JsonObject> FILTER_ANY = (name, metric) -> true;
   private final Vertx vertx;
   private final Measured measured;
-
-  private BiPredicate<String, JsonObject> filter = (name, metric) -> true;
-
+  private BiPredicate<String, JsonObject> filter = FILTER_ANY;
   private volatile long timerId = -1;
 
   public ScheduledMetricsConsumer(Vertx vertx) {
@@ -45,17 +42,27 @@ public class ScheduledMetricsConsumer {
   }
 
   public ScheduledMetricsConsumer(Vertx vertx, Measured measured) {
+    Objects.requireNonNull(vertx, "no null vertx accepted");
+    Objects.requireNonNull(measured, "no null measured accepted");
     this.vertx = vertx;
     this.measured = measured;
   }
 
   public ScheduledMetricsConsumer filter(BiPredicate<String, JsonObject> filter) {
+    Objects.requireNonNull(filter, "no null filter accepted");
     if (timerId != -1) throw new IllegalStateException("Cannot set filter while metrics consumer is running.");
-    this.filter = filter;
+    if (FILTER_ANY.equals(this.filter)) {
+      this.filter = filter;
+    } else {
+      this.filter = this.filter.or(filter);
+    }
     return this;
   }
 
   public void start(long delay, TimeUnit unit, BiConsumer<String, JsonObject> consumer) {
+    Arguments.require(delay > 0, "delay must be > 0");
+    Objects.requireNonNull(unit, "no null unit accepted");
+    Objects.requireNonNull(consumer, "no null consumer accepted");
     timerId = vertx.setPeriodic(unit.toMillis(delay), tid -> {
       measured.metrics().forEach((name, metric) -> {
         if (filter.test(name, metric)) {

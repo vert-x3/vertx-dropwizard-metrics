@@ -46,13 +46,12 @@ import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.vertx.test.core.TestUtils.*;
+import static io.vertx.test.core.TestUtils.randomBuffer;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -649,34 +648,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(vertx.metrics().get("vertx.timers"), 0L);
   }
 
-  @Test
-  public void testScheduledMetricConsumer() {
-    int messages = 18;
-    AtomicInteger count = new AtomicInteger(messages);
-    String baseName = vertx.eventBus().metricBaseName();
 
-    ScheduledMetricsConsumer consumer = new ScheduledMetricsConsumer(vertx).filter((name, metric) -> {
-      return name.startsWith(baseName);
-    });
-
-    consumer.start(300, TimeUnit.MILLISECONDS, (name, metric) -> {
-      assertTrue(name.startsWith(baseName));
-      if (count.get() == 0) {
-        if (name.equals(baseName + ".messages.sent")) {
-          assertCount(metric, (long) messages);
-          testComplete();
-        }
-      }
-    });
-
-    for (int i = 0; i < messages; i++) {
-      vertx.eventBus().send("foo", "Hello");
-      count.decrementAndGet();
-    }
-
-    await();
-  }
-  
   @Test
   public void testMetricsCleanupedOnVertxClose() throws Exception {
     CountDownLatch latch1 = new CountDownLatch(1);
@@ -716,19 +688,6 @@ public class MetricsTest extends MetricsTestBase {
     });
     await();
     vertx = null;
-  }
-
-  private void assertCount(JsonObject metric, Long expected) {
-    Long actual = getCount(metric);
-    String name = metric.getString("name");
-    assertNotNull(actual);
-    assertEquals(name + " (count)", expected, actual);
-  }
-
-  private Long getCount(JsonObject metric) {
-    assertNotNull(metric);
-    Long actual = metric.getLong("count");
-    return actual;
   }
 
   private void assertMinMax(JsonObject metric, Long min, Long max) {
