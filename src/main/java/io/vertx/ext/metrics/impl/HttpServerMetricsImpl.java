@@ -18,7 +18,7 @@ package io.vertx.ext.metrics.impl;
 
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.metrics.spi.HttpServerMetrics;
+import io.vertx.core.spi.metrics.HttpServerMetrics;
 
 import java.util.Map;
 import java.util.WeakHashMap;

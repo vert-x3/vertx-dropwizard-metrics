@@ -20,7 +20,7 @@ import com.codahale.metrics.RatioGauge;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.metrics.spi.HttpClientMetrics;
+import io.vertx.core.spi.metrics.HttpClientMetrics;
 
 import java.util.Map;
 import java.util.WeakHashMap;

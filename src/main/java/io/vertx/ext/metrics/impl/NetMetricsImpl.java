@@ -19,7 +19,7 @@ package io.vertx.ext.metrics.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.vertx.core.metrics.spi.NetMetrics;
+import io.vertx.core.spi.metrics.NetMetrics;
 import io.vertx.core.net.SocketAddress;
 
 import java.util.Map;

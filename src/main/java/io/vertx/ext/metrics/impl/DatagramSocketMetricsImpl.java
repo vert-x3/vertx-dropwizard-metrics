@@ -18,7 +18,7 @@ package io.vertx.ext.metrics.impl;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
-import io.vertx.core.metrics.spi.DatagramSocketMetrics;
+import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.core.net.SocketAddress;
 
 /**

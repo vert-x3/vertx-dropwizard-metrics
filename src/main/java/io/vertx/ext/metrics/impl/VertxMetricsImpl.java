@@ -35,12 +35,13 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.metrics.spi.DatagramSocketMetrics;
-import io.vertx.core.metrics.spi.EventBusMetrics;
-import io.vertx.core.metrics.spi.HttpClientMetrics;
-import io.vertx.core.metrics.spi.HttpServerMetrics;
-import io.vertx.core.metrics.spi.NetMetrics;
-import io.vertx.core.metrics.spi.VertxMetrics;
+import io.vertx.core.metrics.MetricsOptions;
+import io.vertx.core.spi.metrics.DatagramSocketMetrics;
+import io.vertx.core.spi.metrics.EventBusMetrics;
+import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.core.spi.metrics.NetMetrics;
+import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
@@ -63,9 +64,9 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private Counter verticles;
   private Handler<Void> doneHandler;
 
-  VertxMetricsImpl(VertxOptions vertxOptions) {
+  VertxMetricsImpl(VertxOptions options) {
     super(new Registry(), BASE_NAME);
-    initialize(vertxOptions);
+    initialize(options);
   }
 
   public void initialize(VertxOptions options) {

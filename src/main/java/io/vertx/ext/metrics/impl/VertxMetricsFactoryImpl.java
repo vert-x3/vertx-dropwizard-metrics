@@ -18,8 +18,9 @@ package io.vertx.ext.metrics.impl;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.metrics.MetricsOptions;
+import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.metrics.reporters.JmxReporter;
-import io.vertx.core.metrics.spi.VertxMetrics;
 import io.vertx.core.spi.VertxMetricsFactory;
 
 /**
@@ -31,8 +32,9 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
   public VertxMetrics metrics(Vertx vertx, VertxOptions options) {
     VertxMetricsImpl metrics = new VertxMetricsImpl(options);
     // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
-    if (options.isJmxEnabled()) {
-      String jmxDomain = options.getJmxDomain();
+    MetricsOptions metricsOptions = options.getMetricsOptions();
+    if (metricsOptions.isJmxEnabled()) {
+      String jmxDomain = metricsOptions.getJmxDomain();
       if (jmxDomain == null) {
         jmxDomain = "vertx" + "@" + Integer.toHexString(vertx.hashCode());
       }
