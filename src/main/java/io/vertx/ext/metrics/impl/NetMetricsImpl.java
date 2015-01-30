@@ -77,7 +77,7 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
     connectionLifetimes.put(remoteAddress, connections.time());
 
     // Remote address connection metrics
-    counter("open-connections", remoteAddress.hostAddress()).inc();
+    counter("open-connections", remoteAddress.host()).inc();
 
     // A little clunky, but it's possible we got here after closed has been called
     if (closed) {
@@ -94,10 +94,10 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
     }
 
     // Remote address connection metrics
-    Counter counter = counter("open-connections", remoteAddress.hostAddress());
+    Counter counter = counter("open-connections", remoteAddress.host());
     counter.dec();
     if (counter.getCount() == 0) {
-      remove("open-connections", remoteAddress.hostAddress());
+      remove("open-connections", remoteAddress.host());
     }
 
     // A little clunky, but it's possible we got here after closed has been called
@@ -130,6 +130,6 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
   protected static String addressName(SocketAddress address) {
     if (address == null) return null;
 
-    return address.hostAddress() + ":" + address.hostPort();
+    return address.host() + ":" + address.port();
   }
 }

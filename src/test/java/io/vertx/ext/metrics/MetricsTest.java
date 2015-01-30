@@ -305,7 +305,7 @@ public class MetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       AtomicBoolean complete = new AtomicBoolean(false);
-      client.connectWebsocket(8080, "localhost", "/blah", socket -> {
+      client.websocket(8080, "localhost", "/blah", socket -> {
         socket.write(clientMax);
         socket.handler(buff -> {
           if (!complete.getAndSet(true)) {
@@ -613,7 +613,7 @@ public class MetricsTest extends MetricsTestBase {
 
     assertCount(metrics.get("vertx.verticles"), (long) verticles);
 
-    vertx.undeployVerticle(ref.get(), ar -> {
+    vertx.undeploy(ref.get(), ar -> {
       assertTrue(ar.succeeded());
       assertCount(vertx.metrics().get("vertx.verticles"), (long) verticles - 1);
       testComplete();
