@@ -64,8 +64,8 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private Counter verticles;
   private Handler<Void> doneHandler;
 
-  VertxMetricsImpl(VertxOptions options) {
-    super(new Registry(), BASE_NAME);
+  VertxMetricsImpl(Registry registry, VertxOptions options) {
+    super(registry, BASE_NAME);
     initialize(options);
   }
 

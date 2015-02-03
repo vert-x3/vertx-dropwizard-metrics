@@ -16,6 +16,8 @@
 
 package io.vertx.ext.metrics.impl;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.metrics.MetricsOptions;
@@ -30,9 +32,16 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
 
   @Override
   public VertxMetrics metrics(Vertx vertx, VertxOptions options) {
-    VertxMetricsImpl metrics = new VertxMetricsImpl(options);
-    // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
     MetricsOptions metricsOptions = options.getMetricsOptions();
+    Registry registry = new Registry();
+    if (metricsOptions.getName() != null) {
+      MetricRegistry other = SharedMetricRegistries.add(metricsOptions.getName(), registry);
+      if (other != null && other instanceof Registry) {
+        registry = (Registry) other;
+      }
+    }
+    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, options);
+    // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
     if (metricsOptions.isJmxEnabled()) {
       String jmxDomain = metricsOptions.getJmxDomain();
       if (jmxDomain == null) {
