@@ -19,7 +19,11 @@ package io.vertx.ext.metrics.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import io.vertx.core.eventbus.ReplyFailure;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.metrics.EventBusMetrics;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>

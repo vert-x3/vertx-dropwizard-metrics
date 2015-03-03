@@ -19,6 +19,7 @@ package io.vertx.ext.metrics;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
+import io.vertx.ext.metrics.impl.AbstractMetrics;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -34,7 +35,7 @@ import java.util.function.BiPredicate;
 public class ScheduledMetricsConsumer {
 
   private final Vertx vertx;
-  private final Measured measured;
+  private final AbstractMetrics measured;
 
   private BiPredicate<String, JsonObject> filter = (name, metric) -> true;
 
@@ -46,7 +47,7 @@ public class ScheduledMetricsConsumer {
 
   public ScheduledMetricsConsumer(Vertx vertx, Measured measured) {
     this.vertx = vertx;
-    this.measured = measured;
+    this.measured = AbstractMetrics.unwrap(measured);
   }
 
   public ScheduledMetricsConsumer filter(BiPredicate<String, JsonObject> filter) {
@@ -58,7 +59,9 @@ public class ScheduledMetricsConsumer {
   public void start(long delay, TimeUnit unit, BiConsumer<String, JsonObject> consumer) {
     timerId = vertx.setPeriodic(unit.toMillis(delay), tid -> {
       measured.metrics().forEach((name, metric) -> {
+        System.out.println("maybe " + name);
         if (filter.test(name, metric)) {
+          System.out.println("sending " + name);
           consumer.accept(name, metric);
         }
       });
