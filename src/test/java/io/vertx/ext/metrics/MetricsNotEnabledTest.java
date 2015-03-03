@@ -42,6 +42,14 @@ import static io.vertx.test.core.TestUtils.*;
  */
 public class MetricsNotEnabledTest extends MetricsTestBase {
 
+  private MetricsService _metrics;
+
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    _metrics = MetricsService.getMetrics();
+  }
+
   @Override
   protected VertxOptions getOptions() {
     return new VertxOptions();
@@ -90,11 +98,11 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     assertEquals(requests, expected.get());
 
     // Verify http server
-    Map<String, JsonObject> metrics = server.metrics();
+    Map<String, JsonObject> metrics = _metrics.getMetricsSnapshot(server);
     assertTrue(metrics.isEmpty());
 
     // Verify http client
-    metrics = client.metrics();
+    metrics = _metrics.getMetricsSnapshot(client);
     assertTrue(metrics.isEmpty());
 
     cleanup(server, client);

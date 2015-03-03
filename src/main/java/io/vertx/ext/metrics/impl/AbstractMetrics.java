@@ -21,20 +21,65 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
-import io.vertx.core.spi.metrics.BaseMetrics;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.metrics.Measured;
+import io.vertx.core.spi.metrics.Metrics;
+import io.vertx.core.spi.metrics.MetricsProvider;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.codahale.metrics.MetricRegistry.*;
 
 /**
+ * Base Codahale metrics object.
+ *
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-abstract class AbstractMetrics implements BaseMetrics {
+public abstract class AbstractMetrics implements Metrics {
+
+  public static AbstractMetrics unwrap(Measured measured) {
+    if (measured instanceof MetricsProvider) {
+      MetricsProvider provider = (MetricsProvider) measured;
+      Metrics baseMetrics = provider.getMetrics();
+      if (baseMetrics instanceof AbstractMetrics) {
+        return (AbstractMetrics) baseMetrics;
+      }
+    }
+    return null;
+  }
+
   private final Registry registry;
   private String baseName;
 
   AbstractMetrics(Registry registry, String baseName) {
     this.registry = registry;
     this.baseName = baseName;
+  }
+
+  /**
+   * Will return the metrics that correspond with this measured object.
+   *
+   * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
+   * the json data representing that metric
+   */
+  public Map<String, JsonObject> metrics() {
+    // Todo filter ahead of stream
+    Map<String, JsonObject> metrics = new HashMap<>();
+    registry.getMetrics().forEach((name, metric) -> {
+      JsonObject data = registry.convertMetric(metric, TimeUnit.SECONDS, TimeUnit.MILLISECONDS);
+      metrics.put(name, data);
+    });
+    return process(metrics);
+  }
+
+  protected Map<String, JsonObject> process(Map<String, JsonObject> metrics) {
+    String name = baseName();
+    return metrics.entrySet().stream()
+        .filter(e -> e.getKey().startsWith(name))
+        .collect(Collectors.toMap(e -> e.getKey().substring(name.length() + 1), Map.Entry::getValue));
   }
 
   protected Registry registry() {
