@@ -1,7 +1,7 @@
 = Metrics
 
 This project implements the Vert.x Metrics Service Provider Interface (SPI) reporting metrics to the
-[Dropwizard metrics](https://github.com/dropwizard/metrics) library.
+https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
@@ -116,8 +116,9 @@ def metrics = metricsService.getMetricsSnapshot(server)
 == Data
 
 Below is how each dropwizard metric is represented in JSON. Please refer to the
-[Dropwizard metrics](https://github.com/dropwizard/metrics) documentation for detailed information on each metric.
+https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for detailed information on each metric.
 
+[[gauge]]
 === Gauge
 
 [source,javascript]
@@ -127,6 +128,7 @@ Below is how each dropwizard metric is represented in JSON. Please refer to the
 }
 ----
 
+[[counter]]
 === Counter
 
 [source,groovy]
@@ -136,6 +138,7 @@ Below is how each dropwizard metric is represented in JSON. Please refer to the
 }
 ----
 
+[[histogram]]
 === Histogram
 
 [source,javascript]
@@ -155,6 +158,7 @@ Below is how each dropwizard metric is represented in JSON. Please refer to the
 }
 ----
 
+[[meter]]
 === Meter
 
 [source,groovy]
@@ -169,6 +173,7 @@ Below is how each dropwizard metric is represented in JSON. Please refer to the
 }
 ----
 
+[[timer]]
 === Timer
 
 A timer is basically a combination of Histogram + Meter.
@@ -206,32 +211,33 @@ The following metrics are currently provided.
 
 The following metrics are provided:
 
-* `vertx.event-loop-size` - A [Gauge](#gauge) of the number of threads in the event loop pool
-* `vertx.worker-pool-size` - A [Gauge](#gauge) of the number of threads in the worker pool
-* `vertx.cluster-host` - A [Gauge](#gauge) of the cluster-host setting
-* `vertx.cluster-port` - A [Gauge](#gauge) of the cluster-port setting
-* `vertx.verticles` - A [Counter](#counter) of the number of verticles currently deployed
+* `vertx.event-loop-size` - A <<gauge>> of the number of threads in the event loop pool
+* `vertx.worker-pool-size` - A <<gauge>> of the number of threads in the worker pool
+* `vertx.cluster-host` - A <<gauge>> of the cluster-host setting
+* `vertx.cluster-port` - A <<gauge>> of the cluster-port setting
+* `vertx.verticles` - A <<counter>> of the number of verticles currently deployed
 
 === Event bus metrics
 
 Base name: `vertx.eventbus`
 
-* `handlers` - A [Counter](#counter) of the number of event bus handlers
-* `messages.received` - A [Meter](#meter) representing the rate of which messages are being received
-* `messages.sent` - A [Meter](#meter) representing the rate of which messages are being sent
-* `messages.published` - A [Meter](#meter) representing the rate of which messages are being published
-* `messages.reply-failures` - A [Meter](#meter) representing the rate of reply failures
+* `handlers` - A <<counter>> of the number of event bus handlers
+* `messages.received` - A <<meter>> representing the rate of which messages are being received
+* `messages.sent` - A <<meter>> representing the rate of which messages are being sent
+* `messages.published` - A <<meter>> representing the rate of which messages are being published
+* `messages.reply-failures` - A <<meter>> representing the rate of reply failures
 
+[[http-server-metrics]]
 === Http server metrics
 
 Base name: `vertx.http.servers.<host>:<port>`
 
-Http server includes all the metrics of a [Net Server](#net-server-metrics)* plus the following:
+Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus the following:
 
-* `requests` - A [Timer](#timer) of a request and the rate of it's occurrence
-* `<http-method>-requests` - A [Timer](#timer) of a specific http method request and the rate of it's occurrence
+* `requests` - A <<timer>> of a request and the rate of it's occurrence
+* `<http-method>-requests` - A <<timer>> of a specific http method request and the rate of it's occurrence
 ** Examples: `get-requests`, `post-requests`
-* `<http-method>-requests./<uri>` - A [Timer](#timer) of a specific http method & URI request and the rate of it's occurrence
+* `<http-method>-requests./<uri>` - A <<timer>> of a specific http method & URI request and the rate of it's occurrence
 ** Examples: `get-requests./some/uri`, `post-requests./some/uri?foo=bar`
 
 *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
@@ -240,36 +246,37 @@ Http server includes all the metrics of a [Net Server](#net-server-metrics)* plu
 
 Base name: `vertx.http.clients.@<id>`
 
-Http client includes all the metrics of a [Http Server](#http-server-metrics) plus the following:
+Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
 
-* `connections.max-pool-size` - A [Gauge](#gauge) of the max connection pool size
-* `connections.pool-ratio` - A ratio [Gauge](#gauge) of the open connections / max connection pool size
+* `connections.max-pool-size` - A <<gauge>> of the max connection pool size
+* `connections.pool-ratio` - A ratio <<gauge>> of the open connections / max connection pool size
 
+[[net-server-metrics]]
 === Net server metrics
 
 Base name: `vertx.net.servers.<host>:<port>`
 
-* `open-connections` - A [Counter](#counter) of the number of open connections
-* `open-connections.<remote-host>` - A [Counter](#counter) of the number of open connections for a particular remote host
-* `connections` - A [Timer](#timer) of a connection and the rate of it's occurrence
-* `exceptions` - A [Counter](#counter) of the number of exceptions
-* `bytes-read` - A [Histogram](#histogram) of the number of bytes read.
-* `bytes-written` - A [Histogram](#histogram) of the number of bytes written.
+* `open-connections` - A <<counter>> of the number of open connections
+* `open-connections.<remote-host>` - A <<counter>> of the number of open connections for a particular remote host
+* `connections` - A <<timer>> of a connection and the rate of it's occurrence
+* `exceptions` - A <<counter>> of the number of exceptions
+* `bytes-read` - A <<histogram>> of the number of bytes read.
+* `bytes-written` - A <<histogram>> of the number of bytes written.
 
 === Net client metrics
 
 Base name: `vertx.net.clients.@<id>`
 
-Net client includes all the metrics of a [Net Server](#net-server-metrics)
+Net client includes all the metrics of a <<net-server-metrics,Net Server>>
 
 === Datagram socket metrics
 
 Base name: `vertx.datagram`
 
-* `sockets` - A [Counter](#counter) of the number of datagram sockets
-* `exceptions` - A [Counter](#counter) of the number of exceptions
-* `bytes-written` - A [Histogram](#histogram) of the number of bytes written.
-* `<host>:<port>.bytes-read` - A [Histogram](#histogram) of the number of bytes read.
+* `sockets` - A <<counter>> of the number of datagram sockets
+* `exceptions` - A <<counter>> of the number of exceptions
+* `bytes-written` - A <<histogram>> of the number of bytes written.
+* `<host>:<port>.bytes-read` - A <<histogram>> of the number of bytes read.
 ** This metric will only be available if the datagram socket is listening
 
 [[jmx]]
@@ -309,7 +316,7 @@ If you want the metrics to be exposed remotely over JMX, then you need to set, a
 If running from the command line this can be done by editing the `vertx` or `vertx.bat` and uncommenting the
 `JMX_OPTS` line.
 
-Please see the [Oracle JMX documentation](http://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html) for more information on configuring JMX
+Please see the http://docs.oracle.com/javase/8/docs/technotes/guides/management/agent.html[Oracle JMX documentation] for more information on configuring JMX
 
 *If running Vert.x on a public server please be careful about exposing remote JMX access*
 
