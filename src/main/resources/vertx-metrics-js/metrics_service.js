@@ -54,13 +54,13 @@ var MetricsService = function(j_val) {
 /**
 
  @memberof module:vertx-metrics-js/metrics_service
-
+ @param vertx {Vertx} 
  @return {MetricsService}
  */
-MetricsService.getMetrics = function() {
+MetricsService.create = function(vertx) {
   var __args = arguments;
-  if (__args.length === 0) {
-    return new MetricsService(JMetricsService.getMetrics());
+  if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+    return new MetricsService(JMetricsService.create(vertx._jdel));
   } else utils.invalidArgs();
 };
 

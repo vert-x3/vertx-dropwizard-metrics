@@ -1,1 +1,55 @@
-Todo
+== Metrics
+
+Vert.x provides a fairly simple API to retrieve metrics via the `link:jsdoc/measured-Measured.html[Measured]` interface
+which is implemented by various Vert.x components like `link:jsdoc/http_server-HttpServer.html[HttpServer]`, `link:jsdoc/net_server-NetServer.html[NetServer]`,
+and even `link:jsdoc/vertx-Vertx.html[Vertx]` itself.
+
+By default Vert.x does not record any metrics. Instead it provides an SPI for others to implement like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
+which can be added to the classpath. Once added, you can enable metrics by doing the following:
+[source,js]
+----
+var Vertx = require("vertx-js/vertx");
+var vertx = Vertx.vertx({
+  "metricsOptions" : {
+    "enabled" : true
+  }
+});
+
+----
+
+Once enabled, you can retrieve metrics from any `link:jsdoc/measured-Measured.html[Measured]` object which provides
+a map of the metric name to the data, represented by a `link:jsdoc/json_object-JsonObject.html[JsonObject]`. So for example if we were to print
+out all metrics for a particular Vert.x instance:
+[source,js]
+----
+var MetricsService = require("vertx-metrics-js/metrics_service");
+var metricsService = MetricsService.create(vertx);
+var metrics = metricsService.getMetricsSnapshot(vertx);
+metrics.forEach(function (metric, name) {
+  console.log(name + " : " + JSON.stringify(metric));
+});
+
+----
+
+NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:jsdoc/json_object-JsonObject.html[JsonObject]`
+consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
+
+Often it is desired that you only want to capture specific metrics for a particular component, like an http server
+without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
+
+Since `link:jsdoc/http_server-HttpServer.html[HttpServer]` implements `link:jsdoc/measured-Measured.html[Measured]`, you can easily grab all metrics
+that are specific for that particular http server.
+[source,js]
+----
+var MetricsService = require("vertx-metrics-js/metrics_service");
+var metricsService = MetricsService.create(vertx);
+var server = vertx.createHttpServer();
+// set up server
+var metrics = metricsService.getMetricsSnapshot(server);
+
+----
+
+=== Metrics SPI
+
+The metrics SPI is an advanced feature which allows implementers to capture events from Vert.x in order to gather metrics. For
+more information on this, please consult the `link:jsdoc/vertx_metrics-VertxMetrics.html[API Documentation]`.

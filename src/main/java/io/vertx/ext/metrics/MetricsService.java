@@ -17,6 +17,7 @@
 package io.vertx.ext.metrics;
 
 import io.vertx.codegen.annotations.VertxGen;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.ext.metrics.impl.MetricsServiceImpl;
@@ -29,7 +30,8 @@ import java.util.Map;
 @VertxGen
 public interface MetricsService {
 
-  public static MetricsService getMetrics() {
+  public static MetricsService create(Vertx vertx) {
+    // We don't use Vertx instance for now but we might later
     return new MetricsServiceImpl();
   }
 

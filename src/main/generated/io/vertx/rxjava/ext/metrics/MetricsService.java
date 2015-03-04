@@ -21,6 +21,7 @@ import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.metrics.Measured;
 import java.util.Map;
+import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -41,8 +42,8 @@ public class MetricsService {
     return delegate;
   }
 
-  public static MetricsService getMetrics() {
-    MetricsService ret= MetricsService.newInstance(io.vertx.ext.metrics.MetricsService.getMetrics());
+  public static MetricsService create(Vertx vertx) {
+    MetricsService ret= MetricsService.newInstance(io.vertx.ext.metrics.MetricsService.create((io.vertx.core.Vertx) vertx.getDelegate()));
     return ret;
   }
 
