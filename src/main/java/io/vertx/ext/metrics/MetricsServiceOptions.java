@@ -152,6 +152,7 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public MetricsServiceOptions setJmxDomain(String jmxDomain) {
+    // todo test this
     this.jmxDomain = jmxDomain;
     return this;
   }

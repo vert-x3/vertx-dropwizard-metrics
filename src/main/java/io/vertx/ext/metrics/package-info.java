@@ -270,7 +270,12 @@
  * JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.options.jmxEnabled=true"
  * ----
  *
- * todo : add JMX domain configuration
+ * You can configure the domain under which the MBeans will be created:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupJMXWithDomain()}
+ * ----
  *
  * == Enabling remote JMX
  *
@@ -287,8 +292,23 @@
  *
  * == Accessing Dropwizard Registry
  *
- * todo
+ * When configuring the metrics service, an optional name can be specified for registering the underlying
+ * https://dropwizard.github.io/metrics/3.1.0/getting-started/#the-registry[Dropwizard Registry] in the
+ * the https://dropwizard.github.io/metrics/3.1.0/apidocs/com/codahale/metrics/SharedMetricRegistries.html[Dropwizard Shared Registry]
+ * so you can retrieve this registry and use according to your needs.
  *
+ * [source,java]
+ * ----
+ * VertxOptions options = new VertxOptions().setMetricsOptions(
+ *   new MetricsServiceOptions().setEnabled(true).setName("the_name")
+ * );
+ * Vertx vertx = Vertx.vertxt(options);
+ *
+ * // Get the registry
+ * MetricRegistry registry = SharedMetricRegistries.getOrCreate("the_name");
+ *
+ * // Do whatever you need with the registry
+ * ----
  */
 @GenModule(name = "vertx-metrics")
 @Document(fileName = "index.adoc")

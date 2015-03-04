@@ -41,7 +41,15 @@ public class MetricsExamples {
 
   public void setupJMX() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new MetricsServiceOptions().setEnabled(true).setJmxEnabled(true)
+        new MetricsServiceOptions().setJmxEnabled(true)
+    ));
+  }
+
+  public void setupJMXWithDomain() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new MetricsServiceOptions().
+            setJmxEnabled(true).
+            setJmxDomain("mydomain")
     ));
   }
 
