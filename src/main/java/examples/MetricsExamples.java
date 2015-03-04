@@ -18,8 +18,10 @@ package examples;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.docgen.Source;
 import io.vertx.ext.metrics.MetricsService;
 import io.vertx.ext.metrics.MetricsServiceOptions;
 
@@ -28,7 +30,31 @@ import java.util.Map;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
+@Source
 public class MetricsExamples {
+
+  public void setup() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new MetricsServiceOptions().setEnabled(true)
+    ));
+  }
+
+  public void setupJMX() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new MetricsServiceOptions().setEnabled(true).setJmxEnabled(true)
+    ));
+  }
+
+  public void naming1(Vertx vertx, MetricsService metricsService) {
+    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx);
+    metrics.get("vertx.eventbus.handlers");
+  }
+
+  public void naming2(Vertx vertx, MetricsService metricsService) {
+    EventBus eventBus = vertx.eventBus();
+    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(eventBus);
+    metrics.get("handlers");
+  }
 
   public void example1(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
@@ -36,13 +62,6 @@ public class MetricsExamples {
     metrics.forEach((name, metric) -> {
       System.out.println(name + " : " + metric.encodePrettily());
     });
-  }
-
-  public void example2() {
-    Vertx vertx = Vertx.vertx(
-        new VertxOptions().setMetricsOptions(
-            new MetricsServiceOptions().setEnabled(true))
-    );
   }
 
   public void example3(Vertx vertx) {

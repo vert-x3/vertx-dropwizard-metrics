@@ -1,7 +1,7 @@
 == MetricsServiceOptions
 
 ++++
- Vert.x metrics configuration.
+ Vert.x metrics service configuration.
 ++++
 '''
 
