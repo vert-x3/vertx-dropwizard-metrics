@@ -21,7 +21,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 
 /**
- * Vert.x metrics configuration.
+ * Vert.x metrics service configuration.
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
@@ -54,7 +54,7 @@ public class MetricsServiceOptions extends MetricsOptions {
   /**
    * Copy constructor
    *
-   * @param other The other {@link io.vertx.core.metrics.MetricsOptions} to copy when creating this
+   * @param other The other {@link io.vertx.ext.metrics.MetricsServiceOptions} to copy when creating this
    */
   public MetricsServiceOptions(MetricsServiceOptions other) {
     this.enabled = other.isEnabled();

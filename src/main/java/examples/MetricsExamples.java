@@ -20,8 +20,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.ext.metrics.MetricsService;
+import io.vertx.ext.metrics.MetricsServiceOptions;
 
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public class MetricsExamples {
   public void example2() {
     Vertx vertx = Vertx.vertx(
         new VertxOptions().setMetricsOptions(
-            new MetricsOptions().setEnabled(true))
+            new MetricsServiceOptions().setEnabled(true))
     );
   }
 
