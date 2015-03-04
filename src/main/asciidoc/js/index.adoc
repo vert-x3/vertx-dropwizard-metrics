@@ -1,11 +1,20 @@
-== Metrics
+= Metrics
 
-Vert.x provides a fairly simple API to retrieve metrics via the `link:jsdoc/measured-Measured.html[Measured]` interface
-which is implemented by various Vert.x components like `link:jsdoc/http_server-HttpServer.html[HttpServer]`, `link:jsdoc/net_server-NetServer.html[NetServer]`,
-and even `link:jsdoc/vertx-Vertx.html[Vertx]` itself.
+Vert.x provides a Service Provider Interface for reporting metrics to implementations of this SPI.
 
-By default Vert.x does not record any metrics. Instead it provides an SPI for others to implement like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
-which can be added to the classpath. Once added, you can enable metrics by doing the following:
+This project
+is an implementation of the Vert.x SPI that uses Dropwizard metrics](https://github.com/dropwizard/metrics) library.
+
+This library is then used for obtaining measurements snapshots and reporting to thirdparty collectors such as JMX.
+
+
+Vert.x metrics provides a fairly simple API to retrieve metrics via the `link:jsdoc/measured-Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:jsdoc/http_server-HttpServer.html[HttpServer]`,
+`link:jsdoc/net_server-NetServer.html[NetServer]`, and even `link:jsdoc/vertx-Vertx.html[Vertx]` itself.
+
+By default Vert.x does not record any metrics. Instead it provides an SPI for others to implement which can be added
+to the classpath. Once added, you can enable metrics by doing the following:
+
 [source,js]
 ----
 var Vertx = require("vertx-js/vertx");
@@ -18,8 +27,8 @@ var vertx = Vertx.vertx({
 ----
 
 Once enabled, you can retrieve metrics from any `link:jsdoc/measured-Measured.html[Measured]` object which provides
-a map of the metric name to the data, represented by a `link:jsdoc/json_object-JsonObject.html[JsonObject]`. So for example if we were to print
-out all metrics for a particular Vert.x instance:
+a map of the metric name to the data, represented by a `link:jsdoc/json_object-JsonObject.html[JsonObject]`. So for example if we
+were to print out all metrics for a particular Vert.x instance:
 [source,js]
 ----
 var MetricsService = require("vertx-metrics-js/metrics_service");
@@ -48,8 +57,3 @@ var server = vertx.createHttpServer();
 var metrics = metricsService.getMetricsSnapshot(server);
 
 ----
-
-=== Metrics SPI
-
-The metrics SPI is an advanced feature which allows implementers to capture events from Vert.x in order to gather metrics. For
-more information on this, please consult the `link:jsdoc/vertx_metrics-VertxMetrics.html[API Documentation]`.

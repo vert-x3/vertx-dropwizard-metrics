@@ -22,6 +22,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.metrics.VertxMetrics;
+import io.vertx.ext.metrics.MetricsService;
+import io.vertx.ext.metrics.MetricsServiceOptions;
 import io.vertx.ext.metrics.reporters.JmxReporter;
 import io.vertx.core.spi.VertxMetricsFactory;
 
@@ -32,7 +34,13 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
 
   @Override
   public VertxMetrics metrics(Vertx vertx, VertxOptions options) {
-    MetricsOptions metricsOptions = options.getMetricsOptions();
+    MetricsOptions baseOptions = options.getMetricsOptions();
+    MetricsServiceOptions metricsOptions;
+    if (baseOptions instanceof MetricsServiceOptions) {
+      metricsOptions = (MetricsServiceOptions) baseOptions;
+    } else {
+      metricsOptions = new MetricsServiceOptions(baseOptions.toJson());
+    }
     Registry registry = new Registry();
     if (metricsOptions.getName() != null) {
       MetricRegistry other = SharedMetricRegistries.add(metricsOptions.getName(), registry);

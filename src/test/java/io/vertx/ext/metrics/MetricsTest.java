@@ -73,7 +73,7 @@ public class MetricsTest extends MetricsTestBase {
 
   @Override
   protected VertxOptions getOptions() {
-    return new VertxOptions().setMetricsOptions(new MetricsOptions().setEnabled(true).setJmxEnabled(true));
+    return new VertxOptions().setMetricsOptions(new MetricsServiceOptions().setEnabled(true).setJmxEnabled(true));
   }
 
   @Rule

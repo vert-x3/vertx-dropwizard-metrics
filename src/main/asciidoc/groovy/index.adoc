@@ -1,11 +1,20 @@
-== Metrics
+= Metrics
 
-Vert.x provides a fairly simple API to retrieve metrics via the `link:groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` interface
-which is implemented by various Vert.x components like `link:groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]`, `link:groovydoc/io/vertx/groovy/core/net/NetServer.html[NetServer]`,
-and even `link:groovydoc/io/vertx/groovy/core/Vertx.html[Vertx]` itself.
+Vert.x provides a Service Provider Interface for reporting metrics to implementations of this SPI.
 
-By default Vert.x does not record any metrics. Instead it provides an SPI for others to implement like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
-which can be added to the classpath. Once added, you can enable metrics by doing the following:
+This project
+is an implementation of the Vert.x SPI that uses Dropwizard metrics](https://github.com/dropwizard/metrics) library.
+
+This library is then used for obtaining measurements snapshots and reporting to thirdparty collectors such as JMX.
+
+
+Vert.x metrics provides a fairly simple API to retrieve metrics via the `link:groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]`,
+`link:groovydoc/io/vertx/groovy/core/net/NetServer.html[NetServer]`, and even `link:groovydoc/io/vertx/groovy/core/Vertx.html[Vertx]` itself.
+
+By default Vert.x does not record any metrics. Instead it provides an SPI for others to implement which can be added
+to the classpath. Once added, you can enable metrics by doing the following:
+
 [source,groovy]
 ----
 import io.vertx.groovy.core.Vertx
@@ -18,8 +27,8 @@ def vertx = Vertx.vertx([
 ----
 
 Once enabled, you can retrieve metrics from any `link:groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` object which provides
-a map of the metric name to the data, represented by a `link:groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`. So for example if we were to print
-out all metrics for a particular Vert.x instance:
+a map of the metric name to the data, represented by a `link:groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`. So for example if we
+were to print out all metrics for a particular Vert.x instance:
 [source,groovy]
 ----
 import io.vertx.groovy.ext.metrics.MetricsService
@@ -48,8 +57,3 @@ def server = vertx.createHttpServer()
 def metrics = metricsService.getMetricsSnapshot(server)
 
 ----
-
-=== Metrics SPI
-
-The metrics SPI is an advanced feature which allows implementers to capture events from Vert.x in order to gather metrics. For
-more information on this, please consult the `link:groovydoc/io/vertx/groovy/core/spi/metrics/VertxMetrics.html[API Documentation]`.
