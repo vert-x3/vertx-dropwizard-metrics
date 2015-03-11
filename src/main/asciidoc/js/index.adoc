@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:jsdoc/measured-Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:jsdoc/http_server-HttpServer.html[HttpServer]`,
-`link:jsdoc/net_server-NetServer.html[NetServer]`, and even `link:jsdoc/vertx-Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the `link:../../vertx-core/js/jsdoc/measured-Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:../../vertx-core/js/jsdoc/http_server-HttpServer.html[HttpServer]`,
+`link:../../vertx-core/js/jsdoc/net_server-NetServer.html[NetServer]`, and even `link:../../vertx-core/js/jsdoc/vertx-Vertx.html[Vertx]` itself.
 
 Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -80,8 +80,8 @@ See more examples below on how to retrieve/use metrics for a specific component.
 == Retrieving metrics
 
 Once enabled, the `link:jsdoc/metrics_service-MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:jsdoc/measured-Measured.html[Measured]` object which provides a map of the metric name to the data,
-represented by a `link:jsdoc/json_object-JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
+`link:../../vertx-core/js/jsdoc/measured-Measured.html[Measured]` object which provides a map of the metric name to the data,
+represented by a `link:../../vertx-core/js/jsdoc/json_object-JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
 [source,js]
 ----
@@ -94,13 +94,13 @@ metrics.forEach(function (metric, name) {
 
 ----
 
-NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:jsdoc/json_object-JsonObject.html[JsonObject]`
+NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:../../vertx-core/js/jsdoc/json_object-JsonObject.html[JsonObject]`
 consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
 
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:jsdoc/http_server-HttpServer.html[HttpServer]` implements `link:jsdoc/measured-Measured.html[Measured]`, you can easily grab all metrics
+Since `link:../../vertx-core/js/jsdoc/http_server-HttpServer.html[HttpServer]` implements `link:../../vertx-core/js/jsdoc/measured-Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
 [source,js]
 ----

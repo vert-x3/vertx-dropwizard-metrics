@@ -42,7 +42,7 @@ public class MetricsService {
     return delegate;
   }
 
-  public static MetricsService create(Vertx vertx) {
+  public static MetricsService create(Vertx vertx) { 
     MetricsService ret= MetricsService.newInstance(io.vertx.ext.metrics.MetricsService.create((io.vertx.core.Vertx) vertx.getDelegate()));
     return ret;
   }
@@ -53,7 +53,7 @@ public class MetricsService {
    * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
    * the json data representing that metric
    */
-  public Map<String,JsonObject> getMetricsSnapshot(Measured o) {
+  public Map<String,JsonObject> getMetricsSnapshot(Measured o) { 
     Map<String,JsonObject> ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) o.getDelegate());
 ;
     return ret;
