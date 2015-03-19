@@ -32,7 +32,7 @@ import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
-import io.vertx.core.spi.metrics.NetMetrics;
+import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
@@ -109,23 +109,23 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public HttpServerMetrics createMetrics(HttpServer server, HttpServerOptions options) {
+  public HttpServerMetrics<?, ?> createMetrics(HttpServer server, HttpServerOptions options) {
     return new HttpServerMetricsImpl(this, name(baseName(), "http.servers"));
   }
 
   @Override
-  public HttpClientMetrics createMetrics(HttpClient client, HttpClientOptions options) {
+  public HttpClientMetrics<?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
     return new HttpClientMetricsImpl(this, instanceName(name(baseName(), "http.clients"), client), options);
   }
 
   @Override
-  public NetMetrics createMetrics(NetServer server, NetServerOptions options) {
-    return new NetMetricsImpl(this, name(baseName(), "net.servers"), false);
+  public TCPMetrics<?> createMetrics(NetServer server, NetServerOptions options) {
+    return new NetServerMetricsImpl(this, name(baseName(), "net.servers"), false);
   }
 
   @Override
-  public NetMetrics createMetrics(NetClient client, NetClientOptions options) {
-    return new NetMetricsImpl(this, instanceName(name(baseName(), "net.clients"), client), true);
+  public TCPMetrics<?> createMetrics(NetClient client, NetClientOptions options) {
+    return new NetServerMetricsImpl(this, instanceName(name(baseName(), "net.clients"), client), true);
   }
 
   @Override

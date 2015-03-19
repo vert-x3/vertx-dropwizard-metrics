@@ -17,6 +17,7 @@
 package io.vertx.ext.metrics.impl;
 
 import com.codahale.metrics.RatioGauge;
+import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
@@ -28,9 +29,7 @@ import java.util.WeakHashMap;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics {
-
-  private Map<HttpClientRequest, TimedContext> timings;
+class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics<HttpMetricsImpl.TimedContext, Timer.Context> {
 
   HttpClientMetricsImpl(AbstractMetrics metrics, String baseName, HttpClientOptions options) {
     super(metrics, baseName, true);
@@ -38,9 +37,6 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
   }
 
   private void initialize(HttpClientOptions options) {
-    // request timings
-    timings = new WeakHashMap<>();
-
     // max pool size gauge
     int maxPoolSize = options.getMaxPoolSize();
     gauge(() -> maxPoolSize, "connections", "max-pool-size");
@@ -56,15 +52,12 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
   }
 
   @Override
-  public void requestBegin(HttpClientRequest request) {
-    timings.put(request, time(request.method().name(), request.uri()));
+  public TimedContext requestBegin(HttpClientRequest request) {
+    return time(request.method().name(), request.uri());
   }
 
   @Override
-  public void responseEnd(HttpClientRequest request, HttpClientResponse response) {
-    TimedContext ctx = timings.remove(request);
-    if (ctx != null) {
-      ctx.stop();
-    }
+  public void responseEnd(TimedContext ctx, HttpClientRequest request, HttpClientResponse response) {
+    ctx.stop();
   }
 }

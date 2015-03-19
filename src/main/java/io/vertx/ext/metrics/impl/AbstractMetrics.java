@@ -41,12 +41,10 @@ import static com.codahale.metrics.MetricRegistry.*;
 public abstract class AbstractMetrics implements Metrics {
 
   public static AbstractMetrics unwrap(Measured measured) {
-    if (measured instanceof MetricsProvider) {
-      MetricsProvider provider = (MetricsProvider) measured;
-      Metrics baseMetrics = provider.getMetrics();
-      if (baseMetrics instanceof AbstractMetrics) {
-        return (AbstractMetrics) baseMetrics;
-      }
+    MetricsProvider provider = (MetricsProvider) measured;
+    Metrics baseMetrics = provider.getMetrics();
+    if (baseMetrics instanceof AbstractMetrics) {
+      return (AbstractMetrics) baseMetrics;
     }
     return null;
   }

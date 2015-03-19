@@ -27,7 +27,8 @@ import io.vertx.core.json.JsonObject;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  *
- * NOTE: This class has been automatically generated from the original non RX-ified interface using Vert.x codegen.
+ * <p/>
+ * NOTE: This class has been automatically generated from the {@link io.vertx.ext.metrics.MetricsService original} non RX-ified interface using Vert.x codegen.
  */
 
 public class MetricsService {
@@ -49,9 +50,8 @@ public class MetricsService {
 
   /**
    * Will return the metrics that correspond with this measured object.
-   *
-   * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
-   * the json data representing that metric
+   * @param o 
+   * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
    */
   public Map<String,JsonObject> getMetricsSnapshot(Measured o) { 
     Map<String,JsonObject> ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) o.getDelegate());

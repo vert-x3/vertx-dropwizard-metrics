@@ -19,28 +19,24 @@ package io.vertx.ext.metrics.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Timer;
-import io.vertx.core.spi.metrics.NetMetrics;
 import io.vertx.core.net.SocketAddress;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import io.vertx.core.spi.metrics.TCPMetrics;
 
 import static com.codahale.metrics.MetricRegistry.*;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
+class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context> {
 
   private Counter openConnections;
   private Timer connections;
   private Histogram bytesRead;
   private Histogram bytesWritten;
   private Counter exceptions;
-  private Map<SocketAddress, Timer.Context> connectionLifetimes;
   protected volatile boolean closed;
 
-  NetMetricsImpl(AbstractMetrics metrics, String baseName, boolean client) {
+  NetServerMetricsImpl(AbstractMetrics metrics, String baseName, boolean client) {
     super(metrics.registry(), baseName);
     if (client) {
       initialize();
@@ -53,7 +49,6 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
     this.exceptions = counter("exceptions");
     this.bytesRead = histogram("bytes-read");
     this.bytesWritten = histogram("bytes-written");
-    this.connectionLifetimes = new ConcurrentHashMap<>();
   }
 
   @Override
@@ -71,10 +66,9 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
   }
 
   @Override
-  public void connected(SocketAddress remoteAddress) {
+  public Timer.Context connected(SocketAddress remoteAddress) {
     // Connection metrics
     openConnections.inc();
-    connectionLifetimes.put(remoteAddress, connections.time());
 
     // Remote address connection metrics
     counter("open-connections", remoteAddress.host()).inc();
@@ -83,15 +77,15 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
     if (closed) {
       removeAll();
     }
+
+    //
+    return connections.time();
   }
 
   @Override
-  public void disconnected(SocketAddress remoteAddress) {
+  public void disconnected(Timer.Context ctx, SocketAddress remoteAddress) {
     openConnections.dec();
-    Timer.Context ctx = connectionLifetimes.remove(remoteAddress);
-    if (ctx != null) {
-      ctx.stop();
-    }
+    ctx.stop();
 
     // Remote address connection metrics
     Counter counter = counter("open-connections", remoteAddress.host());
@@ -107,17 +101,17 @@ class NetMetricsImpl extends AbstractMetrics implements NetMetrics {
   }
 
   @Override
-  public void bytesRead(SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesRead(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     bytesRead.update(numberOfBytes);
   }
 
   @Override
-  public void bytesWritten(SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesWritten(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     bytesWritten.update(numberOfBytes);
   }
 
   @Override
-  public void exceptionOccurred(SocketAddress remoteAddress, Throwable t) {
+  public void exceptionOccurred(Timer.Context socketMetric, SocketAddress remoteAddress, Throwable t) {
     exceptions.inc();
   }
 

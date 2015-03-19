@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-abstract class HttpMetricsImpl extends NetMetricsImpl {
+abstract class HttpMetricsImpl extends NetServerMetricsImpl {
 
   private Timer requests;
 

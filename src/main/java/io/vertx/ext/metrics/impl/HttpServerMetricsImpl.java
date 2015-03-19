@@ -16,36 +16,27 @@
 
 package io.vertx.ext.metrics.impl;
 
+import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics {
-
-  private Map<HttpServerResponse, TimedContext> timings;
+class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<HttpMetricsImpl.TimedContext, Timer.Context> {
 
   HttpServerMetricsImpl(AbstractMetrics metrics, String baseName) {
     super(metrics, baseName, false);
-    timings = new WeakHashMap<>();
   }
 
   @Override
-  public void requestBegin(HttpServerRequest request, HttpServerResponse response) {
-    timings.put(response, time(request.method().name(), request.uri()));
+  public HttpMetricsImpl.TimedContext requestBegin(HttpServerRequest request, HttpServerResponse response) {
+    return time(request.method().name(), request.uri());
   }
 
   @Override
-  public void responseEnd(HttpServerResponse response) {
-
-    TimedContext ctx = timings.remove(response);
-    if (ctx != null) {
-      ctx.stop();
-    }
+  public void responseEnd(HttpMetricsImpl.TimedContext ctx, HttpServerResponse response) {
+    ctx.stop();
   }
 }

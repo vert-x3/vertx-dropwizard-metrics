@@ -37,42 +37,35 @@ class DatagramSocketMetricsImpl extends AbstractMetrics implements DatagramSocke
     socketsCounter = counter("sockets");
     exceptions = counter("exceptions");
     bytesWritten = histogram("bytes-written");
-  }
-
-  @Override
-  public void newSocket() {
     socketsCounter.inc();
   }
 
   @Override
   public void close() {
     socketsCounter.dec();
-    if (serverName != null) {
-      remove(serverName, "bytes-read");
-    }
     removeAll();
   }
 
   @Override
   public void listening(SocketAddress localAddress) {
-    serverName = NetMetricsImpl.addressName(localAddress);
+    serverName = NetServerMetricsImpl.addressName(localAddress);
     bytesRead = histogram(serverName, "bytes-read");
   }
 
   @Override
-  public void bytesRead(SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesRead(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     if (bytesRead != null) {
       bytesRead.update(numberOfBytes);
     }
   }
 
   @Override
-  public void bytesWritten(SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesWritten(Void socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     bytesWritten.update(numberOfBytes);
   }
 
   @Override
-  public void exceptionOccurred(SocketAddress remoteAddress, Throwable t) {
+  public void exceptionOccurred(Void socketMetric, SocketAddress remoteAddress, Throwable t) {
     exceptions.inc();
   }
 }
