@@ -19,7 +19,7 @@
  * ----
  * <dependency>
  *   <groupId>io.vertx</groupId>
- *   <artifactId>ext-metrics</artifactId>
+ *   <artifactId>vertx-metrics</artifactId>
  *   <version>${vertx.metrics.version}</version>
  * </dependency>
  * ----
