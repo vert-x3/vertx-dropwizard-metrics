@@ -22,8 +22,6 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.TCPMetrics;
 
-import static com.codahale.metrics.MetricRegistry.*;
-
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
@@ -60,7 +58,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   @Override
   public void listening(SocketAddress localAddress) {
     // Set the base name of the server to include the host:port
-    setBaseName(name(baseName(), addressName(localAddress)));
+    setBaseName(nameOf(baseName(), addressName(localAddress)));
 
     initialize();
   }

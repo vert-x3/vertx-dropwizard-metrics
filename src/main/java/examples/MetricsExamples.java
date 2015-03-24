@@ -22,6 +22,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
+import io.vertx.ext.metrics.HandlerMatcher;
 import io.vertx.ext.metrics.MetricsService;
 import io.vertx.ext.metrics.MetricsServiceOptions;
 
@@ -50,6 +51,17 @@ public class MetricsExamples {
         new MetricsServiceOptions().
             setJmxEnabled(true).
             setJmxDomain("mydomain")
+    ));
+  }
+
+  public void setupMonitoredHandlers() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new MetricsServiceOptions().
+            setEnabled(true).
+            addMonitoredHandler(
+                new HandlerMatcher().setAddress("some-address")).
+            addMonitoredHandler(
+                new HandlerMatcher().setAddress("business-.*").setRegex(true))
     ));
   }
 

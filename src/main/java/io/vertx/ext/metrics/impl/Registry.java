@@ -43,26 +43,6 @@ public class Registry extends MetricRegistry {
     return super.register(name, metric);
   }
 
-  @Override
-  public Counter counter(String name) {
-    return super.counter(name);
-  }
-
-  @Override
-  public Histogram histogram(String name) {
-    return super.histogram(name);
-  }
-
-  @Override
-  public Meter meter(String name) {
-    return super.meter(name);
-  }
-
-  @Override
-  public Timer timer(String name) {
-    return super.timer(name);
-  }
-
   //----------------------- Convert metrics to JsonObject
 
   JsonObject convertMetric(Metric metric, TimeUnit rateUnit, TimeUnit durationUnit) {

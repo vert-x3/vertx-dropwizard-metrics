@@ -41,7 +41,7 @@ var MetricsService = function(j_val) {
   this.getMetricsSnapshot = function(o) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnMap(j_metricsService.getMetricsSnapshot(o._jdel));
+      return utils.convReturnMap(j_metricsService["getMetricsSnapshot(io.vertx.core.metrics.Measured)"](o._jdel));
     } else utils.invalidArgs();
   };
 
@@ -60,7 +60,7 @@ var MetricsService = function(j_val) {
 MetricsService.create = function(vertx) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return new MetricsService(JMetricsService.create(vertx._jdel));
+    return new MetricsService(JMetricsService["create(io.vertx.core.Vertx)"](vertx._jdel));
   } else utils.invalidArgs();
 };
 

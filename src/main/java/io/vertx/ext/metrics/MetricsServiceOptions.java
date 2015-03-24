@@ -17,8 +17,13 @@
 package io.vertx.ext.metrics;
 
 import io.vertx.codegen.annotations.DataObject;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Vert.x metrics service configuration.
@@ -38,10 +43,16 @@ public class MetricsServiceOptions extends MetricsOptions {
    */
   public static final boolean DEFAULT_JMX_ENABLED = false;
 
+  /**
+   * The default monitored handlers : empty by default
+   */
+  public static final List<HandlerMatcher> DEFAULT_MONITORED_HANDLERS = Collections.emptyList();
+
   private boolean enabled;
   private String name;
   private boolean jmxEnabled;
   private String jmxDomain;
+  private List<HandlerMatcher> monitoredHandlers;
 
   /**
    * Default constructor
@@ -49,6 +60,7 @@ public class MetricsServiceOptions extends MetricsOptions {
   public MetricsServiceOptions() {
     enabled = DEFAULT_METRICS_ENABLED;
     jmxEnabled = DEFAULT_JMX_ENABLED;
+    monitoredHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
   }
 
   /**
@@ -57,10 +69,11 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param other The other {@link io.vertx.ext.metrics.MetricsServiceOptions} to copy when creating this
    */
   public MetricsServiceOptions(MetricsServiceOptions other) {
-    this.enabled = other.isEnabled();
-    this.name = other.getName();
-    this.jmxEnabled = other.isJmxEnabled();
-    this.jmxDomain = other.getJmxDomain();
+    enabled = other.isEnabled();
+    name = other.getName();
+    jmxEnabled = other.isJmxEnabled();
+    jmxDomain = other.getJmxDomain();
+    monitoredHandlers = new ArrayList<>(other.monitoredHandlers);
   }
 
   /**
@@ -69,10 +82,17 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param json the JsonObject to create it from
    */
   public MetricsServiceOptions(JsonObject json) {
-    this.enabled = json.getBoolean("enabled", DEFAULT_METRICS_ENABLED);
-    this.name = json.getString("name");
-    this.jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
-    this.jmxDomain = json.getString("jmxDomain");
+    enabled = json.getBoolean("enabled", DEFAULT_METRICS_ENABLED);
+    name = json.getString("name");
+    jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
+    jmxDomain = json.getString("jmxDomain");
+    monitoredHandlers = new ArrayList<>();
+    JsonArray handlerAddressesArray = json.getJsonArray("monitoredHandlers");
+    if (handlerAddressesArray != null) {
+      for (Object o : handlerAddressesArray) {
+        monitoredHandlers.add(new HandlerMatcher((JsonObject) o));
+      }
+    }
   }
 
   /**
@@ -154,6 +174,24 @@ public class MetricsServiceOptions extends MetricsOptions {
   public MetricsServiceOptions setJmxDomain(String jmxDomain) {
     // todo test this
     this.jmxDomain = jmxDomain;
+    return this;
+  }
+
+  /**
+   * @return the list of monitored handlers
+   */
+  public List<HandlerMatcher> getMonitoredHandlers() {
+    return monitoredHandlers;
+  }
+
+  /**
+   * Add an monitored event bus handler.
+   *
+   * @param matcher the handler matcher
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MetricsServiceOptions addMonitoredHandler(HandlerMatcher matcher) {
+    monitoredHandlers.add(matcher);
     return this;
   }
 }

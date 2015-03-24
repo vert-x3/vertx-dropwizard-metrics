@@ -42,4 +42,6 @@ public interface MetricsService {
    * the json data representing that metric
    */
   Map<String, JsonObject> getMetricsSnapshot(Measured o);
+
+
 }

@@ -48,7 +48,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
         registry = (Registry) other;
       }
     }
-    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, options);
+    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, options, metricsOptions);
     // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
     if (metricsOptions.isJmxEnabled()) {
       String jmxDomain = metricsOptions.getJmxDomain();

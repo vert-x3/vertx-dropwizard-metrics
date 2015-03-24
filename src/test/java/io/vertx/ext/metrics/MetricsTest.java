@@ -23,6 +23,7 @@ import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
@@ -31,7 +32,6 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
@@ -73,7 +73,14 @@ public class MetricsTest extends MetricsTestBase {
 
   @Override
   protected VertxOptions getOptions() {
-    return new VertxOptions().setMetricsOptions(new MetricsServiceOptions().setEnabled(true).setJmxEnabled(true));
+    return new VertxOptions().
+        setMetricsOptions(
+            new MetricsServiceOptions().
+                setEnabled(true).
+                setJmxEnabled(true).
+                addMonitoredHandler(new HandlerMatcher().setAddress("foo")).
+                addMonitoredHandler(new HandlerMatcher().setAddress("juu.*").setRegex(true))
+        );
   }
 
   @Rule
@@ -517,27 +524,158 @@ public class MetricsTest extends MetricsTestBase {
     Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
     assertCount(metrics.get("messages.sent"), send);
     assertCount(metrics.get("messages.published"), pub);
-    assertCount(metrics.get("messages.received"), 0L);
+    assertCount(metrics.get("messages.received"), 19L);
+    assertCount(metrics.get("messages.delivered"), 0L);
   }
 
   @Test
-  public void testEventBusMetricsWithHandler() {
-    int messages = 13;
-    AtomicInteger count = new AtomicInteger(messages);
+  public void testEventBusMetricsWithHandler() throws Exception {
+    long messages = 13;
 
-    vertx.eventBus().consumer("foo").handler(msg -> {
-      if (count.decrementAndGet() == 0) testComplete();
+    CountDownLatch latch = new CountDownLatch((int) messages);
+    AtomicReference<String> deploymentID = new AtomicReference<>();
+
+    vertx.deployVerticle(new AbstractVerticle() {
+
+      MessageConsumer<Object> consumer;
+
+      @Override
+      public void start() throws Exception {
+        consumer = vertx.eventBus().consumer("foo").handler(msg -> {
+          if (latch.getCount() == 13) {
+            while (true) {
+              Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+              JsonObject pending = metrics.get("messages.pending-local");
+              int count = pending.getInteger("count");
+              if (count == 12) {
+                assertEquals(12, (int)metrics.get("messages.pending").getInteger("count"));
+                assertEquals(0, (int)metrics.get("messages.pending-remote").getInteger("count"));
+                break;
+              } else {
+                // Wait until we have piled the 12 messages on the event loop
+              }
+            }
+            latch.countDown();
+          } else {
+            latch.countDown();;
+          }
+        });
+      }
+
+      @Override
+      public void stop() throws Exception {
+        consumer.unregister();
+      }
+    }, ar -> {
+      assertTrue(ar.succeeded());
+      deploymentID.set(ar.result());
+      for (int i = 0; i < messages; i++) {
+        vertx.eventBus().send("foo", "Hello");
+      }
     });
 
-    for (int i = 0; i < messages; i++) {
-      vertx.eventBus().send("foo", "Hello");
-    }
+    // Wait until all messages have been processed
+    awaitLatch(latch);
 
-    await();
-
+    // Check global metrics
     Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-    assertCount(metrics.get("messages.sent"), (long) messages);
-    assertCount(metrics.get("messages.received"), (long) messages);
+    assertCount(metrics.get("messages.sent"), messages);
+    assertCount(metrics.get("messages.published"), 0L);
+    assertCount(metrics.get("messages.published-local"), 0L);
+    assertCount(metrics.get("messages.published-remote"), 0L);
+    assertCount(metrics.get("messages.received"), messages);
+    assertCount(metrics.get("messages.received-local"), messages);
+    assertCount(metrics.get("messages.received-remote"), 0L);
+    assertCount(metrics.get("messages.delivered"), messages);
+    assertCount(metrics.get("messages.delivered-local"), messages);
+    assertCount(metrics.get("messages.delivered-remote"), 0L);
+    assertCount(metrics.get("messages.pending"), 0L);
+    assertCount(metrics.get("messages.pending-local"), 0L);
+    assertCount(metrics.get("messages.pending-remote"), 0L);
+
+    // Check handler metric
+    JsonObject handlerMetric = metrics.get("handlers.foo");
+    assertNotNull(handlerMetric);
+    assertEquals(messages, (int)handlerMetric.getInteger("count"));
+
+    // Undeploy
+    CountDownLatch undeployLatch = new CountDownLatch(1);
+    vertx.undeploy(deploymentID.get(), ar -> {
+      undeployLatch.countDown();
+    });
+    awaitLatch(undeployLatch);
+
+    // Check cleanup
+    metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+    handlerMetric = metrics.get("handlers.foo");
+    assertNull(handlerMetric);
+  }
+
+  @Test
+  public void testEventBusMetricsHandlerExactMatch() {
+    vertx.eventBus().consumer("foo", msg -> {
+      vertx.runOnContext(done -> {
+        Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+        JsonObject metric = metrics.get("handlers.foo");
+        assertEquals(1, (int) metric.getInteger("count"));
+        testComplete();
+      });
+    });
+    vertx.eventBus().send("foo", "whatever");
+    await();
+  }
+
+  @Test
+  public void testEventBusMetricsHandlerNoMatch() {
+    vertx.eventBus().consumer("bar", msg -> {
+      vertx.runOnContext(done -> {
+        Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+        assertNull(metrics.get("handlers.bar"));
+        testComplete();
+      });
+    });
+    vertx.eventBus().send("bar", "whatever");
+    await();
+  }
+
+  @Test
+  public void testEventBusMetricsHandlerRegexMatch() {
+    vertx.eventBus().consumer("juu1234", msg -> {
+      vertx.runOnContext(done -> {
+        Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+        JsonObject metric = metrics.get("handlers.juu1234");
+        System.out.println("metric = " + metric);
+        assertEquals(1, (int) metric.getInteger("count"));
+        testComplete();
+      });
+    });
+    vertx.eventBus().send("juu1234", "whatever");
+    await();
+  }
+
+  @Test
+  public void testEventBusMetricsHandlerMultiMatch() {
+    vertx.runOnContext(v -> {
+      int size = 3;
+      AtomicInteger count = new AtomicInteger();
+      for (int i = 0; i < size; i++) {
+        vertx.eventBus().consumer("foo", msg -> {
+          Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+          JsonObject metric = metrics.get("handlers.foo");
+          assertEquals(count.get(), (int) metric.getInteger("count"));
+          if (count.incrementAndGet() == size) {
+            vertx.runOnContext(done -> {
+              Map<String, JsonObject> metrics2 = metricsService.getMetricsSnapshot(vertx.eventBus());
+              JsonObject metric2 = metrics2.get("handlers.foo");
+              assertEquals(size, (int) metric2.getInteger("count"));
+              testComplete();
+            });
+          }
+        });
+      }
+      vertx.eventBus().publish("foo", "whatever");
+    });
+    await();
   }
 
   @Test

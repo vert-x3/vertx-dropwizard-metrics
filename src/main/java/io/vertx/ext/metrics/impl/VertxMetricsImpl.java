@@ -38,11 +38,12 @@ import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
+import io.vertx.ext.metrics.MetricsServiceOptions;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.codahale.metrics.MetricRegistry.*;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -51,17 +52,17 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   static final String BASE_NAME = "vertx";
 
-  private Counter timers;
-  private Counter verticles;
+  private final MetricsServiceOptions options;
+  private final Counter timers;
+  private final Counter verticles;
   private Handler<Void> doneHandler;
 
-  VertxMetricsImpl(Registry registry, VertxOptions options) {
+  VertxMetricsImpl(Registry registry, VertxOptions options, MetricsServiceOptions metricsOptions) {
     super(registry, BASE_NAME);
-    initialize(options);
-  }
 
-  public void initialize(VertxOptions options) {
-    timers = counter("timers");
+    this.timers = counter("timers");
+    this.options = metricsOptions;
+    this.verticles = counter("verticles");
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
@@ -69,8 +70,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
       gauge(options::getClusterHost, "cluster-host");
       gauge(options::getClusterPort, "cluster-port");
     }
-
-    verticles = counter("verticles");
   }
 
   // Special case , see how to address this later
@@ -105,32 +104,32 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public EventBusMetrics createMetrics(EventBus eventBus) {
-    return new EventBusMetricsImpl(this, name(baseName(), "eventbus"));
+    return new EventBusMetricsImpl(this, nameOf(baseName(), "eventbus"), options);
   }
 
   @Override
   public HttpServerMetrics<?, ?> createMetrics(HttpServer server, HttpServerOptions options) {
-    return new HttpServerMetricsImpl(this, name(baseName(), "http.servers"));
+    return new HttpServerMetricsImpl(this, nameOf(baseName(), "http.servers"));
   }
 
   @Override
   public HttpClientMetrics<?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
-    return new HttpClientMetricsImpl(this, instanceName(name(baseName(), "http.clients"), client), options);
+    return new HttpClientMetricsImpl(this, instanceName(nameOf(baseName(), "http.clients"), client), options);
   }
 
   @Override
   public TCPMetrics<?> createMetrics(NetServer server, NetServerOptions options) {
-    return new NetServerMetricsImpl(this, name(baseName(), "net.servers"), false);
+    return new NetServerMetricsImpl(this, nameOf(baseName(), "net.servers"), false);
   }
 
   @Override
   public TCPMetrics<?> createMetrics(NetClient client, NetClientOptions options) {
-    return new NetServerMetricsImpl(this, instanceName(name(baseName(), "net.clients"), client), true);
+    return new NetServerMetricsImpl(this, instanceName(nameOf(baseName(), "net.clients"), client), true);
   }
 
   @Override
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
-    return new DatagramSocketMetricsImpl(this, name(baseName(), "datagram"));
+    return new DatagramSocketMetricsImpl(this, nameOf(baseName(), "datagram"));
   }
 
   @Override

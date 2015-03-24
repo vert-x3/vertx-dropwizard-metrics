@@ -194,10 +194,37 @@
  * Base name: `vertx.eventbus`
  *
  * * `handlers` - A <<counter>> of the number of event bus handlers
+ * * `handlers.myaddress` - A <<timer>> representing the rate of which messages are being received for the _myaddress_ handler
+ * * `messages.pending` - A <<counter>> of the number of messages received but not yet processed by an handler
+ * * `messages.pending-local` - A <<counter>> of the number of messages locally received but not yet processed by an handler
+ * * `messages.pending-remote` - A <<counter>> of the number of messages remotely received but not yet processed by an handler
  * * `messages.received` - A <<meter>> representing the rate of which messages are being received
+ * * `messages.received-local` - A <<meter>> representing the rate of which local messages are being received
+ * * `messages.received-remote` - A <<meter>> representing the rate of which remote messages are being received
+ * * `messages.delivered` - A <<meter>> representing the rate of which messages are being delivered to an handler
+ * * `messages.delivered-local` - A <<meter>> representing the rate of which local messages are being delivered to an handler
+ * * `messages.delivered-remote` - A <<meter>> representing the rate of which remote messages are being delivered to an handler
  * * `messages.sent` - A <<meter>> representing the rate of which messages are being sent
+ * * `messages.sent-local` - A <<meter>> representing the rate of which messages are being sent locally
+ * * `messages.sent-remote` - A <<meter>> representing the rate of which messages are being sent remotely
  * * `messages.published` - A <<meter>> representing the rate of which messages are being published
+ * * `messages.published-local` - A <<meter>> representing the rate of which messages are being published locally
+ * * `messages.published-remote` - A <<meter>> representing the rate of which messages are being published remotely
  * * `messages.reply-failures` - A <<meter>> representing the rate of reply failures
+ *
+ * The monitored event bus handlers is configurable via a match performed on the handler registration address.
+ * Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
+ * setting is to monitor zero handlers.
+ *
+ * The monitored handlers can be configured in the {@link io.vertx.ext.metrics.MetricsServiceOptions} via
+ * a specific address match or a regex match:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMonitoredHandlers()}
+ * ----
+ *
+ * WARNING: if you use regex match, a wrong regex can potentially match a lot of handlers.
  *
  * [[http-server-metrics]]
  * === Http server metrics

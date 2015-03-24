@@ -20,6 +20,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
@@ -30,8 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.codahale.metrics.MetricRegistry.*;
 
 /**
  * Base Codahale metrics object.
@@ -49,7 +48,7 @@ public abstract class AbstractMetrics implements Metrics {
     return null;
   }
 
-  private final Registry registry;
+  protected final Registry registry;
   private String baseName;
 
   AbstractMetrics(Registry registry, String baseName) {
@@ -92,40 +91,44 @@ public abstract class AbstractMetrics implements Metrics {
     return baseName;
   }
 
+  protected String nameOf(String... names) {
+    return MetricRegistry.name(baseName, names);
+  }
+
+  protected static String instanceName(String baseName, Object instance) {
+    return MetricRegistry.name(baseName, "@" + Integer.toHexString(instance.hashCode()));
+  }
+
   @Override
   public boolean isEnabled() {
     return true;
   }
 
   protected <T> Gauge<T> gauge(Gauge<T> gauge, String... names) {
-    return registry.register(name(baseName, names), gauge);
+    return registry.register(nameOf(names), gauge);
   }
 
   protected Counter counter(String... names) {
-    return registry.counter(name(baseName, names));
+    return registry.counter(nameOf(names));
   }
 
   protected Histogram histogram(String... names) {
-    return registry.histogram(name(baseName, names));
+    return registry.histogram(nameOf(names));
   }
 
   protected Meter meter(String... names) {
-    return registry.meter(name(baseName, names));
+    return registry.meter(nameOf(names));
   }
 
   protected Timer timer(String... names) {
-    return registry.timer(name(baseName, names));
+    return registry.timer(nameOf(names));
   }
 
   protected void remove(String... names) {
-    registry.remove(name(baseName, names));
+    registry.remove(nameOf(names));
   }
 
   protected void removeAll() {
     registry.removeMatching((name, metric) -> name.startsWith(baseName));
-  }
-
-  protected static String instanceName(String baseName, Object instance) {
-    return name(baseName, "@" + Integer.toHexString(instance.hashCode()));
   }
 }
