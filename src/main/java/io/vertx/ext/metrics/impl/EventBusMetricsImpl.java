@@ -39,7 +39,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   private final ConcurrentMap<String, HandlerTimer> handlerTimers = new ConcurrentHashMap<>();
   private final Set<String> monitoredHandlers;
-  private final Matcher[] matchers;
+  private final Pattern[] matchers;
   private final Counter handlerCount;
   private final Counter pending;
   private final Counter pendingLocal;
@@ -87,8 +87,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     }
     matchers = options.getMonitoredHandlers().stream().
         filter(matcher -> matcher.isRegex() && matcher.getAddress() != null).
-        map(matcher -> Pattern.compile(matcher.getAddress()).matcher("")).
-        toArray(Matcher[]::new);
+        map(matcher -> Pattern.compile(matcher.getAddress())).
+        toArray(Pattern[]::new);
   }
 
   @Override
@@ -102,9 +102,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       return new HandlerMetric(address);
     }
     if  (matchers.length > 0) {
-      for (Matcher matcher : matchers) {
-        matcher.reset(address);
-        if (matcher.matches()) {
+      for (Pattern pattern : matchers) {
+        if (pattern.matcher(address).matches()) {
           return new HandlerMetric(address);
         }
       }
