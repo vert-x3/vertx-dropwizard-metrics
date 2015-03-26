@@ -27,7 +27,6 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
@@ -39,11 +38,6 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.ext.metrics.MetricsServiceOptions;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -72,12 +66,9 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     }
   }
 
-  // Special case , see how to address this later
-  public Map<String, JsonObject> process(Map<String, JsonObject> metrics) {
-    String name = baseName();
-    return metrics.entrySet().stream()
-        .filter(e -> e.getKey().startsWith(name))
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+  @Override
+  String projectName(String name) {
+    return name;
   }
 
   @Override

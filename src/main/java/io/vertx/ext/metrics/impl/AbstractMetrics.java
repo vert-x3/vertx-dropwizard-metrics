@@ -27,7 +27,6 @@ import io.vertx.core.metrics.Measured;
 import io.vertx.core.spi.metrics.Metrics;
 import io.vertx.core.spi.metrics.MetricsProvider;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -63,20 +62,19 @@ public abstract class AbstractMetrics implements Metrics {
    * the json data representing that metric
    */
   public Map<String, JsonObject> metrics() {
-    // Todo filter ahead of stream
-    Map<String, JsonObject> metrics = new HashMap<>();
-    registry.getMetrics().forEach((name, metric) -> {
-      JsonObject data = registry.convertMetric(metric, TimeUnit.SECONDS, TimeUnit.MILLISECONDS);
-      metrics.put(name, data);
-    });
-    return process(metrics);
+    String baseName = baseName();
+    return registry.getMetrics().
+        entrySet().
+        stream().
+        filter(e -> e.getKey().startsWith(baseName)).
+        collect(Collectors.toMap(
+            e -> projectName(e.getKey()),
+            e -> registry.convertMetric(e.getValue(), TimeUnit.SECONDS, TimeUnit.MILLISECONDS)));
   }
 
-  protected Map<String, JsonObject> process(Map<String, JsonObject> metrics) {
-    String name = baseName();
-    return metrics.entrySet().stream()
-        .filter(e -> e.getKey().startsWith(name))
-        .collect(Collectors.toMap(e -> e.getKey().substring(name.length() + 1), Map.Entry::getValue));
+  String projectName(String name) {
+    String baseName = baseName();
+    return name.substring(baseName.length() + 1);
   }
 
   protected Registry registry() {

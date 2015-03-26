@@ -258,6 +258,11 @@ Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus
 ** Examples: `get-requests`, `post-requests`
 * `<http-method>-requests./<uri>` - A <<timer>> of a specific http method & URI request and the rate of it's occurrence
 ** Examples: `get-requests./some/uri`, `post-requests./some/uri?foo=bar`
+* `responses-1xx` - A <<meter>> of the 1xx response code
+* `responses-2xx` - A <<meter>> of the 2xx response code
+* `responses-3xx` - A <<meter>> of the 3xx response code
+* `responses-4xx` - A <<meter>> of the 4xx response code
+* `responses-5xx` - A <<meter>> of the 5xx response code
 
 *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
 
@@ -269,6 +274,11 @@ Http client includes all the metrics of a <<http-server-metrics,Http Server>> pl
 
 * `connections.max-pool-size` - A <<gauge>> of the max connection pool size
 * `connections.pool-ratio` - A ratio <<gauge>> of the open connections / max connection pool size
+* `responses-1xx` - A <<meter>> of the 1xx response code
+* `responses-2xx` - A <<meter>> of the 2xx response code
+* `responses-3xx` - A <<meter>> of the 3xx response code
+* `responses-4xx` - A <<meter>> of the 4xx response code
+* `responses-5xx` - A <<meter>> of the 5xx response code
 
 [[net-server-metrics]]
 === Net server metrics
