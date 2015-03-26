@@ -69,7 +69,7 @@ public abstract class AbstractMetrics implements Metrics {
         filter(e -> e.getKey().startsWith(baseName)).
         collect(Collectors.toMap(
             e -> projectName(e.getKey()),
-            e -> registry.convertMetric(e.getValue(), TimeUnit.SECONDS, TimeUnit.MILLISECONDS)));
+            e -> Helper.convertMetric(e.getValue(), TimeUnit.SECONDS, TimeUnit.MILLISECONDS)));
   }
 
   String projectName(String name) {
