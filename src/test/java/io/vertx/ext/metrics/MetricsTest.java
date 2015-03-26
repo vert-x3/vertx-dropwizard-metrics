@@ -17,6 +17,7 @@
 package io.vertx.ext.metrics;
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
@@ -32,6 +33,7 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.metrics.Measured;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
@@ -44,6 +46,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -52,6 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 import static io.vertx.test.core.TestUtils.*;
 
@@ -256,6 +260,43 @@ public class MetricsTest extends MetricsTestBase {
 
     await();
 
+    cleanup(server, client);
+  }
+
+  @Test
+  public void testHttpMetricsResponseCode() throws Exception {
+    test(200, "responses-2xx");
+    test(300, "responses-3xx");
+    test(404, "responses-4xx");
+    test(500, "responses-5xx");
+
+  }
+
+  private void test(int code, String metricName) throws Exception {
+    CountDownLatch latch = new CountDownLatch(1);
+    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    Handler<HttpServer> doTest = (server) -> {
+      for (Measured measured : Arrays.asList(client, server)) {
+        Map<String, JsonObject> metric = metricsService.getMetricsSnapshot(measured);
+        assertEquals(0, (int) metric.get(metricName).getInteger("count"));
+      }
+      client.request(HttpMethod.GET, 8080, "localhost", "/", resp -> {
+        vertx.runOnContext(v -> {
+          for (Measured measured : Arrays.asList(client, server)) {
+            Map<String, JsonObject> metric = metricsService.getMetricsSnapshot(measured);
+            assertEquals(1, (int) metric.get(metricName).getInteger("count"));
+          }
+          latch.countDown();
+        });
+      }).end();
+    };
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
+      req.response().setStatusCode(code).end();
+    }).listen(ar -> {
+      assertTrue(ar.succeeded());
+      doTest.handle(ar.result());
+    });
+    awaitLatch(latch);
     cleanup(server, client);
   }
 

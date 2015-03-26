@@ -23,9 +23,6 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 
-import java.util.Map;
-import java.util.WeakHashMap;
-
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
@@ -58,6 +55,6 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
 
   @Override
   public void responseEnd(TimedContext ctx, HttpClientRequest request, HttpClientResponse response) {
-    ctx.stop();
+    ctx.end(response.statusCode());
   }
 }

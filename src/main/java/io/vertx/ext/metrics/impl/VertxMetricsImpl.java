@@ -104,32 +104,32 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public EventBusMetrics createMetrics(EventBus eventBus) {
-    return new EventBusMetricsImpl(this, nameOf(baseName(), "eventbus"), options);
+    return new EventBusMetricsImpl(this, nameOf("eventbus"), options);
   }
 
   @Override
   public HttpServerMetrics<?, ?> createMetrics(HttpServer server, HttpServerOptions options) {
-    return new HttpServerMetricsImpl(this, nameOf(baseName(), "http.servers"));
+    return new HttpServerMetricsImpl(this, nameOf("http.servers"));
   }
 
   @Override
   public HttpClientMetrics<?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
-    return new HttpClientMetricsImpl(this, instanceName(nameOf(baseName(), "http.clients"), client), options);
+    return new HttpClientMetricsImpl(this, instanceName(nameOf("http.clients"), client), options);
   }
 
   @Override
   public TCPMetrics<?> createMetrics(NetServer server, NetServerOptions options) {
-    return new NetServerMetricsImpl(this, nameOf(baseName(), "net.servers"), false);
+    return new NetServerMetricsImpl(this, nameOf("net.servers"), false);
   }
 
   @Override
   public TCPMetrics<?> createMetrics(NetClient client, NetClientOptions options) {
-    return new NetServerMetricsImpl(this, instanceName(nameOf(baseName(), "net.clients"), client), true);
+    return new NetServerMetricsImpl(this, instanceName(nameOf("net.clients"), client), true);
   }
 
   @Override
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
-    return new DatagramSocketMetricsImpl(this, nameOf(baseName(), "datagram"));
+    return new DatagramSocketMetricsImpl(this, nameOf("datagram"));
   }
 
   @Override

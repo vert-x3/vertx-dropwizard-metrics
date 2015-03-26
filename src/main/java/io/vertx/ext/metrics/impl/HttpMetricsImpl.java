@@ -16,6 +16,7 @@
 
 package io.vertx.ext.metrics.impl;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 
 import java.util.concurrent.TimeUnit;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 abstract class HttpMetricsImpl extends NetServerMetricsImpl {
 
   private Timer requests;
+  private Meter[] responses;
 
   public HttpMetricsImpl(AbstractMetrics metrics, String baseName, boolean client) {
     super(metrics, baseName, client);
@@ -35,6 +37,13 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   protected void initialize() {
     super.initialize();
     requests = timer("requests");
+    responses = new Meter[]{
+        meter("responses-1xx"),
+        meter("responses-2xx"),
+        meter("responses-3xx"),
+        meter("responses-4xx"),
+        meter("responses-5xx")
+    };
   }
 
   /**
@@ -49,6 +58,7 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   }
 
   protected class TimedContext {
+
     private String method;
     private String uri;
     private long start;
@@ -59,10 +69,18 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
       start = System.nanoTime();
     }
 
-    protected void stop() {
-      if (closed) return;
+    protected void end(int statusCode) {
+      if (closed) {
+        return;
+      }
 
       long duration = System.nanoTime() - start;
+      int responseStatus = statusCode / 100;
+
+      //
+      if (responseStatus >= 1 && responseStatus <= 5) {
+        responses[responseStatus - 1].mark();
+      }
 
       // Update generic requests metric
       requests.update(duration, TimeUnit.NANOSECONDS);
@@ -75,10 +93,6 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
         }
       } else if (uri != null) {
         timer("requests", uri).update(duration, TimeUnit.NANOSECONDS);
-      }
-
-      if (closed) {
-        removeAll();
       }
     }
   }

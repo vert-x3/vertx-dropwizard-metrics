@@ -37,6 +37,6 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public void responseEnd(HttpMetricsImpl.TimedContext ctx, HttpServerResponse response) {
-    ctx.stop();
+    ctx.end(response.getStatusCode());
   }
 }

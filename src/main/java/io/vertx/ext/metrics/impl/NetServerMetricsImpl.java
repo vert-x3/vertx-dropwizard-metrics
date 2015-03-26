@@ -58,8 +58,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   @Override
   public void listening(SocketAddress localAddress) {
     // Set the base name of the server to include the host:port
-    setBaseName(nameOf(baseName(), addressName(localAddress)));
-
+    setBaseName(Registry.name(baseName(), addressName(localAddress)));
     initialize();
   }
 
