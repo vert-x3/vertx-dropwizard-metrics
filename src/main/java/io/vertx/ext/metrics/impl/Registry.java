@@ -16,7 +16,6 @@
 
 package io.vertx.ext.metrics.impl;
 
-import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 
 /**
@@ -26,10 +25,5 @@ public class Registry extends MetricRegistry {
 
   public void shutdown() {
     removeMatching((name, metric) -> true);
-  }
-
-  @Override
-  public <T extends Metric> T register(String name, T metric) throws IllegalArgumentException {
-    return super.register(name, metric);
   }
 }
