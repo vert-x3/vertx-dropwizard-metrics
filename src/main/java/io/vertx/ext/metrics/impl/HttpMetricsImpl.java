@@ -47,53 +47,40 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   }
 
   /**
-   * Provides a timed context to measure http request latency.
+   * Provides a request metric that to measure http request latency and more.
    *
    * @param method the http method or null if it's not to be recorded
    * @param uri the request uri or path of the request, or null if it's not to be recorded
-   * @return the TimedContext to be measured
+   * @return the request metric to be measured
    */
-  protected TimedContext time(String method, String uri) {
-    return new TimedContext(method, uri);
+  protected RequestMetric createRequestMetric(String method, String uri) {
+    return new RequestMetric(this, method, uri);
   }
-
-  protected class TimedContext {
-
-    private String method;
-    private String uri;
-    private long start;
-
-    private TimedContext(String method, String uri) {
-      this.method = (method == null) ? null : method.toLowerCase();
-      this.uri = uri;
-      start = System.nanoTime();
+  
+  protected void end(RequestMetric metric, int statusCode) {
+    if (closed) {
+      return;
     }
 
-    protected void end(int statusCode) {
-      if (closed) {
-        return;
+    long duration = System.nanoTime() - metric.start;
+    int responseStatus = statusCode / 100;
+
+    //
+    if (responseStatus >= 1 && responseStatus <= 5) {
+      responses[responseStatus - 1].mark();
+    }
+
+    // Update generic requests metric
+    requests.update(duration, TimeUnit.NANOSECONDS);
+
+    // Update specific method / uri request metrics
+    if (metric.method != null) {
+      timer(metric.method + "-requests").update(duration, TimeUnit.NANOSECONDS);
+      if (metric.uri != null) {
+        timer(metric.method + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
       }
-
-      long duration = System.nanoTime() - start;
-      int responseStatus = statusCode / 100;
-
-      //
-      if (responseStatus >= 1 && responseStatus <= 5) {
-        responses[responseStatus - 1].mark();
-      }
-
-      // Update generic requests metric
-      requests.update(duration, TimeUnit.NANOSECONDS);
-
-      // Update specific method / uri request metrics
-      if (method != null) {
-        timer(method + "-requests").update(duration, TimeUnit.NANOSECONDS);
-        if (uri != null) {
-          timer(method + "-requests", uri).update(duration, TimeUnit.NANOSECONDS);
-        }
-      } else if (uri != null) {
-        timer("requests", uri).update(duration, TimeUnit.NANOSECONDS);
-      }
+    } else if (metric.uri != null) {
+      timer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
     }
   }
 }

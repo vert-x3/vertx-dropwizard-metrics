@@ -24,19 +24,19 @@ import io.vertx.core.spi.metrics.HttpServerMetrics;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<HttpMetricsImpl.TimedContext, Timer.Context> {
+class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<RequestMetric, Timer.Context> {
 
   HttpServerMetricsImpl(AbstractMetrics metrics, String baseName) {
     super(metrics, baseName, false);
   }
 
   @Override
-  public HttpMetricsImpl.TimedContext requestBegin(HttpServerRequest request, HttpServerResponse response) {
-    return time(request.method().name(), request.uri());
+  public RequestMetric requestBegin(HttpServerRequest request, HttpServerResponse response) {
+    return createRequestMetric(request.method().name(), request.uri());
   }
 
   @Override
-  public void responseEnd(HttpMetricsImpl.TimedContext ctx, HttpServerResponse response) {
-    ctx.end(response.getStatusCode());
+  public void responseEnd(RequestMetric metric, HttpServerResponse response) {
+    end(metric, response.getStatusCode());
   }
 }
