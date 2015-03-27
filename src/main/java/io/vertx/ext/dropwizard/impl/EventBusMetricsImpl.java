@@ -21,16 +21,11 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
-import io.vertx.ext.dropwizard.MatchType;
-import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.MetricsServiceOptions;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -38,8 +33,7 @@ import java.util.regex.Pattern;
 class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<EventBusMetricsImpl.HandlerMetric> {
 
   private final ConcurrentMap<String, HandlerTimer> handlerTimers = new ConcurrentHashMap<>();
-  private final Set<String> monitoredHandlers;
-  private final Pattern[] matchers;
+  private final Matcher handlerMatcher;
   private final Counter handlerCount;
   private final Counter pending;
   private final Counter pendingLocal;
@@ -83,16 +77,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     replyFailures = meter("messages", "reply-failures");
     bytesRead = meter("messages", "bytes-read");
     bytesWritten = meter("messages", "bytes-written");
-    monitoredHandlers = new HashSet<>();
-    for (Match matcher : options.getMonitoredHandlers()) {
-      if (matcher.getType() == MatchType.EQUALS && matcher.getValue() != null) {
-        monitoredHandlers.add(matcher.getValue());
-      }
-    }
-    matchers = options.getMonitoredHandlers().stream().
-        filter(matcher -> matcher.getType() == MatchType.REGEX && matcher.getValue() != null).
-        map(matcher -> Pattern.compile(matcher.getValue())).
-        toArray(Pattern[]::new);
+    handlerMatcher = new Matcher(options.getMonitoredHandlers());
   }
 
   @Override
@@ -112,15 +97,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   @Override
   public HandlerMetric handlerRegistered(String address, boolean replyHandler) {
     handlerCount.inc();
-    if (monitoredHandlers.size() > 0 && monitoredHandlers.contains(address)) {
+    if (handlerMatcher.match(address)) {
       return new HandlerMetric(address);
-    }
-    if  (matchers.length > 0) {
-      for (Pattern pattern : matchers) {
-        if (pattern.matcher(address).matches()) {
-          return new HandlerMetric(address);
-        }
-      }
     }
     return null;
   }
