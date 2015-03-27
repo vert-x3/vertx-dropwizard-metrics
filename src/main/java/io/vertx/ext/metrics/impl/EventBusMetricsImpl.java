@@ -44,6 +44,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final Counter pending;
   private final Counter pendingLocal;
   private final Counter pendingRemote;
+  private final Meter bytesRead;
+  private final Meter bytesWritten;
   private final Meter receivedMessages;
   private final Meter receivedLocalMessages;
   private final Meter receivedRemoteMessages;
@@ -79,6 +81,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     publishedLocalMessages = meter("messages", "published-local");
     publishedRemoteMessages = meter("messages", "published-remote");
     replyFailures = meter("messages", "reply-failures");
+    bytesRead = meter("messages", "bytes-read");
+    bytesWritten = meter("messages", "bytes-written");
     monitoredHandlers = new HashSet<>();
     for (HandlerMatcher matcher : options.getMonitoredHandlers()) {
       if (!matcher.isRegex() && matcher.getAddress() != null) {
@@ -89,6 +93,16 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
         filter(matcher -> matcher.isRegex() && matcher.getAddress() != null).
         map(matcher -> Pattern.compile(matcher.getAddress())).
         toArray(Pattern[]::new);
+  }
+
+  @Override
+  public void messageWritten(String address, int size) {
+    bytesWritten.mark(size);
+  }
+
+  @Override
+  public void messageRead(String address, int size) {
+    bytesRead.mark(size);
   }
 
   @Override

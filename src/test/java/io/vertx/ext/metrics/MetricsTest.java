@@ -734,6 +734,23 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
+  public void testEventBusByteMetrics() {
+    startNodes(2);
+    vertices[1].eventBus().consumer("the_address", msg -> {
+      Map<String, JsonObject> fromMetrics = metricsService.getMetricsSnapshot(vertices[0].eventBus());
+      Map<String, JsonObject> toMetrics = metricsService.getMetricsSnapshot(vertices[1].eventBus());
+      long written = fromMetrics.get("bytes-written").getLong("count");
+      long read = toMetrics.get("bytes-read").getLong("count");
+      assertTrue("Expecting read count " + read + " > 1000", read > 1000);
+      assertTrue("Expecting written count " + written + " > 1000", written > 1000);
+    }).completionHandler(ar -> {
+      assertTrue(ar.succeeded());
+      Buffer buffer = Buffer.buffer(new byte[1000]);
+      vertices[0].eventBus().send("the_address", buffer);
+    });
+  }
+
+  @Test
   public void testEventBusMetricsReplyTimeout() {
     vertx.eventBus().consumer("foo").handler(msg -> {});
 
