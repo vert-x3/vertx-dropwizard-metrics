@@ -853,11 +853,10 @@ public class MetricsTest extends MetricsTestBase {
   public void testScheduledMetricConsumer() {
     int messages = 18;
     AtomicInteger count = new AtomicInteger(messages);
-    String baseName = vertx.eventBus().metricBaseName();
+    String baseName = metricsService.getBaseName(vertx.eventBus());
 
-    ScheduledMetricsConsumer consumer = new ScheduledMetricsConsumer(vertx).filter((name, metric) -> {
-      return name.startsWith(baseName);
-    });
+    ScheduledMetricsConsumer consumer = new ScheduledMetricsConsumer(vertx).
+        filter((name, metric) -> name.startsWith(baseName));
 
     consumer.start(300, TimeUnit.MILLISECONDS, (name, metric) -> {
       assertTrue(name.startsWith(baseName));

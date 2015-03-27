@@ -43,5 +43,7 @@ public interface MetricsService {
    */
   Map<String, JsonObject> getMetricsSnapshot(Measured o);
 
+  String getBaseName(Measured measured);
+
 
 }

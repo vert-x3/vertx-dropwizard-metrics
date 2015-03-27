@@ -59,6 +59,11 @@ public class MetricsService {
     return ret;
   }
 
+  public String getBaseName(Measured measured) { 
+    String ret = this.delegate.getBaseName((io.vertx.core.metrics.Measured) measured.getDelegate());
+    return ret;
+  }
+
 
   public static MetricsService newInstance(io.vertx.ext.dropwizard.MetricsService arg) {
     return new MetricsService(arg);

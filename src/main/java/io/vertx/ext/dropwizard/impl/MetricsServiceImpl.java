@@ -16,4 +16,10 @@ public class MetricsServiceImpl implements MetricsService {
     AbstractMetrics codahaleMetrics = AbstractMetrics.unwrap(measured);
     return codahaleMetrics != null ? codahaleMetrics.metrics() : Collections.emptyMap();
   }
+
+  @Override
+  public String getBaseName(Measured measured) {
+    AbstractMetrics codahaleMetrics = AbstractMetrics.unwrap(measured);
+    return codahaleMetrics != null ? codahaleMetrics.baseName() : null;
+  }
 }

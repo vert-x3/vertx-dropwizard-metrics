@@ -133,8 +133,8 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public String metricBaseName() {
-    return baseName();
+  public boolean isMetricsEnabled() {
+    return true;
   }
 
   void setDoneHandler(Handler<Void> handler) {

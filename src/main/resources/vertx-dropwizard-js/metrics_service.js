@@ -45,6 +45,19 @@ var MetricsService = function(j_val) {
     } else utils.invalidArgs();
   };
 
+  /**
+
+   @public
+   @param measured {Measured} 
+   @return {string}
+   */
+  this.getBaseName = function(measured) {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return j_metricsService["getBaseName(io.vertx.core.metrics.Measured)"](measured._jdel);
+    } else utils.invalidArgs();
+  };
+
   // A reference to the underlying Java delegate
   // NOTE! This is an internal API and must not be used in user code.
   // If you rely on this property your code is likely to break if we change it / remove it without warning.
