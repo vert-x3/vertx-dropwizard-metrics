@@ -254,7 +254,7 @@ var Vertx = require("vertx-js/vertx");
 var vertx = Vertx.vertx({
   "metricsOptions" : {
     "enabled" : true,
-    "monitoredHandlers" : [
+    "monitoredEventBusHandlers" : [
       {
         "value" : "some-address"
       },

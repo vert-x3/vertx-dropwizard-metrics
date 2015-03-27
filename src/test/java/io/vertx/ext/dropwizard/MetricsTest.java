@@ -81,8 +81,8 @@ public class MetricsTest extends MetricsTestBase {
             new MetricsServiceOptions().
                 setEnabled(true).
                 setJmxEnabled(true).
-                addMonitoredHandler(new Match().setValue("foo")).
-                addMonitoredHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
+                addMonitoredEventBusHandler(new Match().setValue("foo")).
+                addMonitoredEventBusHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
                 addMonitoredHttpServerUri(new Match().setValue("/get")).
                 addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX))
         );

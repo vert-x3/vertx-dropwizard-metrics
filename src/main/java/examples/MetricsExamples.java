@@ -59,9 +59,9 @@ public class MetricsExamples {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
         new MetricsServiceOptions().
             setEnabled(true).
-            addMonitoredHandler(
+            addMonitoredEventBusHandler(
                 new Match().setValue("some-address")).
-            addMonitoredHandler(
+            addMonitoredEventBusHandler(
                 new Match().setValue("business-.*").setType(MatchType.REGEX))
     ));
   }

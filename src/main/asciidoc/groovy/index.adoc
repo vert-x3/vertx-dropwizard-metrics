@@ -255,7 +255,7 @@ import io.vertx.ext.dropwizard.MatchType
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
-    monitoredHandlers:[
+    monitoredEventBusHandlers:[
       [
         value:"some-address"
       ],

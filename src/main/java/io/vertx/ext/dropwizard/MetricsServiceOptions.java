@@ -192,19 +192,19 @@ public class MetricsServiceOptions extends MetricsOptions {
   }
 
   /**
-   * @return the list of monitored handlers
+   * @return the list of monitored event bus handlers
    */
-  public List<Match> getMonitoredHandlers() {
+  public List<Match> getMonitoredEventBusHandlers() {
     return monitoredEventBusHandlers;
   }
 
   /**
-   * Add an monitored event bus handler.
+   * Add a monitored event bus handler.
    *
-   * @param match the handler match
+   * @param match the event bus address match
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions addMonitoredHandler(Match match) {
+  public MetricsServiceOptions addMonitoredEventBusHandler(Match match) {
     monitoredEventBusHandlers.add(match);
     return this;
   }

@@ -30,10 +30,10 @@ Set whether JMX will be enabled on the Vert.x instance.+++
 |+++
 Set the JMX domain to use when JMX metrics are enabled.+++
 
-|[[monitoredHandlers]]`monitoredHandlers`
+|[[monitoredEventBusHandlers]]`monitoredEventBusHandlers`
 |`Array of link:Match.html[Match]`
 |+++
-Add an monitored event bus handler.+++
+Add a monitored event bus handler.+++
 
 |[[monitoredHttpServerUris]]`monitoredHttpServerUris`
 |`Array of link:Match.html[Match]`

@@ -77,7 +77,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     replyFailures = meter("messages", "reply-failures");
     bytesRead = meter("messages", "bytes-read");
     bytesWritten = meter("messages", "bytes-written");
-    handlerMatcher = new Matcher(options.getMonitoredHandlers());
+    handlerMatcher = new Matcher(options.getMonitoredEventBusHandlers());
   }
 
   @Override
