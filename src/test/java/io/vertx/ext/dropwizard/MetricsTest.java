@@ -82,7 +82,9 @@ public class MetricsTest extends MetricsTestBase {
                 setEnabled(true).
                 setJmxEnabled(true).
                 addMonitoredHandler(new Match().setValue("foo")).
-                addMonitoredHandler(new Match().setValue("juu.*").setType(MatchType.REGEX))
+                addMonitoredHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
+                addMonitoredHttpServerUri(new Match().setValue("/get")).
+                addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX))
         );
   }
 
@@ -243,15 +245,15 @@ public class MetricsTest extends MetricsTestBase {
       assertCount(metrics.get("put-requests"), 1L);
       assertCount(metrics.get("put-requests./put"), 1L);
       assertCount(metrics.get("delete-requests"), 1L);
-      assertCount(metrics.get("delete-requests./delete"), 1L);
+      assertNull(metrics.get("delete-requests./delete"));
       assertCount(metrics.get("options-requests"), 1L);
-      assertCount(metrics.get("options-requests./options"), 1L);
+      assertNull(metrics.get("options-requests./options"));
       assertCount(metrics.get("head-requests"), 1L);
-      assertCount(metrics.get("head-requests./head"), 1L);
+      assertNull(metrics.get("head-requests./head"));
       assertCount(metrics.get("trace-requests"), 1L);
-      assertCount(metrics.get("trace-requests./trace"), 1L);
+      assertNull(metrics.get("trace-requests./trace"));
       assertCount(metrics.get("connect-requests"), 1L);
-      assertCount(metrics.get("connect-requests./connect"), 1L);
+      assertNull(metrics.get("connect-requests./connect"));
       assertCount(metrics.get("patch-requests"), 1L);
       assertCount(metrics.get("patch-requests./patch"), 1L);
       testComplete();

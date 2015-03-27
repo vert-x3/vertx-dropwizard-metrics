@@ -20,14 +20,17 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.ext.dropwizard.Match;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<RequestMetric, Timer.Context> {
 
-  HttpServerMetricsImpl(AbstractMetrics metrics, String baseName) {
-    super(metrics, baseName, false);
+  HttpServerMetricsImpl(AbstractMetrics metrics, String baseName, List<Match> monitoredUris) {
+    super(metrics, baseName, false, monitoredUris);
   }
 
   @Override

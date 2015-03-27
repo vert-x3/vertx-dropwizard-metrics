@@ -34,4 +34,14 @@ Set the JMX domain to use when JMX metrics are enabled.+++
 |`Array of link:Match.html[Match]`
 |+++
 Add an monitored event bus handler.+++
+
+|[[monitoredHttpServerUris]]`monitoredHttpServerUris`
+|`Array of link:Match.html[Match]`
+|+++
+Add an monitored http server uri.+++
+
+|[[monitoredHttpClientUris]]`monitoredHttpClientUris`
+|`Array of link:Match.html[Match]`
+|+++
+Add an monitored http client uri.+++
 |===

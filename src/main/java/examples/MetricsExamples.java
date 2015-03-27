@@ -66,6 +66,17 @@ public class MetricsExamples {
     ));
   }
 
+  public void setupMonitoredUris() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new MetricsServiceOptions().
+            setEnabled(true).
+            addMonitoredHttpServerUri(
+                new Match().setValue("/")).
+            addMonitoredHttpServerUri(
+                new Match().setValue("/foo/.*").setType(MatchType.REGEX))
+    ));
+  }
+
   public void naming1(Vertx vertx, MetricsService metricsService) {
     Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx);
     metrics.get("vertx.eventbus.handlers");

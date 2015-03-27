@@ -246,6 +246,13 @@
  * * `responses-4xx` - A <<meter>> of the 4xx response code
  * * `responses-5xx` - A <<meter>> of the 5xx response code
  *
+ * Http URI metrics must be explicitely configured in the options either by exact match or regex match:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMonitoredUris()}
+ * ----
+ *
  * *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
  *
  * === Http client metrics

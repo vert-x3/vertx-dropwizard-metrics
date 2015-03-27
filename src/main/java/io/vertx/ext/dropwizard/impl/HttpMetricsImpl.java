@@ -18,7 +18,9 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.vertx.ext.dropwizard.Match;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,9 +30,11 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
 
   private Timer requests;
   private Meter[] responses;
+  private Matcher uriMatcher;
 
-  public HttpMetricsImpl(AbstractMetrics metrics, String baseName, boolean client) {
+  public HttpMetricsImpl(AbstractMetrics metrics, String baseName, boolean client, List<Match> monitoredUris) {
     super(metrics, baseName, client);
+    uriMatcher = new Matcher(monitoredUris);
   }
 
   @Override
@@ -76,10 +80,10 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
     // Update specific method / uri request metrics
     if (metric.method != null) {
       timer(metric.method + "-requests").update(duration, TimeUnit.NANOSECONDS);
-      if (metric.uri != null) {
+      if (metric.uri != null && uriMatcher.match(metric.uri)) {
         timer(metric.method + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
       }
-    } else if (metric.uri != null) {
+    } else if (metric.uri != null && uriMatcher.match(metric.uri)) {
       timer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
     }
   }

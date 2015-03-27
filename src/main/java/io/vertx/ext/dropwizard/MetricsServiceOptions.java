@@ -48,11 +48,23 @@ public class MetricsServiceOptions extends MetricsOptions {
    */
   public static final List<Match> DEFAULT_MONITORED_HANDLERS = Collections.emptyList();
 
+  /**
+   * The default monitored http server uris : empty by default
+   */
+  public static final List<Match> DEFAULT_MONITORED_HTTP_SERVER_URIS = Collections.emptyList();
+
+  /**
+   * The default monitored http client uris : empty by default
+   */
+  public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_URIS = Collections.emptyList();
+
   private boolean enabled;
   private String name;
   private boolean jmxEnabled;
   private String jmxDomain;
-  private List<Match> monitoredHandlers;
+  private List<Match> monitoredEventBusHandlers;
+  private List<Match> monitoredHttpServerUris;
+  private List<Match> monitoredHttpClientUris;
 
   /**
    * Default constructor
@@ -60,7 +72,9 @@ public class MetricsServiceOptions extends MetricsOptions {
   public MetricsServiceOptions() {
     enabled = DEFAULT_METRICS_ENABLED;
     jmxEnabled = DEFAULT_JMX_ENABLED;
-    monitoredHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
+    monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
+    monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
+    monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
   }
 
   /**
@@ -73,7 +87,7 @@ public class MetricsServiceOptions extends MetricsOptions {
     name = other.getName();
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
-    monitoredHandlers = new ArrayList<>(other.monitoredHandlers);
+    monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
   }
 
   /**
@@ -86,11 +100,11 @@ public class MetricsServiceOptions extends MetricsOptions {
     name = json.getString("name");
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
-    monitoredHandlers = new ArrayList<>();
+    monitoredEventBusHandlers = new ArrayList<>();
     JsonArray handlerAddressesArray = json.getJsonArray("monitoredHandlers");
     if (handlerAddressesArray != null) {
       for (Object o : handlerAddressesArray) {
-        monitoredHandlers.add(new Match((JsonObject) o));
+        monitoredEventBusHandlers.add(new Match((JsonObject) o));
       }
     }
   }
@@ -181,17 +195,53 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @return the list of monitored handlers
    */
   public List<Match> getMonitoredHandlers() {
-    return monitoredHandlers;
+    return monitoredEventBusHandlers;
   }
 
   /**
    * Add an monitored event bus handler.
    *
-   * @param matcher the handler matcher
+   * @param match the handler match
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions addMonitoredHandler(Match matcher) {
-    monitoredHandlers.add(matcher);
+  public MetricsServiceOptions addMonitoredHandler(Match match) {
+    monitoredEventBusHandlers.add(match);
+    return this;
+  }
+
+  /**
+   * @return the list of monitored http server uris
+   */
+  public List<Match> getMonitoredHttpServerUris() {
+    return monitoredHttpServerUris;
+  }
+
+  /**
+   * Add an monitored http server uri.
+   *
+   * @param match the handler match
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MetricsServiceOptions addMonitoredHttpServerUri(Match match) {
+    monitoredHttpServerUris.add(match);
+    return this;
+  }
+
+  /**
+   * @return the list of monitored http client uris
+   */
+  public List<Match> getMonitoredHttpClientUris() {
+    return monitoredHttpClientUris;
+  }
+
+  /**
+   * Add an monitored http client uri.
+   *
+   * @param match the handler match
+   * @return a reference to this, so the API can be used fluently
+   */
+  public MetricsServiceOptions addMonitoredHttpClientUri(Match match) {
+    monitoredHttpClientUris.add(match);
     return this;
   }
 }

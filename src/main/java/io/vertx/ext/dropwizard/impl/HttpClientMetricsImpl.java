@@ -22,14 +22,17 @@ import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.ext.dropwizard.Match;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics<RequestMetric, Timer.Context> {
 
-  HttpClientMetricsImpl(AbstractMetrics metrics, String baseName, HttpClientOptions options) {
-    super(metrics, baseName, true);
+  HttpClientMetricsImpl(AbstractMetrics metrics, String baseName, HttpClientOptions options, List<Match> monitoredUris) {
+    super(metrics, baseName, true, monitoredUris);
     initialize(options);
   }
 
