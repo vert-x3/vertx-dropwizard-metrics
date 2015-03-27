@@ -22,9 +22,9 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
-import io.vertx.ext.metrics.HandlerMatcher;
-import io.vertx.ext.metrics.MetricsService;
-import io.vertx.ext.metrics.MetricsServiceOptions;
+import io.vertx.ext.dropwizard.HandlerMatcher;
+import io.vertx.ext.dropwizard.MetricsService;
+import io.vertx.ext.dropwizard.MetricsServiceOptions;
 
 import java.util.Map;
 

@@ -14,7 +14,7 @@
  * under the License.
  */
 
-/** @module vertx-metrics-js/metrics_service */
+/** @module vertx-dropwizard-js/metrics_service */
 var utils = require('vertx-js/util/utils');
 var Measured = require('vertx-js/measured');
 
@@ -53,7 +53,7 @@ var MetricsService = function(j_val) {
 
 /**
 
- @memberof module:vertx-metrics-js/metrics_service
+ @memberof module:vertx-dropwizard-js/metrics_service
  @param vertx {Vertx} 
  @return {MetricsService}
  */

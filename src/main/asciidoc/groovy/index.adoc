@@ -79,13 +79,13 @@ See more examples below on how to retrieve/use metrics for a specific component.
 
 == Retrieving metrics
 
-Once enabled, the `link:groovydoc/io/vertx/groovy/ext/metrics/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+Once enabled, the `link:groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
 `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
 represented by a `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
 [source,groovy]
 ----
-import io.vertx.groovy.ext.metrics.MetricsService
+import io.vertx.groovy.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def metrics = metricsService.getMetricsSnapshot(vertx)
 metrics.each { name, metric ->
@@ -104,7 +104,7 @@ Since `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/http/HttpServ
 that are specific for that particular http server.
 [source,groovy]
 ----
-import io.vertx.groovy.ext.metrics.MetricsService
+import io.vertx.groovy.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def server = vertx.createHttpServer()
 // set up server

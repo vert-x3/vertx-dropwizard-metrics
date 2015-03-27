@@ -23,7 +23,7 @@ To enable metrics first setup maven to include this as a dependency
 </dependency>
 ----
 
-Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/metrics/MetricsServiceOptions.html[MetricsServiceOptions]`:
+Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsServiceOptions.html[MetricsServiceOptions]`:
 
 [source,java]
 ----
@@ -69,7 +69,7 @@ See more examples below on how to retrieve/use metrics for a specific component.
 
 == Retrieving metrics
 
-Once enabled, the `link:../../apidocs/io/vertx/ext/metrics/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
 `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
 represented by a `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
@@ -231,7 +231,7 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/metrics/MetricsServiceOptions.html[MetricsServiceOptions]` via
+The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsServiceOptions.html[MetricsServiceOptions]` via
 a specific address match or a regex match:
 
 [source,java]
