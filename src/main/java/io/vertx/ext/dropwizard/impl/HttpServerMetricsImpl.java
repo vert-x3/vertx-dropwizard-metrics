@@ -40,7 +40,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public void responseEnd(RequestMetric requestMetric, HttpServerRequest request, HttpServerResponse response) {
+  public void responseEnd(RequestMetric requestMetric, HttpServerResponse response) {
     end(requestMetric, response.getStatusCode());
   }
 }

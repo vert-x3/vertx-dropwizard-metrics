@@ -53,7 +53,7 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
   }
 
   @Override
-  public void responseEnd(RequestMetric metric, HttpClientRequest request, HttpClientResponse response) {
+  public void responseEnd(RequestMetric metric, HttpClientResponse response) {
     end(metric, response.statusCode());
   }
 }
