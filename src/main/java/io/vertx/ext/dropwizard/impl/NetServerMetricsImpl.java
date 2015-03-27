@@ -34,14 +34,14 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   private Counter exceptions;
   protected volatile boolean closed;
 
-  NetServerMetricsImpl(AbstractMetrics metrics, String baseName, boolean client) {
+  NetServerMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAddress) {
     super(metrics.registry(), baseName);
-    if (client) {
-      initialize();
-    }
-  }
 
-  protected void initialize() {
+    if (localAddress != null) {
+      // Set the base name of the server to include the host:port
+      setBaseName(Registry.name(baseName(), addressName(localAddress)));
+    }
+
     this.openConnections = counter("open-connections");
     this.connections = timer("connections");
     this.exceptions = counter("exceptions");
@@ -53,13 +53,6 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   public void close() {
     this.closed = true;
     removeAll();
-  }
-
-  @Override
-  public void listening(SocketAddress localAddress) {
-    // Set the base name of the server to include the host:port
-    setBaseName(Registry.name(baseName(), addressName(localAddress)));
-    initialize();
   }
 
   @Override

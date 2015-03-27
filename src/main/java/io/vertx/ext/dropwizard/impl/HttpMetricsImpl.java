@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.dropwizard.Match;
 
 import java.util.List;
@@ -32,14 +33,9 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   private Meter[] responses;
   private Matcher uriMatcher;
 
-  public HttpMetricsImpl(AbstractMetrics metrics, String baseName, boolean client, List<Match> monitoredUris) {
-    super(metrics, baseName, client);
+  public HttpMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAdress, List<Match> monitoredUris) {
+    super(metrics, baseName, localAdress);
     uriMatcher = new Matcher(monitoredUris);
-  }
-
-  @Override
-  protected void initialize() {
-    super.initialize();
     requests = timer("requests");
     responses = new Meter[]{
         meter("responses-1xx"),
@@ -58,7 +54,7 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
    * @return the request metric to be measured
    */
   protected RequestMetric createRequestMetric(String method, String uri) {
-    return new RequestMetric(this, method, uri);
+    return new RequestMetric(method, uri);
   }
   
   protected void end(RequestMetric metric, int statusCode) {

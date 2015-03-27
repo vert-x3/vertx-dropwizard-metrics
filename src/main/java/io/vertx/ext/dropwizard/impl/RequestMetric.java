@@ -5,13 +5,11 @@ package io.vertx.ext.dropwizard.impl;
 */
 class RequestMetric {
 
-  private final HttpMetricsImpl httpMetrics;
   final String method;
   final String uri;
   long start;
 
-  RequestMetric(HttpMetricsImpl httpMetrics, String method, String uri) {
-    this.httpMetrics = httpMetrics;
+  RequestMetric(String method, String uri) {
     this.method = (method == null) ? null : method.toLowerCase();
     this.uri = uri;
     start = System.nanoTime();

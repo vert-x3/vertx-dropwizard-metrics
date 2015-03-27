@@ -32,11 +32,7 @@ import java.util.List;
 class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics<RequestMetric, Timer.Context> {
 
   HttpClientMetricsImpl(AbstractMetrics metrics, String baseName, HttpClientOptions options, List<Match> monitoredUris) {
-    super(metrics, baseName, true, monitoredUris);
-    initialize(options);
-  }
-
-  private void initialize(HttpClientOptions options) {
+    super(metrics, baseName, null, monitoredUris);
     // max pool size gauge
     int maxPoolSize = options.getMaxPoolSize();
     gauge(() -> maxPoolSize, "connections", "max-pool-size");
