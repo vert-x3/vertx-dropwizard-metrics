@@ -251,16 +251,17 @@ a specific address match or a regex match:
 [source,groovy]
 ----
 import io.vertx.groovy.core.Vertx
+import io.vertx.ext.dropwizard.MatchType
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
     monitoredHandlers:[
       [
-        address:"some-address"
+        value:"some-address"
       ],
       [
-        address:"business-.*",
-        regex:true
+        value:"business-.*",
+        type:MatchType.REGEX
       ]
     ]
   ]

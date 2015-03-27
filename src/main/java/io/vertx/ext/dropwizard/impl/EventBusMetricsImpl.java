@@ -21,7 +21,8 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
-import io.vertx.ext.dropwizard.HandlerMatcher;
+import io.vertx.ext.dropwizard.MatchType;
+import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.MetricsServiceOptions;
 
 import java.util.HashSet;
@@ -83,14 +84,14 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     bytesRead = meter("messages", "bytes-read");
     bytesWritten = meter("messages", "bytes-written");
     monitoredHandlers = new HashSet<>();
-    for (HandlerMatcher matcher : options.getMonitoredHandlers()) {
-      if (!matcher.isRegex() && matcher.getAddress() != null) {
-        monitoredHandlers.add(matcher.getAddress());
+    for (Match matcher : options.getMonitoredHandlers()) {
+      if (matcher.getType() == MatchType.EQUALS && matcher.getValue() != null) {
+        monitoredHandlers.add(matcher.getValue());
       }
     }
     matchers = options.getMonitoredHandlers().stream().
-        filter(matcher -> matcher.isRegex() && matcher.getAddress() != null).
-        map(matcher -> Pattern.compile(matcher.getAddress())).
+        filter(matcher -> matcher.getType() == MatchType.REGEX && matcher.getValue() != null).
+        map(matcher -> Pattern.compile(matcher.getValue())).
         toArray(Pattern[]::new);
   }
 

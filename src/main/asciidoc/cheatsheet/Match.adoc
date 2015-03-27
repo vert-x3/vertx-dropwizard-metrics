@@ -1,0 +1,17 @@
+== Match
+
+++++
+ A match for a value.
+++++
+'''
+
+[cols=">25%,^25%,50%"]
+[frame="topbot"]
+|===
+^|Name | Type ^| Description
+
+|[[value]]`value`
+|`String`
+|+++
+Set the matched value.+++
+|===

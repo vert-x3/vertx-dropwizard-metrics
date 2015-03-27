@@ -46,13 +46,13 @@ public class MetricsServiceOptions extends MetricsOptions {
   /**
    * The default monitored handlers : empty by default
    */
-  public static final List<HandlerMatcher> DEFAULT_MONITORED_HANDLERS = Collections.emptyList();
+  public static final List<Match> DEFAULT_MONITORED_HANDLERS = Collections.emptyList();
 
   private boolean enabled;
   private String name;
   private boolean jmxEnabled;
   private String jmxDomain;
-  private List<HandlerMatcher> monitoredHandlers;
+  private List<Match> monitoredHandlers;
 
   /**
    * Default constructor
@@ -90,7 +90,7 @@ public class MetricsServiceOptions extends MetricsOptions {
     JsonArray handlerAddressesArray = json.getJsonArray("monitoredHandlers");
     if (handlerAddressesArray != null) {
       for (Object o : handlerAddressesArray) {
-        monitoredHandlers.add(new HandlerMatcher((JsonObject) o));
+        monitoredHandlers.add(new Match((JsonObject) o));
       }
     }
   }
@@ -180,7 +180,7 @@ public class MetricsServiceOptions extends MetricsOptions {
   /**
    * @return the list of monitored handlers
    */
-  public List<HandlerMatcher> getMonitoredHandlers() {
+  public List<Match> getMonitoredHandlers() {
     return monitoredHandlers;
   }
 
@@ -190,7 +190,7 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param matcher the handler matcher
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions addMonitoredHandler(HandlerMatcher matcher) {
+  public MetricsServiceOptions addMonitoredHandler(Match matcher) {
     monitoredHandlers.add(matcher);
     return this;
   }

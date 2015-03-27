@@ -256,11 +256,11 @@ var vertx = Vertx.vertx({
     "enabled" : true,
     "monitoredHandlers" : [
       {
-        "address" : "some-address"
+        "value" : "some-address"
       },
       {
-        "address" : "business-.*",
-        "regex" : true
+        "value" : "business-.*",
+        "type" : 'REGEX'
       }
     ]
   }

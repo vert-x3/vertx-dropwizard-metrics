@@ -22,7 +22,8 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
-import io.vertx.ext.dropwizard.HandlerMatcher;
+import io.vertx.ext.dropwizard.MatchType;
+import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.dropwizard.MetricsServiceOptions;
 
@@ -59,9 +60,9 @@ public class MetricsExamples {
         new MetricsServiceOptions().
             setEnabled(true).
             addMonitoredHandler(
-                new HandlerMatcher().setAddress("some-address")).
+                new Match().setValue("some-address")).
             addMonitoredHandler(
-                new HandlerMatcher().setAddress("business-.*").setRegex(true))
+                new Match().setValue("business-.*").setType(MatchType.REGEX))
     ));
   }
 

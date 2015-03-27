@@ -240,9 +240,9 @@ Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
     new MetricsServiceOptions().
         setEnabled(true).
         addMonitoredHandler(
-            new HandlerMatcher().setAddress("some-address")).
+            new Match().setValue("some-address")).
         addMonitoredHandler(
-            new HandlerMatcher().setAddress("business-.*").setRegex(true))
+            new Match().setValue("business-.*").setType(MatchType.REGEX))
 ));
 ----
 
