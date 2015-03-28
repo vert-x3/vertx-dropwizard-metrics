@@ -35,12 +35,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   protected volatile boolean closed;
 
   NetServerMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAddress) {
-    super(metrics.registry(), baseName);
-
-    if (localAddress != null) {
-      // Set the base name of the server to include the host:port
-      setBaseName(Registry.name(baseName(), addressName(localAddress)));
-    }
+    super(metrics.registry(), localAddress != null ? (Registry.name(baseName, addressName(localAddress))) : (baseName));
 
     this.openConnections = counter("open-connections");
     this.connections = timer("connections");

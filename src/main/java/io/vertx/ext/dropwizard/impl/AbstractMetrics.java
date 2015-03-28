@@ -48,7 +48,7 @@ public abstract class AbstractMetrics implements Metrics {
   }
 
   protected final Registry registry;
-  private String baseName;
+  protected final String baseName;
 
   AbstractMetrics(Registry registry, String baseName) {
     this.registry = registry;
@@ -79,10 +79,6 @@ public abstract class AbstractMetrics implements Metrics {
 
   protected Registry registry() {
     return registry;
-  }
-
-  protected void setBaseName(String baseName) {
-    this.baseName = baseName;
   }
 
   public String baseName() {
