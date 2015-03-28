@@ -1,7 +1,7 @@
-== MetricsServiceOptions
+== DropwizardMetricsOptions
 
 ++++
- Vert.x metrics service configuration.
+ Vert.x Dropwizard metrics configuration.
 ++++
 '''
 
@@ -9,11 +9,6 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-
-|[[enabled]]`enabled`
-|`Boolean`
-|+++
-Set whether metrics will be enabled on the Vert.x instance.+++
 
 |[[name]]`name`
 |`String`
@@ -40,6 +35,9 @@ Add a monitored event bus handler.+++
 |+++
 Add an monitored http server uri.+++
 
+|[[enabled]]`enabled`
+|`Boolean`
+|-
 |[[monitoredHttpClientUris]]`monitoredHttpClientUris`
 |`Array of link:Match.html[Match]`
 |+++

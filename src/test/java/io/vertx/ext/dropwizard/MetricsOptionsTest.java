@@ -30,7 +30,7 @@ public class MetricsOptionsTest extends VertxTestBase {
 
   @Test
   public void testOptions() {
-    MetricsServiceOptions options = new MetricsServiceOptions();
+    DropwizardMetricsOptions options = new DropwizardMetricsOptions();
 
     assertFalse(options.isEnabled());
     assertEquals(options, options.setEnabled(true));
@@ -53,7 +53,7 @@ public class MetricsOptionsTest extends VertxTestBase {
 
   @Test
   public void testCopyOptions() {
-    MetricsServiceOptions options = new MetricsServiceOptions();
+    DropwizardMetricsOptions options = new DropwizardMetricsOptions();
 
     Random rand = new Random();
     boolean metricsEnabled = rand.nextBoolean();
@@ -64,7 +64,7 @@ public class MetricsOptionsTest extends VertxTestBase {
     options.setJmxEnabled(jmxEnabled);
     options.setJmxDomain(jmxDomain);
     options.setName(name);
-    options = new MetricsServiceOptions(options);
+    options = new DropwizardMetricsOptions(options);
     assertEquals(metricsEnabled || jmxEnabled, options.isEnabled());
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
@@ -73,7 +73,7 @@ public class MetricsOptionsTest extends VertxTestBase {
 
   @Test
   public void testJsonOptions() {
-    MetricsServiceOptions options = new MetricsServiceOptions(new JsonObject());
+    DropwizardMetricsOptions options = new DropwizardMetricsOptions(new JsonObject());
     assertFalse(options.isEnabled());
     assertFalse(options.isJmxEnabled());
     assertNull(options.getJmxDomain());
@@ -83,7 +83,7 @@ public class MetricsOptionsTest extends VertxTestBase {
     boolean jmxEnabled = rand.nextBoolean();
     String jmxDomain = TestUtils.randomAlphaString(100);
     String metricsName = TestUtils.randomAlphaString(100);
-    options = new MetricsServiceOptions(new JsonObject().
+    options = new DropwizardMetricsOptions(new JsonObject().
         put("enabled", metricsEnabled).
         put("name", metricsName).
         put("jmxEnabled", jmxEnabled).

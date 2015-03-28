@@ -25,7 +25,7 @@ import io.vertx.docgen.Source;
 import io.vertx.ext.dropwizard.MatchType;
 import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.MetricsService;
-import io.vertx.ext.dropwizard.MetricsServiceOptions;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.Map;
 
@@ -37,19 +37,19 @@ public class MetricsExamples {
 
   public void setup() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new MetricsServiceOptions().setEnabled(true)
+        new DropwizardMetricsOptions().setEnabled(true)
     ));
   }
 
   public void setupJMX() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new MetricsServiceOptions().setJmxEnabled(true)
+        new DropwizardMetricsOptions().setJmxEnabled(true)
     ));
   }
 
   public void setupJMXWithDomain() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new MetricsServiceOptions().
+        new DropwizardMetricsOptions().
             setJmxEnabled(true).
             setJmxDomain("mydomain")
     ));
@@ -57,7 +57,7 @@ public class MetricsExamples {
 
   public void setupMonitoredHandlers() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new MetricsServiceOptions().
+        new DropwizardMetricsOptions().
             setEnabled(true).
             addMonitoredEventBusHandler(
                 new Match().setValue("some-address")).
@@ -68,7 +68,7 @@ public class MetricsExamples {
 
   public void setupMonitoredUris() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new MetricsServiceOptions().
+        new DropwizardMetricsOptions().
             setEnabled(true).
             addMonitoredHttpServerUri(
                 new Match().setValue("/")).

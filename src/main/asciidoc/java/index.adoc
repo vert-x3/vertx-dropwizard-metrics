@@ -23,12 +23,12 @@ To enable metrics first setup maven to include this as a dependency
 </dependency>
 ----
 
-Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsServiceOptions.html[MetricsServiceOptions]`:
+Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new MetricsServiceOptions().setEnabled(true)
+    new DropwizardMetricsOptions().setEnabled(true)
 ));
 ----
 
@@ -37,7 +37,7 @@ You can also enable JMX:
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new MetricsServiceOptions().setJmxEnabled(true)
+    new DropwizardMetricsOptions().setJmxEnabled(true)
 ));
 ----
 
@@ -231,13 +231,13 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsServiceOptions.html[MetricsServiceOptions]` via
+The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new MetricsServiceOptions().
+    new DropwizardMetricsOptions().
         setEnabled(true).
         addMonitoredEventBusHandler(
             new Match().setValue("some-address")).
@@ -271,7 +271,7 @@ Http URI metrics must be explicitely configured in the options either by exact m
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new MetricsServiceOptions().
+    new DropwizardMetricsOptions().
         setEnabled(true).
         addMonitoredHttpServerUri(
             new Match().setValue("/")).
@@ -334,7 +334,7 @@ If you want JMX, then you need to enabled that:
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new MetricsServiceOptions().setJmxEnabled(true)
+    new DropwizardMetricsOptions().setJmxEnabled(true)
 ));
 ----
 
@@ -350,7 +350,7 @@ You can configure the domain under which the MBeans will be created:
 [source,java]
 ----
 Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new MetricsServiceOptions().
+    new DropwizardMetricsOptions().
         setJmxEnabled(true).
         setJmxDomain("mydomain")
 ));

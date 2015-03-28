@@ -23,7 +23,7 @@ To enable metrics first setup maven to include this as a dependency
 </dependency>
 ----
 
-Then when you create vertx enable metrics using the `link:../cheatsheet/MetricsServiceOptions.html[MetricsServiceOptions]`:
+Then when you create vertx enable metrics using the `link:../cheatsheet/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
 [source,groovy]
 ----
@@ -245,7 +245,7 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../cheatsheet/MetricsServiceOptions.html[MetricsServiceOptions]` via
+The monitored handlers can be configured in the `link:../cheatsheet/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
 [source,groovy]

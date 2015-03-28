@@ -22,7 +22,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.metrics.VertxMetrics;
-import io.vertx.ext.dropwizard.MetricsServiceOptions;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.reporters.JmxReporter;
 import io.vertx.core.spi.VertxMetricsFactory;
 
@@ -34,11 +34,11 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
   @Override
   public VertxMetrics metrics(Vertx vertx, VertxOptions options) {
     MetricsOptions baseOptions = options.getMetricsOptions();
-    MetricsServiceOptions metricsOptions;
-    if (baseOptions instanceof MetricsServiceOptions) {
-      metricsOptions = (MetricsServiceOptions) baseOptions;
+    DropwizardMetricsOptions metricsOptions;
+    if (baseOptions instanceof DropwizardMetricsOptions) {
+      metricsOptions = (DropwizardMetricsOptions) baseOptions;
     } else {
-      metricsOptions = new MetricsServiceOptions(baseOptions.toJson());
+      metricsOptions = new DropwizardMetricsOptions(baseOptions.toJson());
     }
     Registry registry = new Registry();
     if (metricsOptions.getName() != null) {

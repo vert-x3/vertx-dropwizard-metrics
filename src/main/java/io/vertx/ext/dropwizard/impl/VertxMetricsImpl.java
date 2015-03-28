@@ -38,7 +38,7 @@ import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
-import io.vertx.ext.dropwizard.MetricsServiceOptions;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -47,12 +47,12 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   static final String BASE_NAME = "vertx";
 
-  private final MetricsServiceOptions options;
+  private final DropwizardMetricsOptions options;
   private final Counter timers;
   private final Counter verticles;
   private Handler<Void> doneHandler;
 
-  VertxMetricsImpl(Registry registry, VertxOptions options, MetricsServiceOptions metricsOptions) {
+  VertxMetricsImpl(Registry registry, VertxOptions options, DropwizardMetricsOptions metricsOptions) {
     super(registry, BASE_NAME);
 
     this.timers = counter("timers");

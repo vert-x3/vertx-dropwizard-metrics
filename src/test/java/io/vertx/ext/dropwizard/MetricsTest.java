@@ -78,7 +78,7 @@ public class MetricsTest extends MetricsTestBase {
   protected VertxOptions getOptions() {
     return new VertxOptions().
         setMetricsOptions(
-            new MetricsServiceOptions().
+            new DropwizardMetricsOptions().
                 setEnabled(true).
                 setJmxEnabled(true).
                 addMonitoredEventBusHandler(new Match().setValue("foo")).

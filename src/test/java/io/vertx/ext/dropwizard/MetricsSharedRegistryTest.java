@@ -29,7 +29,7 @@ public class MetricsSharedRegistryTest extends MetricsTestBase {
 
   @Override
   protected VertxOptions getOptions() {
-    return new VertxOptions().setMetricsOptions(new MetricsServiceOptions().setEnabled(true).setName("the_name"));
+    return new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions().setEnabled(true).setName("the_name"));
   }
 
   @Test

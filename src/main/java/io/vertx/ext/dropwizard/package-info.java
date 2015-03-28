@@ -24,7 +24,7 @@
  * </dependency>
  * ----
  *
- * Then when you create vertx enable metrics using the {@link io.vertx.ext.dropwizard.MetricsServiceOptions}:
+ * Then when you create vertx enable metrics using the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions}:
  *
  * [source,$lang]
  * ----
@@ -218,7 +218,7 @@
  * Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
  * setting is to monitor zero handlers.
  *
- * The monitored handlers can be configured in the {@link io.vertx.ext.dropwizard.MetricsServiceOptions} via
+ * The monitored handlers can be configured in the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions} via
  * a specific address match or a regex match:
  *
  * [source,$lang]

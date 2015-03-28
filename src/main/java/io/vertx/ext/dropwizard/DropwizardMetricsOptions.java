@@ -26,17 +26,12 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Vert.x metrics service configuration.
+ * Vert.x Dropwizard metrics configuration.
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @DataObject
-public class MetricsServiceOptions extends MetricsOptions {
-
-  /**
-   * The default value of metrics enabled false
-   */
-  public static final boolean DEFAULT_METRICS_ENABLED = false;
+public class DropwizardMetricsOptions extends MetricsOptions {
 
   /**
    * The default value of JMX enabled = false
@@ -58,7 +53,6 @@ public class MetricsServiceOptions extends MetricsOptions {
    */
   public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_URIS = Collections.emptyList();
 
-  private boolean enabled;
   private String name;
   private boolean jmxEnabled;
   private String jmxDomain;
@@ -69,8 +63,7 @@ public class MetricsServiceOptions extends MetricsOptions {
   /**
    * Default constructor
    */
-  public MetricsServiceOptions() {
-    enabled = DEFAULT_METRICS_ENABLED;
+  public DropwizardMetricsOptions() {
     jmxEnabled = DEFAULT_JMX_ENABLED;
     monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
     monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
@@ -80,10 +73,10 @@ public class MetricsServiceOptions extends MetricsOptions {
   /**
    * Copy constructor
    *
-   * @param other The other {@link io.vertx.ext.dropwizard.MetricsServiceOptions} to copy when creating this
+   * @param other The other {@link DropwizardMetricsOptions} to copy when creating this
    */
-  public MetricsServiceOptions(MetricsServiceOptions other) {
-    enabled = other.isEnabled();
+  public DropwizardMetricsOptions(DropwizardMetricsOptions other) {
+    super(other);
     name = other.getName();
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
@@ -95,8 +88,8 @@ public class MetricsServiceOptions extends MetricsOptions {
    *
    * @param json the JsonObject to create it from
    */
-  public MetricsServiceOptions(JsonObject json) {
-    enabled = json.getBoolean("enabled", DEFAULT_METRICS_ENABLED);
+  public DropwizardMetricsOptions(JsonObject json) {
+    super(json);
     name = json.getString("name");
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
@@ -107,26 +100,6 @@ public class MetricsServiceOptions extends MetricsOptions {
         monitoredEventBusHandlers.add(new Match((JsonObject) o));
       }
     }
-  }
-
-  /**
-   * Will metrics be enabled on the Vert.x instance?
-   *
-   * @return true if enabled, false if not.
-   */
-  public boolean isEnabled() {
-    return enabled;
-  }
-
-  /**
-   * Set whether metrics will be enabled on the Vert.x instance.
-   *
-   * @param enable true if metrics enabled, or false if not.
-   * @return a reference to this, so the API can be used fluently
-   */
-  public MetricsServiceOptions setEnabled(boolean enable) {
-    this.enabled = enable;
-    return this;
   }
 
   /**
@@ -144,7 +117,7 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param name the name
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions setName(String name) {
+  public DropwizardMetricsOptions setName(String name) {
     this.name = name;
     return this;
   }
@@ -164,9 +137,11 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param jmxEnabled true if JMX enabled, or false if not.
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions setJmxEnabled(boolean jmxEnabled) {
+  public DropwizardMetricsOptions setJmxEnabled(boolean jmxEnabled) {
     this.jmxEnabled = jmxEnabled;
-    if (jmxEnabled) enabled = true;
+    if (jmxEnabled) {
+      setEnabled(true);
+    }
     return this;
   }
 
@@ -185,7 +160,7 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param jmxDomain  the JMX domain
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions setJmxDomain(String jmxDomain) {
+  public DropwizardMetricsOptions setJmxDomain(String jmxDomain) {
     // todo test this
     this.jmxDomain = jmxDomain;
     return this;
@@ -204,7 +179,7 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param match the event bus address match
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions addMonitoredEventBusHandler(Match match) {
+  public DropwizardMetricsOptions addMonitoredEventBusHandler(Match match) {
     monitoredEventBusHandlers.add(match);
     return this;
   }
@@ -222,7 +197,7 @@ public class MetricsServiceOptions extends MetricsOptions {
    * @param match the handler match
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions addMonitoredHttpServerUri(Match match) {
+  public DropwizardMetricsOptions addMonitoredHttpServerUri(Match match) {
     monitoredHttpServerUris.add(match);
     return this;
   }
@@ -234,13 +209,18 @@ public class MetricsServiceOptions extends MetricsOptions {
     return monitoredHttpClientUris;
   }
 
+  @Override
+  public DropwizardMetricsOptions setEnabled(boolean enable) {
+    return (DropwizardMetricsOptions) super.setEnabled(enable);
+  }
+
   /**
    * Add an monitored http client uri.
    *
    * @param match the handler match
    * @return a reference to this, so the API can be used fluently
    */
-  public MetricsServiceOptions addMonitoredHttpClientUri(Match match) {
+  public DropwizardMetricsOptions addMonitoredHttpClientUri(Match match) {
     monitoredHttpClientUris.add(match);
     return this;
   }

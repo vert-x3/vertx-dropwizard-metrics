@@ -21,7 +21,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
-import io.vertx.ext.dropwizard.MetricsServiceOptions;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -55,7 +55,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final Meter replyFailures;
 
 
-  EventBusMetricsImpl(AbstractMetrics metrics, String baseName, MetricsServiceOptions options) {
+  EventBusMetricsImpl(AbstractMetrics metrics, String baseName, DropwizardMetricsOptions options) {
     super(metrics.registry(), baseName);
 
     handlerCount = counter("handlers");
