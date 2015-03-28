@@ -49,7 +49,7 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
   }
 
   @Override
-  public RequestMetric requestBegin(SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+  public RequestMetric requestBegin(Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     return createRequestMetric(request.method().name(), request.uri());
   }
 
