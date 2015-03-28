@@ -35,7 +35,7 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertFalse(options.isEnabled());
     assertEquals(options, options.setEnabled(true));
     assertTrue(options.isEnabled());
-    assertNull(options.getName());
+    assertNull(options.getRegistryName());
 
     // Test metrics get enabled if jmx is set to true
     options.setEnabled(false);
@@ -47,8 +47,8 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertNull(options.getJmxDomain());
     assertEquals("foo", options.setJmxDomain("foo").getJmxDomain());
 
-    assertNull(options.getName());
-    assertEquals("bar", options.setName("bar").getName());
+    assertNull(options.getRegistryName());
+    assertEquals("bar", options.setRegistryName("bar").getRegistryName());
   }
 
   @Test
@@ -63,12 +63,12 @@ public class MetricsOptionsTest extends VertxTestBase {
     options.setEnabled(metricsEnabled);
     options.setJmxEnabled(jmxEnabled);
     options.setJmxDomain(jmxDomain);
-    options.setName(name);
+    options.setRegistryName(name);
     options = new DropwizardMetricsOptions(options);
     assertEquals(metricsEnabled || jmxEnabled, options.isEnabled());
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
-    assertEquals(name, options.getName());
+    assertEquals(name, options.getRegistryName());
   }
 
   @Test
@@ -77,20 +77,20 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertFalse(options.isEnabled());
     assertFalse(options.isJmxEnabled());
     assertNull(options.getJmxDomain());
-    assertNull(options.getName());
+    assertNull(options.getRegistryName());
     Random rand = new Random();
     boolean metricsEnabled = rand.nextBoolean();
     boolean jmxEnabled = rand.nextBoolean();
     String jmxDomain = TestUtils.randomAlphaString(100);
-    String metricsName = TestUtils.randomAlphaString(100);
+    String registryName = TestUtils.randomAlphaString(100);
     options = new DropwizardMetricsOptions(new JsonObject().
         put("enabled", metricsEnabled).
-        put("name", metricsName).
+        put("registryName", registryName).
         put("jmxEnabled", jmxEnabled).
         put("jmxDomain", jmxDomain)
     );
     assertEquals(metricsEnabled, options.isEnabled());
-    assertEquals(metricsName, options.getName());
+    assertEquals(registryName, options.getRegistryName());
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
   }

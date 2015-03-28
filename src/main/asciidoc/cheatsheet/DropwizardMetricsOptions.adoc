@@ -10,10 +10,10 @@
 |===
 ^|Name | Type ^| Description
 
-|[[name]]`name`
+|[[registryName]]`registryName`
 |`String`
 |+++
-Set the name used by the metrics implementation for namespacing or registering the metrics.+++
+Set the name used for registering the metrics in the Dropwizard shared registry.+++
 
 |[[jmxEnabled]]`jmxEnabled`
 |`Boolean`

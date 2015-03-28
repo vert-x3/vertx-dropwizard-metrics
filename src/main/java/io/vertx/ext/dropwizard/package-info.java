@@ -338,7 +338,7 @@
  *
  * == Accessing Dropwizard Registry
  *
- * When configuring the metrics service, an optional name can be specified for registering the underlying
+ * When configuring the metrics service, an optional registry name can be specified for registering the underlying
  * https://dropwizard.github.io/metrics/3.1.0/getting-started/#the-registry[Dropwizard Registry] in the
  * the https://dropwizard.github.io/metrics/3.1.0/apidocs/com/codahale/metrics/SharedMetricRegistries.html[Dropwizard Shared Registry]
  * so you can retrieve this registry and use according to your needs.
@@ -346,7 +346,7 @@
  * [source,java]
  * ----
  * VertxOptions options = new VertxOptions().setMetricsOptions(
- *   new MetricsServiceOptions().setEnabled(true).setName("the_name")
+ *   new MetricsServiceOptions().setEnabled(true).setRegistryName("the_name")
  * );
  * Vertx vertx = Vertx.vertxt(options);
  *

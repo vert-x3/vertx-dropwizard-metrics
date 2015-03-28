@@ -53,7 +53,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_URIS = Collections.emptyList();
 
-  private String name;
+  private String registryName;
   private boolean jmxEnabled;
   private String jmxDomain;
   private List<Match> monitoredEventBusHandlers;
@@ -77,7 +77,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions(DropwizardMetricsOptions other) {
     super(other);
-    name = other.getName();
+    registryName = other.getRegistryName();
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
     monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
@@ -90,7 +90,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions(JsonObject json) {
     super(json);
-    name = json.getString("name");
+    registryName = json.getString("registryName");
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
     monitoredEventBusHandlers = new ArrayList<>();
@@ -103,22 +103,22 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   }
 
   /**
-   * An optional name used by the metrics implementation for namespacing or registering the metrics.
+   * An optional name used for registering the metrics in the Dropwizard shared registry.
    *
-   * @return the metrics name
+   * @return the registry name
    */
-  public String getName() {
-    return name;
+  public String getRegistryName() {
+    return registryName;
   }
 
   /**
-   * Set the name used by the metrics implementation for namespacing or registering the metrics.
+   * Set the name used for registering the metrics in the Dropwizard shared registry.
    *
-   * @param name the name
+   * @param registryName the name
    * @return a reference to this, so the API can be used fluently
    */
-  public DropwizardMetricsOptions setName(String name) {
-    this.name = name;
+  public DropwizardMetricsOptions setRegistryName(String registryName) {
+    this.registryName = registryName;
     return this;
   }
 
