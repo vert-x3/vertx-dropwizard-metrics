@@ -21,6 +21,7 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.dropwizard.Match;
 
@@ -48,7 +49,7 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
   }
 
   @Override
-  public RequestMetric requestBegin(HttpClientRequest request) {
+  public RequestMetric requestBegin(SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     return createRequestMetric(request.method().name(), request.uri());
   }
 
