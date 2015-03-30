@@ -622,18 +622,32 @@ public class MetricsTest extends MetricsTestBase {
     // Check global metrics
     Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
     assertCount(metrics.get("messages.sent"), messages);
+    assertTroughput(metrics.get("messages.sent"), 1, messages);
+    assertCount(metrics.get("messages.sent-local"), messages);
+    assertTroughput(metrics.get("messages.sent-local"), 1, messages);
+    assertCount(metrics.get("messages.sent-remote"), 0);
+    assertTroughput(metrics.get("messages.sent-remote"), 0, 0);
     assertCount(metrics.get("messages.published"), 0L);
-    assertCount(metrics.get("messages.published-local"), 0L);
-    assertCount(metrics.get("messages.published-remote"), 0L);
+    assertTroughput(metrics.get("messages.published"), 0, 0);
+    assertCount(metrics.get("messages.published-local"), 0);
+    assertTroughput(metrics.get("messages.published-local"), 0, 0);
+    assertCount(metrics.get("messages.published-remote"), 0);
+    assertTroughput(metrics.get("messages.published-remote"), 0, 0);
     assertCount(metrics.get("messages.received"), messages);
+    assertTroughput(metrics.get("messages.received"), 1, messages);
     assertCount(metrics.get("messages.received-local"), messages);
-    assertCount(metrics.get("messages.received-remote"), 0L);
+    assertTroughput(metrics.get("messages.received-local"), 1, messages);
+    assertCount(metrics.get("messages.received-remote"), 0);
+    assertTroughput(metrics.get("messages.received-remote"), 0, 0);
     assertCount(metrics.get("messages.delivered"), messages);
+    assertTroughput(metrics.get("messages.delivered"), 1, messages);
     assertCount(metrics.get("messages.delivered-local"), messages);
-    assertCount(metrics.get("messages.delivered-remote"), 0L);
-    assertCount(metrics.get("messages.pending"), 0L);
-    assertCount(metrics.get("messages.pending-local"), 0L);
-    assertCount(metrics.get("messages.pending-remote"), 0L);
+    assertTroughput(metrics.get("messages.delivered-local"), 1, messages);
+    assertCount(metrics.get("messages.delivered-remote"), 0);
+    assertTroughput(metrics.get("messages.delivered-remote"), 0, 0);
+    assertCount(metrics.get("messages.pending"), 0);
+    assertCount(metrics.get("messages.pending-local"), 0);
+    assertCount(metrics.get("messages.pending-remote"), 0);
 
     // Check handler metric
     JsonObject handlerMetric = metrics.get("handlers.foo");
@@ -917,16 +931,34 @@ public class MetricsTest extends MetricsTestBase {
     vertx = null;
   }
 
-  private void assertCount(JsonObject metric, Long expected) {
+  private void assertCount(JsonObject metric, long expected) {
     Long actual = getCount(metric);
-    String name = metric.getString("name");
     assertNotNull(actual);
-    assertEquals(name + " (count)", expected, actual);
+    String name = metric.getString("name");
+    assertEquals(name + " (count)", expected, (long)actual);
+  }
+
+  private void assertTroughput(JsonObject metric, double min, double max) {
+    Double actual = getThroughput(metric);
+    assertNotNull(actual);
+    String name = metric.getString("name");
+    if (actual < min) {
+      fail("Was expecting throughput(" + name + ") " + actual + " >= " + min);
+    }
+    if (actual > max) {
+      fail("Was expecting throughput(" + name + ") " + actual + " <= " + max);
+    }
   }
 
   private Long getCount(JsonObject metric) {
     assertNotNull(metric);
     Long actual = metric.getLong("count");
+    return actual;
+  }
+
+  private Double getThroughput(JsonObject metric) {
+    assertNotNull(metric);
+    Double actual = metric.getDouble("throughput");
     return actual;
   }
 

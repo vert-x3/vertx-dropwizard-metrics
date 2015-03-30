@@ -17,7 +17,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class Helper {
   static JsonObject convertMetric(Metric metric, TimeUnit rateUnit, TimeUnit durationUnit) {
-    if (metric instanceof Gauge) {
+    if (metric instanceof Throughput) {
+      return toJson((Throughput) metric, rateUnit);
+    } else if (metric instanceof Gauge) {
       return toJson((Gauge) metric);
     } else if (metric instanceof Counter) {
       return toJson((Counter) metric);
@@ -27,8 +29,6 @@ public class Helper {
       return toJson((Meter) metric, rateUnit);
     } else if (metric instanceof Timer) {
       return toJson((Timer) metric, rateUnit, durationUnit);
-    } else if (metric instanceof Throughput) {
-      return toJson((Throughput) metric);
     } else {
       throw new IllegalArgumentException("Unknown metric " + metric);
     }
@@ -38,8 +38,15 @@ public class Helper {
     return new JsonObject().put("value", gauge.getValue());
   }
 
-  private static JsonObject toJson(Throughput throughput) {
-    return new JsonObject().put("value", throughput.getValue());
+  private static JsonObject toJson(Throughput throughput, TimeUnit rateUnit) {
+    JsonObject json = new JsonObject();
+
+    json.put("throughput", throughput.getValue());
+
+    // Meter
+    populateMetered(json, throughput, rateUnit);
+
+    return json;
   }
 
   private static JsonObject toJson(Counter counter) {

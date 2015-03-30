@@ -40,23 +40,19 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final Counter pendingRemote;
   private final Meter bytesRead;
   private final Meter bytesWritten;
-  private final Meter receivedMessages;
-  private final Meter receivedLocalMessages;
-  private final Meter receivedRemoteMessages;
-  private final Meter sentMessages;
-  private final Meter sentLocalMessages;
-  private final Meter sentRemoteMessages;
-  private final Meter publishedMessages;
-  private final Meter publishedLocalMessages;
-  private final Meter publishedRemoteMessages;
-  private final Meter deliveredMessages;
-  private final Meter deliveredLocalMessages;
-  private final Meter deliveredRemoteMessages;
+  private final Throughput receivedMessages;
+  private final Throughput receivedLocalMessages;
+  private final Throughput receivedRemoteMessages;
+  private final Throughput sentMessages;
+  private final Throughput sentLocalMessages;
+  private final Throughput sentRemoteMessages;
+  private final Throughput publishedMessages;
+  private final Throughput publishedLocalMessages;
+  private final Throughput publishedRemoteMessages;
+  private final Throughput deliveredMessages;
+  private final Throughput deliveredLocalMessages;
+  private final Throughput deliveredRemoteMessages;
   private final Meter replyFailures;
-  private final Throughput receivedThroughput;
-  private final Throughput sentThroughput;
-  private final Throughput publishedThroughput;
-  private final Throughput deliveredThroughput;
 
 
   EventBusMetricsImpl(AbstractMetrics metrics, String baseName, DropwizardMetricsOptions options) {
@@ -66,25 +62,21 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     pending = counter("messages", "pending");
     pendingLocal = counter("messages", "pending-local");
     pendingRemote = counter("messages", "pending-remote");
-    receivedMessages = meter("messages", "received");
-    receivedLocalMessages = meter("messages", "received-local");
-    receivedRemoteMessages = meter("messages", "received-remote");
-    deliveredMessages = meter("messages", "delivered");
-    deliveredLocalMessages = meter("messages", "delivered-local");
-    deliveredRemoteMessages = meter("messages", "delivered-remote");
-    sentMessages = meter("messages", "sent");
-    sentLocalMessages = meter("messages", "sent-local");
-    sentRemoteMessages = meter("messages", "sent-remote");
-    publishedMessages = meter("messages", "published");
-    publishedLocalMessages = meter("messages", "published-local");
-    publishedRemoteMessages = meter("messages", "published-remote");
+    receivedMessages = throughput("messages", "received");
+    receivedLocalMessages = throughput("messages", "received-local");
+    receivedRemoteMessages = throughput("messages", "received-remote");
+    deliveredMessages = throughput("messages", "delivered");
+    deliveredLocalMessages = throughput("messages", "delivered-local");
+    deliveredRemoteMessages = throughput("messages", "delivered-remote");
+    sentMessages = throughput("messages", "sent");
+    sentLocalMessages = throughput("messages", "sent-local");
+    sentRemoteMessages = throughput("messages", "sent-remote");
+    publishedMessages = throughput("messages", "published");
+    publishedLocalMessages = throughput("messages", "published-local");
+    publishedRemoteMessages = throughput("messages", "published-remote");
     replyFailures = meter("messages", "reply-failures");
     bytesRead = meter("messages", "bytes-read");
     bytesWritten = meter("messages", "bytes-written");
-    receivedThroughput = throughput("throughput", "received");
-    sentThroughput = throughput("throughput", "sent");
-    publishedThroughput = throughput("throughput", "published");
-    deliveredThroughput = throughput("throughput", "delivered");
     handlerMatcher = new Matcher(options.getMonitoredEventBusHandlers());
   }
 
@@ -143,7 +135,6 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   public void messageSent(String address, boolean publish, boolean local, boolean remote) {
     if (publish) {
       publishedMessages.mark();
-      publishedThroughput.mark();
       if (local) {
         publishedLocalMessages.mark();
       } else {
@@ -151,7 +142,6 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       }
     } else {
       sentMessages.mark();
-      sentThroughput.mark();
       if (local) {
         sentLocalMessages.mark();
       } else {
@@ -164,7 +154,6 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   public void messageReceived(String address, boolean publish, boolean local, int handlers) {
     pending.inc(handlers);
     receivedMessages.mark();
-    receivedThroughput.mark();
     if (local) {
       receivedLocalMessages.mark();
       pendingLocal.inc(handlers);
@@ -174,7 +163,6 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     }
     if (handlers > 0) {
       deliveredMessages.mark();
-      deliveredThroughput.mark();
       if (local) {
         deliveredLocalMessages.mark();
       } else {
