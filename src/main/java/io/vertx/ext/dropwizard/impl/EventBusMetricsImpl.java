@@ -53,6 +53,10 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final Meter deliveredLocalMessages;
   private final Meter deliveredRemoteMessages;
   private final Meter replyFailures;
+  private final Throughput receivedThroughput;
+  private final Throughput sentThroughput;
+  private final Throughput publishedThroughput;
+  private final Throughput deliveredThroughput;
 
 
   EventBusMetricsImpl(AbstractMetrics metrics, String baseName, DropwizardMetricsOptions options) {
@@ -77,6 +81,10 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     replyFailures = meter("messages", "reply-failures");
     bytesRead = meter("messages", "bytes-read");
     bytesWritten = meter("messages", "bytes-written");
+    receivedThroughput = throughput("throughput", "received");
+    sentThroughput = throughput("throughput", "sent");
+    publishedThroughput = throughput("throughput", "published");
+    deliveredThroughput = throughput("throughput", "delivered");
     handlerMatcher = new Matcher(options.getMonitoredEventBusHandlers());
   }
 
@@ -135,6 +143,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   public void messageSent(String address, boolean publish, boolean local, boolean remote) {
     if (publish) {
       publishedMessages.mark();
+      publishedThroughput.mark();
       if (local) {
         publishedLocalMessages.mark();
       } else {
@@ -142,6 +151,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       }
     } else {
       sentMessages.mark();
+      sentThroughput.mark();
       if (local) {
         sentLocalMessages.mark();
       } else {
@@ -154,6 +164,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   public void messageReceived(String address, boolean publish, boolean local, int handlers) {
     pending.inc(handlers);
     receivedMessages.mark();
+    receivedThroughput.mark();
     if (local) {
       receivedLocalMessages.mark();
       pendingLocal.inc(handlers);
@@ -163,6 +174,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     }
     if (handlers > 0) {
       deliveredMessages.mark();
+      deliveredThroughput.mark();
       if (local) {
         deliveredLocalMessages.mark();
       } else {

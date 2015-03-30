@@ -27,6 +27,8 @@ public class Helper {
       return toJson((Meter) metric, rateUnit);
     } else if (metric instanceof Timer) {
       return toJson((Timer) metric, rateUnit, durationUnit);
+    } else if (metric instanceof Throughput) {
+      return toJson((Throughput) metric);
     } else {
       throw new IllegalArgumentException("Unknown metric " + metric);
     }
@@ -34,6 +36,10 @@ public class Helper {
 
   private static JsonObject toJson(Gauge gauge) {
     return new JsonObject().put("value", gauge.getValue());
+  }
+
+  private static JsonObject toJson(Throughput throughput) {
+    return new JsonObject().put("value", throughput.getValue());
   }
 
   private static JsonObject toJson(Counter counter) {

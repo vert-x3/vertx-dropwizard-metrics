@@ -118,6 +118,10 @@ public abstract class AbstractMetrics implements Metrics {
     return registry.timer(nameOf(names));
   }
 
+  protected Throughput throughput(String... names) {
+    return registry.throughput(nameOf(names));
+  }
+
   protected void remove(String... names) {
     registry.remove(nameOf(names));
   }

@@ -16,6 +16,7 @@
 
 package io.vertx.ext.dropwizard.impl;
 
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 
 /**
@@ -25,5 +26,22 @@ public class Registry extends MetricRegistry {
 
   public void shutdown() {
     removeMatching((name, metric) -> true);
+  }
+
+  public Throughput throughput(String name) {
+    final Metric metric = getMetrics().get(name);
+    if (metric instanceof Throughput) {
+      return (Throughput) metric;
+    } else if (metric == null) {
+      try {
+        return register(name, new Throughput());
+      } catch (IllegalArgumentException e) {
+        final Metric added = getMetrics().get(name);
+        if (added instanceof Throughput) {
+          return (Throughput) added;
+        }
+      }
+    }
+    throw new IllegalArgumentException(name + " is already used for a different type of metric");
   }
 }
