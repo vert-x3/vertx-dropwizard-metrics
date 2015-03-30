@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
+import io.vertx.ext.dropwizard.Throughput;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>

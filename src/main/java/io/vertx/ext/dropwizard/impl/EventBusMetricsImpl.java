@@ -22,6 +22,7 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.Throughput;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

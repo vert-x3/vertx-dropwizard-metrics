@@ -9,6 +9,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.dropwizard.Throughput;
 
 import java.util.concurrent.TimeUnit;
 

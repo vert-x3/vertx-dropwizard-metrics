@@ -1,4 +1,4 @@
-package io.vertx.ext.dropwizard.impl;
+package io.vertx.ext.dropwizard;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
@@ -9,6 +9,9 @@ import com.codahale.metrics.SlidingTimeWindowReservoir;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A throughput metric, wraps a {@link Meter} object to provide a one second instant
+ * throughput value returned by {@link #getValue()}.
+ *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 public class Throughput implements Metered, Gauge<Long> {

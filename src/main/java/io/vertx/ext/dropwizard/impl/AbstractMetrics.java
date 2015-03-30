@@ -26,6 +26,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.spi.metrics.Metrics;
 import io.vertx.core.spi.metrics.MetricsProvider;
+import io.vertx.ext.dropwizard.Throughput;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
