@@ -18,9 +18,11 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.dropwizard.Match;
 
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +34,7 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   private Timer requests;
   private Meter[] responses;
   private Matcher uriMatcher;
+  private EnumMap<HttpMethod, Timer> methodRequests;
 
   public HttpMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAdress, List<Match> monitoredUris) {
     super(metrics, baseName, localAdress);
@@ -44,6 +47,10 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
         meter("responses-4xx"),
         meter("responses-5xx")
     };
+    methodRequests = new EnumMap<>(HttpMethod.class);
+    for (HttpMethod method : HttpMethod.values()) {
+      methodRequests.put(method, timer(method.toString().toLowerCase() + "-requests"));
+    }
   }
 
   /**
@@ -53,7 +60,7 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
    * @param uri the request uri or path of the request, or null if it's not to be recorded
    * @return the request metric to be measured
    */
-  protected RequestMetric createRequestMetric(String method, String uri) {
+  protected RequestMetric createRequestMetric(HttpMethod method, String uri) {
     return new RequestMetric(method, uri);
   }
   
@@ -75,9 +82,9 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
 
     // Update specific method / uri request metrics
     if (metric.method != null) {
-      timer(metric.method + "-requests").update(duration, TimeUnit.NANOSECONDS);
+      methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
       if (metric.uri != null && uriMatcher.match(metric.uri)) {
-        timer(metric.method + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
+        timer(metric.method.toString().toLowerCase() + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
       }
     } else if (metric.uri != null && uriMatcher.match(metric.uri)) {
       timer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
