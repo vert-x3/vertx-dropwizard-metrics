@@ -18,28 +18,58 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
-import io.vertx.ext.dropwizard.Throughput;
+import io.vertx.ext.dropwizard.ThroughputMeter;
+import io.vertx.ext.dropwizard.ThroughputTimer;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 public class Registry extends MetricRegistry {
 
+  private static final Function<Metric, ThroughputMeter> THROUGHPUT_METER = metric -> {
+    if (metric != null) {
+      return (ThroughputMeter) metric;
+    } else {
+      return new ThroughputMeter();
+    }
+  };
+
+  private static final Function<Metric, ThroughputTimer> THROUGHPUT_TIMER = metric -> {
+    if (metric != null) {
+      return (ThroughputTimer) metric;
+    } else {
+      return new ThroughputTimer();
+    }
+  };
+
   public void shutdown() {
     removeMatching((name, metric) -> true);
   }
 
-  public Throughput throughput(String name) {
-    final Metric metric = getMetrics().get(name);
-    if (metric instanceof Throughput) {
-      return (Throughput) metric;
+  public ThroughputMeter throughputMeter(String name) {
+    return getOrAdd(name, THROUGHPUT_METER);
+  }
+
+  public ThroughputTimer throughputTimer(String name) {
+    return getOrAdd(name, THROUGHPUT_TIMER);
+  }
+
+  public <M extends Metric> M getOrAdd(String name, Function<Metric, M> metricProvider) {
+    Metric metric = getMetrics().get(name);
+    M found = metric != null ? metricProvider.apply(metric) : null;
+    if (found != null) {
+      return found;
     } else if (metric == null) {
       try {
-        return register(name, new Throughput());
+        return register(name, metricProvider.apply(null));
       } catch (IllegalArgumentException e) {
-        final Metric added = getMetrics().get(name);
-        if (added instanceof Throughput) {
-          return (Throughput) added;
+        metric = getMetrics().get(name);
+        found = metricProvider.apply(metric);
+        if (found != null) {
+          return found;
         }
       }
     }

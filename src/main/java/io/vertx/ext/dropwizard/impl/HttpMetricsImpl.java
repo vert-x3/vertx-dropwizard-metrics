@@ -16,11 +16,11 @@
 
 package io.vertx.ext.dropwizard.impl;
 
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.dropwizard.Match;
+import io.vertx.ext.dropwizard.ThroughputMeter;
+import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -31,25 +31,25 @@ import java.util.concurrent.TimeUnit;
  */
 abstract class HttpMetricsImpl extends NetServerMetricsImpl {
 
-  private Timer requests;
-  private Meter[] responses;
+  private ThroughputTimer requests;
+  private ThroughputMeter[] responses;
   private Matcher uriMatcher;
-  private EnumMap<HttpMethod, Timer> methodRequests;
+  private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
 
   public HttpMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAdress, List<Match> monitoredUris) {
     super(metrics, baseName, localAdress);
     uriMatcher = new Matcher(monitoredUris);
-    requests = timer("requests");
-    responses = new Meter[]{
-        meter("responses-1xx"),
-        meter("responses-2xx"),
-        meter("responses-3xx"),
-        meter("responses-4xx"),
-        meter("responses-5xx")
+    requests = throughputTimer("requests");
+    responses = new ThroughputMeter[]{
+        throughputMeter("responses-1xx"),
+        throughputMeter("responses-2xx"),
+        throughputMeter("responses-3xx"),
+        throughputMeter("responses-4xx"),
+        throughputMeter("responses-5xx")
     };
     methodRequests = new EnumMap<>(HttpMethod.class);
     for (HttpMethod method : HttpMethod.values()) {
-      methodRequests.put(method, timer(method.toString().toLowerCase() + "-requests"));
+      methodRequests.put(method, throughputTimer(method.toString().toLowerCase() + "-requests"));
     }
   }
 
@@ -84,10 +84,10 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
     if (metric.method != null) {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
       if (metric.uri != null && uriMatcher.match(metric.uri)) {
-        timer(metric.method.toString().toLowerCase() + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
+        throughputTimer(metric.method.toString().toLowerCase() + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
       }
     } else if (metric.uri != null && uriMatcher.match(metric.uri)) {
-      timer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
+      throughputTimer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
     }
   }
 }

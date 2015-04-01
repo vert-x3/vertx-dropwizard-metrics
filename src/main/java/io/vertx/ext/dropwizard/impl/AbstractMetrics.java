@@ -26,7 +26,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.spi.metrics.Metrics;
 import io.vertx.core.spi.metrics.MetricsProvider;
-import io.vertx.ext.dropwizard.Throughput;
+import io.vertx.ext.dropwizard.ThroughputMeter;
+import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -119,8 +120,12 @@ public abstract class AbstractMetrics implements Metrics {
     return registry.timer(nameOf(names));
   }
 
-  protected Throughput throughput(String... names) {
-    return registry.throughput(nameOf(names));
+  protected ThroughputMeter throughputMeter(String... names) {
+    return registry.throughputMeter(nameOf(names));
+  }
+
+  protected ThroughputTimer throughputTimer(String... names) {
+    return registry.throughputTimer(nameOf(names));
   }
 
   protected void remove(String... names) {

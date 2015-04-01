@@ -158,14 +158,16 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 }
 ----
 
-[[throughput]]
-=== Throughput
+[[throughput_meter]]
+=== ThroughputMeter
+
+Extends a <<meter>> to provide an instant throughput.
 
 [source,java]
 ----
 {
   "count"             : 40 // long
-  "throughput"        : 3.4 // double - number of occurence per second
+  "throughput"        : 3 // long - number of occurence per second
   "meanRate"          : 2.0 // double
   "oneMinuteRate"     : 1.0 // double
   "fiveMinuteRate"    : 1.0 // double
@@ -204,6 +206,37 @@ A timer is basically a combination of Histogram + Meter.
 }
 ----
 
+[[throughput_timer]]
+=== Throughput Timer
+
+Extends a <<timer>> to provide an instant throughput metric.
+
+[source,java]
+----
+{
+  // histogram data
+  "count"      : 1 // long
+  "throughput" : 3 // long - number of occurence per second
+  "min"        : 1 // long
+  "max"        : 1 // long
+  "mean"       : 1.0 // double
+  "stddev"     : 1.0 // double
+  "median"     : 1.0 // double
+  "75%"        : 1.0 // double
+  "95%"        : 1.0 // double
+  "98%"        : 1.0 // double
+  "99%"        : 1.0 // double
+  "99.9%"      : 1.0 // double
+
+  // meter data
+  "meanRate"          : 1.0 // double
+  "oneMinuteRate"     : 1.0 // double
+  "fiveMinuteRate"    : 1.0 // double
+  "fifteenMinuteRate" : 1.0 // double
+  "rate"              : "events/second" // string representing rate
+}
+----
+
 == The metrics
 
 The following metrics are currently provided.
@@ -229,18 +262,18 @@ Base name: `vertx.eventbus`
 * `messages.pending` - A <<counter>> of the number of messages received but not yet processed by an handler
 * `messages.pending-local` - A <<counter>> of the number of messages locally received but not yet processed by an handler
 * `messages.pending-remote` - A <<counter>> of the number of messages remotely received but not yet processed by an handler
-* `messages.received` - A <<throughput>> representing the rate of which messages are being received
-* `messages.received-local` - A <<throughput>> representing the rate of which local messages are being received
-* `messages.received-remote` - A <<throughput>> representing the rate of which remote messages are being received
-* `messages.delivered` - A <<throughput>> representing the rate of which messages are being delivered to an handler
-* `messages.delivered-local` - A <<throughput>> representing the rate of which local messages are being delivered to an handler
-* `messages.delivered-remote` - A <<throughput>> representing the rate of which remote messages are being delivered to an handler
-* `messages.sent` - A <<throughput>> representing the rate of which messages are being sent
-* `messages.sent-local` - A <<throughput>> representing the rate of which messages are being sent locally
-* `messages.sent-remote` - A <<throughput>> representing the rate of which messages are being sent remotely
-* `messages.published` - A <<throughput>> representing the rate of which messages are being published
-* `messages.published-local` - A <<throughput>> representing the rate of which messages are being published locally
-* `messages.published-remote` - A <<throughput>> representing the rate of which messages are being published remotely
+* `messages.received` - A <<throughput_meter>> representing the rate of which messages are being received
+* `messages.received-local` - A <<throughput_meter>> representing the rate of which local messages are being received
+* `messages.received-remote` - A <<throughput_meter>> representing the rate of which remote messages are being received
+* `messages.delivered` - A <<throughpu_metert>> representing the rate of which messages are being delivered to an handler
+* `messages.delivered-local` - A <<throughput_meter>> representing the rate of which local messages are being delivered to an handler
+* `messages.delivered-remote` - A <<throughput_meter>> representing the rate of which remote messages are being delivered to an handler
+* `messages.sent` - A <<throughput_metert>> representing the rate of which messages are being sent
+* `messages.sent-local` - A <<throughput_meter>> representing the rate of which messages are being sent locally
+* `messages.sent-remote` - A <<throughput_meter>> representing the rate of which messages are being sent remotely
+* `messages.published` - A <<throughput_meter>> representing the rate of which messages are being published
+* `messages.published-local` - A <<throughput_meter>> representing the rate of which messages are being published locally
+* `messages.published-remote` - A <<throughput_meter>> representing the rate of which messages are being published remotely
 * `messages.reply-failures` - A <<meter>> representing the rate of reply failures
 
 The monitored event bus handlers is configurable via a match performed on the handler registration address.
@@ -271,16 +304,16 @@ Base name: `vertx.http.servers.<host>:<port>`
 
 Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus the following:
 
-* `requests` - A <<timer>> of a request and the rate of it's occurrence
-* `<http-method>-requests` - A <<timer>> of a specific http method request and the rate of it's occurrence
+* `requests` - A <<throughput_timer>> of a request and the rate of it's occurrence
+* `<http-method>-requests` - A <<throughput_timer>> of a specific http method request and the rate of it's occurrence
 ** Examples: `get-requests`, `post-requests`
-* `<http-method>-requests./<uri>` - A <<timer>> of a specific http method & URI request and the rate of it's occurrence
+* `<http-method>-requests./<uri>` - A <<throughput_timer>> of a specific http method & URI request and the rate of it's occurrence
 ** Examples: `get-requests./some/uri`, `post-requests./some/uri?foo=bar`
-* `responses-1xx` - A <<meter>> of the 1xx response code
-* `responses-2xx` - A <<meter>> of the 2xx response code
-* `responses-3xx` - A <<meter>> of the 3xx response code
-* `responses-4xx` - A <<meter>> of the 4xx response code
-* `responses-5xx` - A <<meter>> of the 5xx response code
+* `responses-1xx` - A <<throughput_meter>> of the 1xx response code
+* `responses-2xx` - A <<throughput_meter>> of the 2xx response code
+* `responses-3xx` - A <<throughput_meter>> of the 3xx response code
+* `responses-4xx` - A <<throughput_meter>> of the 4xx response code
+* `responses-5xx` - A <<throughput_meter>> of the 5xx response code
 
 Http URI metrics must be explicitely configured in the options either by exact match or regex match:
 

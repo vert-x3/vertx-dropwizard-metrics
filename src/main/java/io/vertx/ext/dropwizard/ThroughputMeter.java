@@ -14,42 +14,18 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class Throughput implements Metered, Gauge<Long> {
+public class ThroughputMeter extends Meter implements Gauge<Long> {
 
   private final Reservoir reservoir = new SlidingTimeWindowReservoir(1, TimeUnit.SECONDS);
-  private final Meter meter = new Meter();
 
-  public void mark() {
-    meter.mark();
-    reservoir.update(1);
-  }
-
+  @Override
   public Long getValue() {
     return (long)reservoir.size();
   }
 
   @Override
-  public long getCount() {
-    return meter.getCount();
-  }
-
-  @Override
-  public double getFifteenMinuteRate() {
-    return meter.getFifteenMinuteRate();
-  }
-
-  @Override
-  public double getFiveMinuteRate() {
-    return meter.getFiveMinuteRate();
-  }
-
-  @Override
-  public double getMeanRate() {
-    return meter.getMeanRate();
-  }
-
-  @Override
-  public double getOneMinuteRate() {
-    return meter.getOneMinuteRate();
+  public void mark() {
+    super.mark();
+    reservoir.update(1);
   }
 }

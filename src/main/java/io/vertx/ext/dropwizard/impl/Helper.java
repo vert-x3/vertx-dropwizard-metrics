@@ -9,17 +9,21 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.dropwizard.Throughput;
+import io.vertx.ext.dropwizard.ThroughputMeter;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 public class Helper {
+
   static JsonObject convertMetric(Metric metric, TimeUnit rateUnit, TimeUnit durationUnit) {
-    if (metric instanceof Throughput) {
-      return toJson((Throughput) metric, rateUnit);
+    if (metric instanceof ThroughputMeter) {
+      return toJson((ThroughputMeter) metric, rateUnit);
+    } else if (metric instanceof Timer) {
+      return toJson((Timer) metric, rateUnit, durationUnit);
     } else if (metric instanceof Gauge) {
       return toJson((Gauge) metric);
     } else if (metric instanceof Counter) {
@@ -28,8 +32,6 @@ public class Helper {
       return toJson((Histogram) metric);
     } else if (metric instanceof Meter) {
       return toJson((Meter) metric, rateUnit);
-    } else if (metric instanceof Timer) {
-      return toJson((Timer) metric, rateUnit, durationUnit);
     } else {
       throw new IllegalArgumentException("Unknown metric " + metric);
     }
@@ -39,7 +41,7 @@ public class Helper {
     return new JsonObject().put("value", gauge.getValue());
   }
 
-  private static JsonObject toJson(Throughput throughput, TimeUnit rateUnit) {
+  private static JsonObject toJson(ThroughputMeter throughput, TimeUnit rateUnit) {
     JsonObject json = new JsonObject();
 
     json.put("throughput", throughput.getValue());

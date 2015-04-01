@@ -279,7 +279,9 @@ public class MetricsTest extends MetricsTestBase {
     Handler<HttpServer> doTest = (server) -> {
       for (Measured measured : Arrays.asList(client, server)) {
         Map<String, JsonObject> metric = metricsService.getMetricsSnapshot(measured);
-        assertEquals(0, (int) metric.get(metricName).getInteger("count"));
+        JsonObject metrics = metric.get(metricName);
+        assertNotNull("Was expecting " + metricName + " to be not null", metrics);
+        assertEquals("Was expecting " + metricName + " to have count = 0", 0, (int) metrics.getInteger("count"));
       }
       client.request(HttpMethod.GET, 8080, "localhost", "/", resp -> {
         vertx.runOnContext(v -> {
