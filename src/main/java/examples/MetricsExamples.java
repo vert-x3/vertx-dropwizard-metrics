@@ -78,28 +78,26 @@ public class MetricsExamples {
   }
 
   public void naming1(Vertx vertx, MetricsService metricsService) {
-    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx);
-    metrics.get("vertx.eventbus.handlers");
+    JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
+    metrics.getJsonObject("vertx.eventbus.handlers");
   }
 
   public void naming2(Vertx vertx, MetricsService metricsService) {
     EventBus eventBus = vertx.eventBus();
-    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(eventBus);
-    metrics.get("handlers");
+    JsonObject metrics = metricsService.getMetricsSnapshot(eventBus);
+    metrics.getJsonObject("handlers");
   }
 
   public void example1(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
-    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx);
-    metrics.forEach((name, metric) -> {
-      System.out.println(name + " : " + metric.encodePrettily());
-    });
+    JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
+    System.out.println(metrics);
   }
 
   public void example3(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
     HttpServer server = vertx.createHttpServer();
     // set up server
-    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(server);
+    JsonObject metrics = metricsService.getMetricsSnapshot(server);
   }
 }

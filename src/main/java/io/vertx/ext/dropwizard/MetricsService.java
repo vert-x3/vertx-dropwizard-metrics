@@ -36,12 +36,12 @@ public interface MetricsService {
   }
 
   /**
-   * Will return the metrics that correspond with this measured object.
+   * Will return the metrics that correspond with this measured object, null if no metrics is available.
    *
    * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
    * the json data representing that metric
    */
-  Map<String, JsonObject> getMetricsSnapshot(Measured o);
+  JsonObject getMetricsSnapshot(Measured o);
 
   String getBaseName(Measured measured);
 

@@ -20,7 +20,6 @@ import java.util.Map;
 import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.metrics.Measured;
-import java.util.Map;
 import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
@@ -49,13 +48,12 @@ public class MetricsService {
   }
 
   /**
-   * Will return the metrics that correspond with this measured object.
+   * Will return the metrics that correspond with this measured object, null if no metrics is available.
    * @param o 
    * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
    */
-  public Map<String,JsonObject> getMetricsSnapshot(Measured o) { 
-    Map<String,JsonObject> ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) o.getDelegate());
-;
+  public JsonObject getMetricsSnapshot(Measured o) { 
+    JsonObject ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) o.getDelegate());
     return ret;
   }
 

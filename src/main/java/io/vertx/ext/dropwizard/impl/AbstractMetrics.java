@@ -63,15 +63,16 @@ public abstract class AbstractMetrics implements Metrics {
    * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
    * the json data representing that metric
    */
-  public Map<String, JsonObject> metrics() {
+  public JsonObject metrics() {
     String baseName = baseName();
-    return registry.getMetrics().
+    Map<String, Object> map = registry.getMetrics().
         entrySet().
         stream().
         filter(e -> e.getKey().startsWith(baseName)).
         collect(Collectors.toMap(
             e -> projectName(e.getKey()),
             e -> Helper.convertMetric(e.getValue(), TimeUnit.SECONDS, TimeUnit.MILLISECONDS)));
+    return new JsonObject(map);
   }
 
   String projectName(String name) {

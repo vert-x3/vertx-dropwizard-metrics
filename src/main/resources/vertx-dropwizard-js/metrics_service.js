@@ -32,16 +32,16 @@ var MetricsService = function(j_val) {
   var that = this;
 
   /**
-   Will return the metrics that correspond with this measured object.
+   Will return the metrics that correspond with this measured object, null if no metrics is available.
 
    @public
    @param o {Measured} 
-   @return {Array.<string>} the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
+   @return {Object} the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
    */
   this.getMetricsSnapshot = function(o) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnMap(j_metricsService["getMetricsSnapshot(io.vertx.core.metrics.Measured)"](o._jdel));
+      return utils.convReturnJson(j_metricsService["getMetricsSnapshot(io.vertx.core.metrics.Measured)"](o._jdel));
     } else utils.invalidArgs();
   };
 

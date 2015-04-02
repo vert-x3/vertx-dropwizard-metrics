@@ -12,9 +12,9 @@ import java.util.Map;
  */
 public class MetricsServiceImpl implements MetricsService {
   @Override
-  public Map<String, JsonObject> getMetricsSnapshot(Measured measured) {
+  public JsonObject getMetricsSnapshot(Measured measured) {
     AbstractMetrics codahaleMetrics = AbstractMetrics.unwrap(measured);
-    return codahaleMetrics != null ? codahaleMetrics.metrics() : Collections.emptyMap();
+    return codahaleMetrics != null ? codahaleMetrics.metrics() : null;
   }
 
   @Override

@@ -37,7 +37,7 @@ public class ScheduledMetricsConsumer {
   private final Vertx vertx;
   private final AbstractMetrics measured;
 
-  private BiPredicate<String, JsonObject> filter = (name, metric) -> true;
+  private BiPredicate<String, Object> filter = (name, metric) -> true;
 
   private volatile long timerId = -1;
 
@@ -50,15 +50,15 @@ public class ScheduledMetricsConsumer {
     this.measured = AbstractMetrics.unwrap(measured);
   }
 
-  public ScheduledMetricsConsumer filter(BiPredicate<String, JsonObject> filter) {
+  public ScheduledMetricsConsumer filter(BiPredicate<String, Object> filter) {
     if (timerId != -1) throw new IllegalStateException("Cannot set filter while metrics consumer is running.");
     this.filter = filter;
     return this;
   }
 
-  public void start(long delay, TimeUnit unit, BiConsumer<String, JsonObject> consumer) {
+  public void start(long delay, TimeUnit unit, BiConsumer<String, Object> consumer) {
     timerId = vertx.setPeriodic(unit.toMillis(delay), tid -> {
-      measured.metrics().forEach((name, metric) -> {
+      measured.metrics().getMap().forEach((name, metric) -> {
         System.out.println("maybe " + name);
         if (filter.test(name, metric)) {
           System.out.println("sending " + name);

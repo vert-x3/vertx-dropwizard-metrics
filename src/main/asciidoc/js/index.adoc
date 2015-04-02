@@ -61,7 +61,7 @@ can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + 
 [source,js]
 ----
 var metrics = metricsService.getMetricsSnapshot(vertx);
-metrics["vertx.eventbus.handlers"];
+metrics."vertx.eventbus.handlers";
 
 ----
 
@@ -71,7 +71,7 @@ or from the measured component itself using just the metric name:
 ----
 var eventBus = vertx.eventBus();
 var metrics = metricsService.getMetricsSnapshot(eventBus);
-metrics["handlers"];
+metrics."handlers";
 
 ----
 
@@ -88,9 +88,7 @@ for a particular Vert.x instance:
 var MetricsService = require("vertx-dropwizard-js/metrics_service");
 var metricsService = MetricsService.create(vertx);
 var metrics = metricsService.getMetricsSnapshot(vertx);
-metrics.forEach(function (metric, name) {
-  console.log(name + " : " + JSON.stringify(metric));
-});
+console.log(metrics);
 
 ----
 

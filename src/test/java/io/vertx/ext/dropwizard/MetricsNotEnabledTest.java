@@ -98,12 +98,12 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     assertEquals(requests, expected.get());
 
     // Verify http server
-    Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(server);
-    assertTrue(metrics.isEmpty());
+    JsonObject metrics = metricsService.getMetricsSnapshot(server);
+    assertNull(metrics);
 
     // Verify http client
     metrics = metricsService.getMetricsSnapshot(client);
-    assertTrue(metrics.isEmpty());
+    assertNull(metrics);
 
     cleanup(server, client);
   }

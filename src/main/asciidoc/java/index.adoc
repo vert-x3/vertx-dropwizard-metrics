@@ -52,8 +52,8 @@ can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + 
 
 [source,java]
 ----
-Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx);
-metrics.get("vertx.eventbus.handlers");
+JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
+metrics.getJsonObject("vertx.eventbus.handlers");
 ----
 
 or from the measured component itself using just the metric name:
@@ -61,8 +61,8 @@ or from the measured component itself using just the metric name:
 [source,java]
 ----
 EventBus eventBus = vertx.eventBus();
-Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(eventBus);
-metrics.get("handlers");
+JsonObject metrics = metricsService.getMetricsSnapshot(eventBus);
+metrics.getJsonObject("handlers");
 ----
 
 See more examples below on how to retrieve/use metrics for a specific component.
@@ -76,10 +76,8 @@ for a particular Vert.x instance:
 [source,java]
 ----
 MetricsService metricsService = MetricsService.create(vertx);
-Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(vertx);
-metrics.forEach((name, metric) -> {
-  System.out.println(name + " : " + metric.encodePrettily());
-});
+JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
+System.out.println(metrics);
 ----
 
 NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`
@@ -95,7 +93,7 @@ that are specific for that particular http server.
 MetricsService metricsService = MetricsService.create(vertx);
 HttpServer server = vertx.createHttpServer();
 // set up server
-Map<String, JsonObject> metrics = metricsService.getMetricsSnapshot(server);
+JsonObject metrics = metricsService.getMetricsSnapshot(server);
 ----
 
 == Data

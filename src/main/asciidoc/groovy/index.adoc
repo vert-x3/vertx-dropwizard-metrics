@@ -61,7 +61,7 @@ can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + 
 [source,groovy]
 ----
 def metrics = metricsService.getMetricsSnapshot(vertx)
-metrics["vertx.eventbus.handlers"]
+metrics."vertx.eventbus.handlers"
 
 ----
 
@@ -71,7 +71,7 @@ or from the measured component itself using just the metric name:
 ----
 def eventBus = vertx.eventBus()
 def metrics = metricsService.getMetricsSnapshot(eventBus)
-metrics["handlers"]
+metrics."handlers"
 
 ----
 
@@ -88,9 +88,7 @@ for a particular Vert.x instance:
 import io.vertx.groovy.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def metrics = metricsService.getMetricsSnapshot(vertx)
-metrics.each { name, metric ->
-  println("${name} : ${metric.toString()}")
-}
+println(metrics)
 
 ----
 
