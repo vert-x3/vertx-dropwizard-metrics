@@ -19,6 +19,7 @@ package io.vertx.ext.dropwizard.impl;
 import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
 import io.vertx.ext.dropwizard.Match;
@@ -28,7 +29,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<RequestMetric, Timer.Context> {
+class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<RequestMetric, WebSocketMetric, Timer.Context> {
 
   HttpServerMetricsImpl(AbstractMetrics metrics, String baseName, List<Match> monitoredUris, SocketAddress localAddress) {
     super(metrics, baseName, localAddress, monitoredUris);
@@ -42,5 +43,15 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   @Override
   public void responseEnd(RequestMetric requestMetric, HttpServerResponse response) {
     end(requestMetric, response.getStatusCode());
+  }
+
+  @Override
+  public WebSocketMetric connected(Timer.Context socketMetric, ServerWebSocket serverWebSocket) {
+    return createWebSocketMetric();
+  }
+
+  @Override
+  public void disconnected(WebSocketMetric serverWebSocketMetric) {
+    disconnect(serverWebSocketMetric);
   }
 }

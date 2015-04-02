@@ -100,12 +100,12 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public HttpServerMetrics<?, ?> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
+  public HttpServerMetrics<?, ?, ?> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
     return new HttpServerMetricsImpl(this, nameOf("http.servers"), this.options.getMonitoredHttpServerUris(), localAddress);
   }
 
   @Override
-  public HttpClientMetrics<?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
+  public HttpClientMetrics<?, ?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
     return new HttpClientMetricsImpl(this, instanceName(nameOf("http.clients"), client), options, this.options.getMonitoredHttpClientUris());
   }
 

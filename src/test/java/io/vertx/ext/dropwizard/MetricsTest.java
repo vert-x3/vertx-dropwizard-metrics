@@ -348,7 +348,10 @@ public class MetricsTest extends MetricsTestBase {
 
     AtomicBoolean sendMax = new AtomicBoolean(false);
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
-    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).websocketHandler(socket -> {
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080));
+    server.websocketHandler(socket -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(server);
+      assertEquals(1, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
       socket.handler(buff -> {
         if (sendMax.getAndSet(!sendMax.get())) {
           socket.write(serverMax);
@@ -360,12 +363,17 @@ public class MetricsTest extends MetricsTestBase {
       assertTrue(ar.succeeded());
       AtomicBoolean complete = new AtomicBoolean(false);
       client.websocket(8080, "localhost", "/blah", socket -> {
+        JsonObject metrics = metricsService.getMetricsSnapshot(client);
+        assertEquals(1, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
         socket.write(clientMax);
         socket.handler(buff -> {
           if (!complete.getAndSet(true)) {
             socket.write(clientMin);
           } else {
-            testComplete();
+            socket.closeHandler(done -> {
+              testComplete();
+            });
+            socket.close();
           }
         });
       });
@@ -374,6 +382,7 @@ public class MetricsTest extends MetricsTestBase {
     await();
 
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
+    assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
     String name = "bytes-written";
     assertCount(metrics.getJsonObject(name), 2L);
     assertMinMax(metrics.getJsonObject(name), (long) serverMin.length(), (long) serverMax.length());
@@ -382,12 +391,14 @@ public class MetricsTest extends MetricsTestBase {
     assertMinMax(metrics.getJsonObject(name), (long) clientMin.length(), (long) clientMax.length());
 
     metrics = metricsService.getMetricsSnapshot(client);
+    assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
     name = "bytes-written";
     assertCount(metrics.getJsonObject(name), 2L);
     assertMinMax(metrics.getJsonObject(name), (long) clientMin.length(), (long) clientMax.length());
     name = "bytes-read";
     assertCount(metrics.getJsonObject(name), 2L);
     assertMinMax(metrics.getJsonObject(name), (long) serverMin.length(), (long) serverMax.length());
+
 
     cleanup(server, client);
   }

@@ -294,6 +294,8 @@
  * * `responses-3xx` - A <<throughput_meter>> of the 3xx response code
  * * `responses-4xx` - A <<throughput_meter>> of the 4xx response code
  * * `responses-5xx` - A <<throughput_meter>> of the 5xx response code
+ * * `open-websockets` - A <<counter>> of the number of open web socket connections
+ * * `open-websockets.<remote-host>` - A <<counter>> of the number of open web socket connections for a particular remote host
  *
  * Http URI metrics must be explicitely configured in the options either by exact match or regex match:
  *
@@ -323,8 +325,8 @@
  *
  * Base name: `vertx.net.servers.<host>:<port>`
  *
- * * `open-connections` - A <<counter>> of the number of open connections
- * * `open-connections.<remote-host>` - A <<counter>> of the number of open connections for a particular remote host
+ * * `open-netsockets` - A <<counter>> of the number of open net socket connections
+ * * `open-netsockets.<remote-host>` - A <<counter>> of the number of open net socket connections for a particular remote host
  * * `connections` - A <<timer>> of a connection and the rate of it's occurrence
  * * `exceptions` - A <<counter>> of the number of exceptions
  * * `bytes-read` - A <<histogram>> of the number of bytes read.

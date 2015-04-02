@@ -37,7 +37,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   NetServerMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAddress) {
     super(metrics.registry(), localAddress != null ? (Registry.name(baseName, addressName(localAddress))) : (baseName));
 
-    this.openConnections = counter("open-connections");
+    this.openConnections = counter("open-netsockets");
     this.connections = timer("connections");
     this.exceptions = counter("exceptions");
     this.bytesRead = histogram("bytes-read");

@@ -16,6 +16,7 @@
 
 package io.vertx.ext.dropwizard.impl;
 
+import com.codahale.metrics.Counter;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.dropwizard.Match;
@@ -33,11 +34,14 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
 
   private ThroughputTimer requests;
   private ThroughputMeter[] responses;
+  private final Counter openWebSockets;
+
   private Matcher uriMatcher;
   private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
 
   public HttpMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAdress, List<Match> monitoredUris) {
     super(metrics, baseName, localAdress);
+    openWebSockets = counter("open-websockets");
     uriMatcher = new Matcher(monitoredUris);
     requests = throughputTimer("requests");
     responses = new ThroughputMeter[]{
@@ -63,7 +67,17 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   protected RequestMetric createRequestMetric(HttpMethod method, String uri) {
     return new RequestMetric(method, uri);
   }
-  
+
+  /**
+   * Provides a request metric that to measure http request latency and more.
+   *
+   * @return the web socket metric to be measured
+   */
+  protected WebSocketMetric createWebSocketMetric() {
+    openWebSockets.inc();
+    return null;
+  }
+
   protected void end(RequestMetric metric, int statusCode) {
     if (closed) {
       return;
@@ -89,5 +103,12 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
     } else if (metric.uri != null && uriMatcher.match(metric.uri)) {
       throughputTimer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
     }
+  }
+
+  protected void disconnect(WebSocketMetric metric) {
+    if (closed) {
+      return;
+    }
+    openWebSockets.dec();
   }
 }

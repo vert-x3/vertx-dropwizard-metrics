@@ -21,6 +21,7 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.dropwizard.Match;
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics<RequestMetric, Timer.Context> {
+class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics<RequestMetric, WebSocketMetric, Timer.Context> {
 
   HttpClientMetricsImpl(AbstractMetrics metrics, String baseName, HttpClientOptions options, List<Match> monitoredUris) {
     super(metrics, baseName, null, monitoredUris);
@@ -56,5 +57,15 @@ class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics
   @Override
   public void responseEnd(RequestMetric metric, HttpClientResponse response) {
     end(metric, response.statusCode());
+  }
+
+  @Override
+  public WebSocketMetric connected(Timer.Context socketMetric, WebSocket webSocket) {
+    return createWebSocketMetric();
+  }
+
+  @Override
+  public void disconnected(WebSocketMetric webSocketMetric) {
+    disconnect(webSocketMetric);
   }
 }
