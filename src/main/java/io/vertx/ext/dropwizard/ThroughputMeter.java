@@ -2,11 +2,7 @@ package io.vertx.ext.dropwizard;
 
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metered;
-import com.codahale.metrics.Reservoir;
-import com.codahale.metrics.SlidingTimeWindowReservoir;
-
-import java.util.concurrent.TimeUnit;
+import io.vertx.ext.dropwizard.impl.InstantThroughput;
 
 /**
  * A throughput metric, wraps a {@link Meter} object to provide a one second instant
@@ -16,16 +12,16 @@ import java.util.concurrent.TimeUnit;
  */
 public class ThroughputMeter extends Meter implements Gauge<Long> {
 
-  private final Reservoir reservoir = new SlidingTimeWindowReservoir(1, TimeUnit.SECONDS);
+  private final InstantThroughput instantThroughput = new InstantThroughput();
 
   @Override
   public Long getValue() {
-    return (long)reservoir.size();
+    return instantThroughput.count();
   }
 
   @Override
   public void mark() {
     super.mark();
-    reservoir.update(1);
+    instantThroughput.mark();
   }
 }

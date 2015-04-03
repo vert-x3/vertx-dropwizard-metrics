@@ -44,7 +44,7 @@ public class Helper {
   private static JsonObject toJson(ThroughputMeter throughput, TimeUnit rateUnit) {
     JsonObject json = new JsonObject();
 
-    json.put("throughput", throughput.getValue());
+    json.put("oneSecondRate", throughput.getValue());
 
     // Meter
     populateMetered(json, throughput, rateUnit);

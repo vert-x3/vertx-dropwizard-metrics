@@ -713,7 +713,6 @@ public class MetricsTest extends MetricsTestBase {
       vertx.runOnContext(done -> {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         JsonObject metric = metrics.getJsonObject("handlers.juu1234");
-        System.out.println("metric = " + metric);
         assertEquals(1, (int) metric.getInteger("count"));
         testComplete();
       });
@@ -971,7 +970,7 @@ public class MetricsTest extends MetricsTestBase {
 
   private Double getThroughput(JsonObject metric) {
     assertNotNull(metric);
-    Double actual = metric.getDouble("throughput");
+    Double actual = metric.getDouble("oneSecondRate");
     return actual;
   }
 

@@ -154,8 +154,8 @@
  * ----
  * {
  *   "count"             : 40 // long
- *   "throughput"        : 3 // long - number of occurence per second
  *   "meanRate"          : 2.0 // double
+ *   "oneSecondRate"     : 3 // long - number of occurence for the last second
  *   "oneMinuteRate"     : 1.0 // double
  *   "fiveMinuteRate"    : 1.0 // double
  *   "fifteenMinuteRate" : 1.0 // double
@@ -203,7 +203,6 @@
  * {
  *   // histogram data
  *   "count"      : 1 // long
- *   "throughput" : 3 // long - number of occurence per second
  *   "min"        : 1 // long
  *   "max"        : 1 // long
  *   "mean"       : 1.0 // double
@@ -217,6 +216,7 @@
  *
  *   // meter data
  *   "meanRate"          : 1.0 // double
+ *   "oneSecondRate"     : 3 // long - number of occurence for the last second
  *   "oneMinuteRate"     : 1.0 // double
  *   "fiveMinuteRate"    : 1.0 // double
  *   "fifteenMinuteRate" : 1.0 // double
