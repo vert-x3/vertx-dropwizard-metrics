@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:../../vertx-core/js/jsdoc/measured-Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:../../vertx-core/js/jsdoc/http_server-HttpServer.html[HttpServer]`,
-`link:../../vertx-core/js/jsdoc/net_server-NetServer.html[NetServer]`, and even `link:../../vertx-core/js/jsdoc/vertx-Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the `link:../../vertx-core/ruby/yardoc/Vertx/Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:../../vertx-core/ruby/yardoc/Vertx/HttpServer.html[HttpServer]`,
+`link:../../vertx-core/ruby/yardoc/Vertx/NetServer.html[NetServer]`, and even `link:../../vertx-core/ruby/yardoc/Vertx/Vertx.html[Vertx]` itself.
 
 Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -25,27 +25,27 @@ To enable metrics first setup maven to include this as a dependency
 
 Then when you create vertx enable metrics using the `link:../cheatsheet/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
-[source,js]
+[source,ruby]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true
   }
-});
+})
 
 ----
 
 You can also enable JMX:
 
-[source,js]
+[source,ruby]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "jmxEnabled" : true
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'jmxEnabled' => true
   }
-});
+})
 
 ----
 
@@ -58,20 +58,20 @@ To see details about JMX see the <<jmx>> section at the bottom.
 Each measured component listed below (except for Vertx) will have a base name associated with it. Each metric
 can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + `metricName` from Vertx:
 
-[source,js]
+[source,ruby]
 ----
-var metrics = metricsService.getMetricsSnapshot(vertx);
-metrics."vertx.eventbus.handlers";
+metrics = metricsService.get_metrics_snapshot(vertx)
+metrics["vertx.eventbus.handlers"]
 
 ----
 
 or from the measured component itself using just the metric name:
 
-[source,js]
+[source,ruby]
 ----
-var eventBus = vertx.eventBus();
-var metrics = metricsService.getMetricsSnapshot(eventBus);
-metrics."handlers";
+eventBus = vertx.event_bus()
+metrics = metricsService.get_metrics_snapshot(eventBus)
+metrics["handlers"]
 
 ----
 
@@ -79,34 +79,34 @@ See more examples below on how to retrieve/use metrics for a specific component.
 
 == Retrieving metrics
 
-Once enabled, the `link:jsdoc/metrics_service-MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:../../vertx-core/js/jsdoc/measured-Measured.html[Measured]` object which provides a map of the metric name to the data,
-represented by a `JsonObject`. So for example if we were to print out all metrics
+Once enabled, the `link:yardoc/VertxDropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+`link:../../vertx-core/ruby/yardoc/Vertx/Measured.html[Measured]` object which provides a map of the metric name to the data,
+represented by a `link:unavailable[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
-[source,js]
+[source,ruby]
 ----
-var MetricsService = require("vertx-dropwizard-js/metrics_service");
-var metricsService = MetricsService.create(vertx);
-var metrics = metricsService.getMetricsSnapshot(vertx);
-console.log(metrics);
+require 'vertx-dropwizard/metrics_service'
+metricsService = VertxDropwizard::MetricsService.create(vertx)
+metrics = metricsService.get_metrics_snapshot(vertx)
+puts metrics
 
 ----
 
-NOTE: For details on the actual contents of the data (the actual metric) represented by the `JsonObject`
+NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:unavailable[JsonObject]`
 consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
 
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:../../vertx-core/js/jsdoc/http_server-HttpServer.html[HttpServer]` implements `link:../../vertx-core/js/jsdoc/measured-Measured.html[Measured]`, you can easily grab all metrics
+Since `link:../../vertx-core/ruby/yardoc/Vertx/HttpServer.html[HttpServer]` implements `link:../../vertx-core/ruby/yardoc/Vertx/Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
-[source,js]
+[source,ruby]
 ----
-var MetricsService = require("vertx-dropwizard-js/metrics_service");
-var metricsService = MetricsService.create(vertx);
-var server = vertx.createHttpServer();
-// set up server
-var metrics = metricsService.getMetricsSnapshot(server);
+require 'vertx-dropwizard/metrics_service'
+metricsService = VertxDropwizard::MetricsService.create(vertx)
+server = vertx.create_http_server()
+# set up server
+metrics = metricsService.get_metrics_snapshot(server)
 
 ----
 
@@ -128,7 +128,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[counter]]
 === Counter
 
-[source,js]
+[source,ruby]
 ----
 {
   "count" : 1 // number
@@ -158,7 +158,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[meter]]
 === Meter
 
-[source,js]
+[source,ruby]
 ----
 {
   "count"             : 1 // long
@@ -175,7 +175,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 
 Extends a <<meter>> to provide an instant throughput.
 
-[source,js]
+[source,ruby]
 ----
 {
   "count"             : 40 // long
@@ -193,7 +193,7 @@ Extends a <<meter>> to provide an instant throughput.
 
 A timer is basically a combination of Histogram + Meter.
 
-[source,js]
+[source,ruby]
 ----
 {
   // histogram data
@@ -223,7 +223,7 @@ A timer is basically a combination of Histogram + Meter.
 
 Extends a <<timer>> to provide an instant throughput metric.
 
-[source,js]
+[source,ruby]
 ----
 {
   // histogram data
@@ -295,23 +295,23 @@ setting is to monitor zero handlers.
 The monitored handlers can be configured in the `link:../cheatsheet/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
-[source,js]
+[source,ruby]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "monitoredEventBusHandlers" : [
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'monitoredEventBusHandlers' => [
       {
-        "value" : "some-address"
+        'value' => "some-address"
       },
       {
-        "value" : "business-.*",
-        "type" : 'REGEX'
+        'value' => "business-.*",
+        'type' => :REGEX
       }
     ]
   }
-});
+})
 
 ----
 
@@ -339,23 +339,23 @@ Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus
 
 Http URI metrics must be explicitely configured in the options either by exact match or regex match:
 
-[source,js]
+[source,ruby]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "monitoredHttpServerUris" : [
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'monitoredHttpServerUris' => [
       {
-        "value" : "/"
+        'value' => "/"
       },
       {
-        "value" : "/foo/.*",
-        "type" : 'REGEX'
+        'value' => "/foo/.*",
+        'type' => :REGEX
       }
     ]
   }
-});
+})
 
 ----
 
@@ -410,14 +410,14 @@ JMX is disabled by default.
 
 If you want JMX, then you need to enabled that:
 
-[source,js]
+[source,ruby]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "jmxEnabled" : true
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'jmxEnabled' => true
   }
-});
+})
 
 ----
 
@@ -430,15 +430,15 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.options.jmxEnabled=true"
 
 You can configure the domain under which the MBeans will be created:
 
-[source,js]
+[source,ruby]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "jmxEnabled" : true,
-    "jmxDomain" : "mydomain"
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'jmxEnabled' => true,
+    'jmxDomain' => "mydomain"
   }
-});
+})
 
 ----
 

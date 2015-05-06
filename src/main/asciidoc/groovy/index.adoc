@@ -18,7 +18,7 @@ To enable metrics first setup maven to include this as a dependency
 ----
 <dependency>
   <groupId>io.vertx</groupId>
-  <artifactId>vertx-dropwizard-metrics</artifactId>
+  <artifactId>vertx-metrics</artifactId>
   <version>${vertx.metrics.version}</version>
 </dependency>
 ----
@@ -81,7 +81,7 @@ See more examples below on how to retrieve/use metrics for a specific component.
 
 Once enabled, the `link:groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
 `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
-represented by a `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
+represented by a `JsonObject`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
 [source,groovy]
 ----
@@ -92,8 +92,8 @@ println(metrics)
 
 ----
 
-NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/json/JsonObject.html[JsonObject]`
-consult the implementation documentation like https://github.com/vert-x3/vertx-dropwizard-metrics[vertx-dropwizard-metrics]
+NOTE: For details on the actual contents of the data (the actual metric) represented by the `JsonObject`
+consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
 
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
