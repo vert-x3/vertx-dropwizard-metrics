@@ -25,11 +25,19 @@ import io.vertx.ext.dropwizard.impl.MetricsServiceImpl;
 import java.util.Map;
 
 /**
+ * The metrics service mainly allows to return a snapshot of measured objects.
+ *
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 @VertxGen
 public interface MetricsService {
 
+  /**
+   * Creates a metric service for a given {@link io.vertx.core.Vertx} instance.
+   *
+   * @param vertx the vertx instance
+   * @return the metrics service
+   */
   public static MetricsService create(Vertx vertx) {
     // We don't use Vertx instance for now but we might later
     return new MetricsServiceImpl();
@@ -46,7 +54,10 @@ public interface MetricsService {
    */
   JsonObject getMetricsSnapshot(Measured o);
 
+  /**
+   * @param measured the measure object
+   * @return the base name of the measured object
+   */
   String getBaseName(Measured measured);
-
 
 }

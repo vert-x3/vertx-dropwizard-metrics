@@ -2,7 +2,7 @@ require 'vertx/measured'
 require 'vertx/util/utils.rb'
 # Generated from io.vertx.ext.dropwizard.MetricsService
 module VertxDropwizard
-  #  @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
+  #  The metrics service mainly allows to return a snapshot of measured objects.
   class MetricsService
     # @private
     # @param j_del [::VertxDropwizard::MetricsService] the java delegate
@@ -14,8 +14,9 @@ module VertxDropwizard
     def j_del
       @j_del
     end
-    # @param [::Vertx::Vertx] vertx
-    # @return [::VertxDropwizard::MetricsService]
+    #  Creates a metric service for a given {::Vertx::Vertx} instance.
+    # @param [::Vertx::Vertx] vertx the vertx instance
+    # @return [::VertxDropwizard::MetricsService] the metrics service
     def self.create(vertx=nil)
       if vertx.class.method_defined?(:j_del) && !block_given?
         return ::VertxDropwizard::MetricsService.new(Java::IoVertxExtDropwizard::MetricsService.java_method(:create, [Java::IoVertxCore::Vertx.java_class]).call(vertx.j_del))
@@ -34,8 +35,9 @@ module VertxDropwizard
       end
       raise ArgumentError, "Invalid arguments when calling get_metrics_snapshot(o)"
     end
+    #  @param measured the measure object
     # @param [::Vertx::Measured] measured
-    # @return [String]
+    # @return [String] the base name of the measured object
     def get_base_name(measured=nil)
       if measured.class.method_defined?(:j_del) && !block_given?
         return @j_del.java_method(:getBaseName, [Java::IoVertxCoreMetrics::Measured.java_class]).call(measured.j_del)

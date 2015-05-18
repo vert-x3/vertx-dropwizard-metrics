@@ -23,6 +23,7 @@ var JsonObject = io.vertx.core.json.JsonObject;
 var JMetricsService = io.vertx.ext.dropwizard.MetricsService;
 
 /**
+ The metrics service mainly allows to return a snapshot of measured objects.
 
  @class
 */
@@ -49,10 +50,11 @@ var MetricsService = function(j_val) {
   };
 
   /**
+   @param measured the measure object
 
    @public
    @param measured {Measured} 
-   @return {string}
+   @return {string} the base name of the measured object
    */
   this.getBaseName = function(measured) {
     var __args = arguments;
@@ -68,10 +70,11 @@ var MetricsService = function(j_val) {
 };
 
 /**
+ Creates a metric service for a given {@link Vertx} instance.
 
  @memberof module:vertx-dropwizard-js/metrics_service
- @param vertx {Vertx} 
- @return {MetricsService}
+ @param vertx {Vertx} the vertx instance 
+ @return {MetricsService} the metrics service
  */
 MetricsService.create = function(vertx) {
   var __args = arguments;

@@ -24,7 +24,7 @@ import io.vertx.rxjava.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 /**
- * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
+ * The metrics service mainly allows to return a snapshot of measured objects.
  *
  * <p/>
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.dropwizard.MetricsService original} non RX-ified interface using Vert.x codegen.
@@ -42,6 +42,11 @@ public class MetricsService {
     return delegate;
   }
 
+  /**
+   * Creates a metric service for a given {@link  io.vertx.rxjava.core.Vertx} instance.
+   * @param vertx the vertx instance
+   * @return the metrics service
+   */
   public static MetricsService create(Vertx vertx) { 
     MetricsService ret= MetricsService.newInstance(io.vertx.ext.dropwizard.MetricsService.create((io.vertx.core.Vertx) vertx.getDelegate()));
     return ret;
@@ -60,6 +65,11 @@ public class MetricsService {
     return ret;
   }
 
+  /**
+   * @param measured the measure object
+   * @param measured 
+   * @return the base name of the measured object
+   */
   public String getBaseName(Measured measured) { 
     String ret = this.delegate.getBaseName((io.vertx.core.metrics.Measured) measured.getDelegate());
     return ret;
