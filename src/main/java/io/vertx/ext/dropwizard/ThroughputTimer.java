@@ -1,6 +1,5 @@
 package io.vertx.ext.dropwizard;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import io.vertx.ext.dropwizard.impl.InstantThroughput;
@@ -13,11 +12,10 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class ThroughputTimer extends Timer implements Gauge<Long> {
+public class ThroughputTimer extends Timer {
 
   private final InstantThroughput instantThroughput = new InstantThroughput();
 
-  @Override
   public Long getValue() {
     return instantThroughput.count();
   }
