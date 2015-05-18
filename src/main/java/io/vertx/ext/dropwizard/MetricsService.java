@@ -36,7 +36,10 @@ public interface MetricsService {
   }
 
   /**
-   * Will return the metrics that correspond with this measured object, null if no metrics is available.
+   * Will return the metrics that correspond with this measured object, null if no metrics is available.<p/>
+   *
+   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   * dropwizard backend reports to a single server.
    *
    * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
    * the json data representing that metric

@@ -32,7 +32,10 @@ var MetricsService = function(j_val) {
   var that = this;
 
   /**
-   Will return the metrics that correspond with this measured object, null if no metrics is available.
+   Will return the metrics that correspond with this measured object, null if no metrics is available.<p/>
+  
+   Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   dropwizard backend reports to a single server.
 
    @public
    @param o {Measured} 

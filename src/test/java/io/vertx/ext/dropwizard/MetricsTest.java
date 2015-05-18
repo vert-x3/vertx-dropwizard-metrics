@@ -32,6 +32,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.net.NetClient;
@@ -46,7 +47,10 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -941,6 +945,48 @@ public class MetricsTest extends MetricsTestBase {
     });
     await();
     vertx = null;
+  }
+
+  @Test
+  public void testScaleHttpServers() throws Exception {
+    int size = 3;
+    List<HttpServer> servers = new ArrayList<>();
+    CountDownLatch listenLatch = new CountDownLatch(size);
+    for (int i = 0;i < size;i++) {
+      int id = i;
+      HttpServer server = vertx.createHttpServer();
+      server.requestHandler(req -> {
+        HttpServerResponse resp = req.response();
+        req.response().putHeader("id", "" + id);
+        resp.end();
+      });
+      server.listen(8080, ar -> {
+        assertTrue(ar.succeeded());
+        listenLatch.countDown();
+      });
+      servers.add(server);
+    }
+    awaitLatch(listenLatch);
+    HttpClient client = vertx.createHttpClient();
+    BitSet bs = new BitSet();
+    CountDownLatch requestLatch = new CountDownLatch(1);
+    for (int i = 0;i < size;i++) {
+      client.get(8080, "localhost", "/", resp -> {
+        assertEquals(200, resp.statusCode());
+        int id = Integer.parseInt(resp.getHeader("id"));
+        synchronized (bs) {
+          bs.set(id);
+          if (bs.cardinality() == 3) {
+            requestLatch.countDown();
+          }
+        }
+      }).end();
+    }
+    awaitLatch(requestLatch);
+    for (HttpServer server : servers) {
+      JsonObject metrics = metricsService.getMetricsSnapshot(server);
+      assertEquals(3, (int)metrics.getJsonObject("connections").getInteger("count"));
+    }
   }
 
   private void assertCount(JsonObject metric, long expected) {
