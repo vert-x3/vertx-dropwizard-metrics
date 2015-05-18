@@ -81,6 +81,8 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
     monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
+    monitoredHttpServerUris = new ArrayList<>(other.monitoredHttpServerUris);
+    monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
   }
 
   /**
@@ -93,13 +95,32 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     registryName = json.getString("registryName");
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
+
     monitoredEventBusHandlers = new ArrayList<>();
+    monitoredHttpServerUris = new ArrayList<>();
+    monitoredHttpClientUris = new ArrayList<>();
+
     JsonArray handlerAddressesArray = json.getJsonArray("monitoredHandlers");
     if (handlerAddressesArray != null) {
       for (Object o : handlerAddressesArray) {
         monitoredEventBusHandlers.add(new Match((JsonObject) o));
       }
     }
+
+    JsonArray httpServerUris = json.getJsonArray("monitoredServerUris");
+    if (httpServerUris != null) {
+      for (Object o : httpServerUris) {
+        monitoredHttpServerUris.add(new Match((JsonObject) o));
+      }
+    }
+
+    JsonArray httpClientUris = json.getJsonArray("monitoredClientUris");
+    if (httpClientUris != null) {
+      for (Object o : httpClientUris) {
+        monitoredHttpClientUris.add(new Match((JsonObject) o));
+      }
+    }
+
   }
 
   /**
