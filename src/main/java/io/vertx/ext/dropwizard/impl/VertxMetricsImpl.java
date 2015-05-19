@@ -17,6 +17,8 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Handler;
 import io.vertx.core.Verticle;
 import io.vertx.core.VertxOptions;
@@ -51,13 +53,15 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final Counter timers;
   private final Counter verticles;
   private Handler<Void> doneHandler;
+  private final boolean shutdown;
 
-  VertxMetricsImpl(Registry registry, VertxOptions options, DropwizardMetricsOptions metricsOptions) {
+  VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions) {
     super(registry, BASE_NAME);
 
     this.timers = counter("timers");
     this.options = metricsOptions;
     this.verticles = counter("verticles");
+    this.shutdown = shutdown;
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
@@ -126,7 +130,12 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public void close() {
-    registry().shutdown();
+    if (shutdown) {
+      RegistryHelper.shutdown(registry);
+      if (options.getRegistryName() != null) {
+        SharedMetricRegistries.remove(options.getRegistryName());
+      }
+    }
     if (doneHandler != null) {
       doneHandler.handle(null);
     }

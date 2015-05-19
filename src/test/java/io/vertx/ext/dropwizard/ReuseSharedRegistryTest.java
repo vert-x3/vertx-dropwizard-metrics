@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.VertxOptions;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -25,17 +26,33 @@ import java.util.Collections;
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class MetricsSharedRegistryTest extends MetricsTestBase {
+public class ReuseSharedRegistryTest extends MetricsTestBase {
 
   @Override
   protected VertxOptions getOptions() {
     return new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions().setEnabled(true).setRegistryName("the_name"));
   }
 
+  private MetricRegistry registry;
+
+  @Override
+  public void setUp() throws Exception {
+    SharedMetricRegistries.clear();
+    SharedMetricRegistries.getOrCreate("the_name");
+    super.setUp();
+  }
+
   @Test
   public void testRegistration() {
     assertEquals(Collections.singleton("the_name"), SharedMetricRegistries.names());
-    MetricRegistry registry = SharedMetricRegistries.getOrCreate("the_name");
+    registry = SharedMetricRegistries.getOrCreate("the_name");
     assertTrue(registry.getNames().size() > 0);
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    super.tearDown();
+    Assert.assertEquals(Collections.singleton("the_name"), SharedMetricRegistries.names());
+    Assert.assertTrue(registry.getNames().size() > 0);
   }
 }

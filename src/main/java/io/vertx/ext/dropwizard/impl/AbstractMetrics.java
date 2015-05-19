@@ -49,10 +49,10 @@ public abstract class AbstractMetrics implements Metrics {
     return null;
   }
 
-  protected final Registry registry;
+  protected final MetricRegistry registry;
   protected final String baseName;
 
-  AbstractMetrics(Registry registry, String baseName) {
+  AbstractMetrics(MetricRegistry registry, String baseName) {
     this.registry = registry;
     this.baseName = baseName;
   }
@@ -80,7 +80,7 @@ public abstract class AbstractMetrics implements Metrics {
     return name.substring(baseName.length() + 1);
   }
 
-  protected Registry registry() {
+  protected MetricRegistry registry() {
     return registry;
   }
 
@@ -122,11 +122,11 @@ public abstract class AbstractMetrics implements Metrics {
   }
 
   protected ThroughputMeter throughputMeter(String... names) {
-    return registry.throughputMeter(nameOf(names));
+    return RegistryHelper.throughputMeter(registry, nameOf(names));
   }
 
   protected ThroughputTimer throughputTimer(String... names) {
-    return registry.throughputTimer(nameOf(names));
+    return RegistryHelper.throughputTimer(registry, nameOf(names));
   }
 
   protected void remove(String... names) {

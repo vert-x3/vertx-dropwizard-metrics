@@ -22,12 +22,11 @@ import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-public class Registry extends MetricRegistry {
+class RegistryHelper {
 
   private static final Function<Metric, ThroughputMeter> THROUGHPUT_METER = metric -> {
     if (metric != null) {
@@ -45,28 +44,28 @@ public class Registry extends MetricRegistry {
     }
   };
 
-  public void shutdown() {
-    removeMatching((name, metric) -> true);
+  public static void shutdown(MetricRegistry registry) {
+    registry.removeMatching((name, metric) -> true);
   }
 
-  public ThroughputMeter throughputMeter(String name) {
-    return getOrAdd(name, THROUGHPUT_METER);
+  public static ThroughputMeter throughputMeter(MetricRegistry registry, String name) {
+    return getOrAdd(registry, name, THROUGHPUT_METER);
   }
 
-  public ThroughputTimer throughputTimer(String name) {
-    return getOrAdd(name, THROUGHPUT_TIMER);
+  public static ThroughputTimer throughputTimer(MetricRegistry registry, String name) {
+    return getOrAdd(registry, name, THROUGHPUT_TIMER);
   }
 
-  public <M extends Metric> M getOrAdd(String name, Function<Metric, M> metricProvider) {
-    Metric metric = getMetrics().get(name);
+  public static <M extends Metric> M getOrAdd(MetricRegistry registry, String name, Function<Metric, M> metricProvider) {
+    Metric metric = registry.getMetrics().get(name);
     M found = metric != null ? metricProvider.apply(metric) : null;
     if (found != null) {
       return found;
     } else if (metric == null) {
       try {
-        return register(name, metricProvider.apply(null));
+        return registry.register(name, metricProvider.apply(null));
       } catch (IllegalArgumentException e) {
-        metric = getMetrics().get(name);
+        metric = registry.getMetrics().get(name);
         found = metricProvider.apply(metric);
         if (found != null) {
           return found;

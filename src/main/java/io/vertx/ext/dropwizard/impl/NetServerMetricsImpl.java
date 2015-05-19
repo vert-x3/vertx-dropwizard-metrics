@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.TCPMetrics;
@@ -35,7 +36,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   protected volatile boolean closed;
 
   NetServerMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAddress) {
-    super(metrics.registry(), localAddress != null ? (Registry.name(baseName, addressName(localAddress))) : (baseName));
+    super(metrics.registry(), localAddress != null ? (MetricRegistry.name(baseName, addressName(localAddress))) : (baseName));
 
     this.openConnections = counter("open-netsockets");
     this.connections = timer("connections");

@@ -40,14 +40,16 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     } else {
       metricsOptions = new DropwizardMetricsOptions(baseOptions.toJson());
     }
-    Registry registry = new Registry();
+    MetricRegistry registry = new MetricRegistry();
+    boolean shutdown = true;
     if (metricsOptions.getRegistryName() != null) {
       MetricRegistry other = SharedMetricRegistries.add(metricsOptions.getRegistryName(), registry);
-      if (other != null && other instanceof Registry) {
-        registry = (Registry) other;
+      if (other != null) {
+        registry = other;
+        shutdown = false;
       }
     }
-    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, options, metricsOptions);
+    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, shutdown, options, metricsOptions);
     // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
     if (metricsOptions.isJmxEnabled()) {
       String jmxDomain = metricsOptions.getJmxDomain();
