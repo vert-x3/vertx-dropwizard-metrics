@@ -16,6 +16,7 @@
 
 package io.vertx.ext.dropwizard;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.test.core.TestUtils;
 import io.vertx.test.core.VertxTestBase;
@@ -94,4 +95,82 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
   }
+
+  @Test
+  public void testFullJsonOptions() throws Exception {
+
+    JsonArray monitoredServerUris = new JsonArray()
+        .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"))
+        .add(new JsonObject().put("value", "^/server/test/2/.*").put("type", "REGEX"));
+
+    JsonArray monitoredClientUris = new JsonArray()
+        .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
+        .add(new JsonObject().put("value", "^/client/test/2/.*").put("type", "REGEX"));
+
+    JsonArray monitoredHandlers = new JsonArray()
+        .add(new JsonObject().put("value", "test.address.1").put("type", "EQUALS"))
+        .add(new JsonObject().put("value", "^test.2.*").put("type", "REGEX"));
+
+    JsonObject config = new JsonObject()
+        .put("registryName", "testRegistry")
+        .put("jmxEnabled", true)
+        .put("jmxDomain", "testJmxDomain")
+        .put("monitoredServerUris", monitoredServerUris)
+        .put("monitoredClientUris", monitoredClientUris)
+        .put("monitoredHandlers", monitoredHandlers);
+
+    DropwizardMetricsOptions options = new DropwizardMetricsOptions(config);
+
+    assertEquals("testRegistry", options.getRegistryName());
+    assertTrue(options.isJmxEnabled());
+    assertEquals("testJmxDomain", options.getJmxDomain());
+
+    assertEquals(2, options.getMonitoredHttpServerUris().size());
+    assertEquals("/test/server/1", options.getMonitoredHttpServerUris().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredHttpServerUris().get(0).getType());
+    assertEquals("^/server/test/2/.*", options.getMonitoredHttpServerUris().get(1).getValue());
+    assertEquals(MatchType.REGEX, options.getMonitoredHttpServerUris().get(1).getType());
+
+    assertEquals(2, options.getMonitoredHttpClientUris().size());
+    assertEquals("/test/client/1", options.getMonitoredHttpClientUris().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientUris().get(0).getType());
+    assertEquals("^/client/test/2/.*", options.getMonitoredHttpClientUris().get(1).getValue());
+    assertEquals(MatchType.REGEX, options.getMonitoredHttpClientUris().get(1).getType());
+
+    assertEquals(2, options.getMonitoredEventBusHandlers().size());
+    assertEquals("test.address.1", options.getMonitoredEventBusHandlers().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredEventBusHandlers().get(0).getType());
+    assertEquals("^test.2.*", options.getMonitoredEventBusHandlers().get(1).getValue());
+    assertEquals(MatchType.REGEX, options.getMonitoredEventBusHandlers().get(1).getType());
+  }
+
+  @Test
+  public void testInvalidAndEmptyMonitoredEntries() throws Exception {
+    JsonArray monitoredServerUris = new JsonArray()
+        .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"));
+
+    JsonArray monitoredClientUris = new JsonArray()
+        .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
+        .add("Just a string");
+
+    JsonObject config = new JsonObject()
+        .put("registryName", "testRegistry")
+        .put("jmxEnabled", true)
+        .put("jmxDomain", "testJmxDomain")
+        .put("monitoredServerUris", monitoredServerUris)
+        .put("monitoredClientUris", monitoredClientUris);
+
+    DropwizardMetricsOptions options = new DropwizardMetricsOptions(config);
+
+    assertEquals(1, options.getMonitoredHttpServerUris().size());
+    assertEquals("/test/server/1", options.getMonitoredHttpServerUris().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredHttpServerUris().get(0).getType());
+
+    assertEquals(1, options.getMonitoredHttpClientUris().size());
+    assertEquals("/test/client/1", options.getMonitoredHttpClientUris().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientUris().get(0).getType());
+
+    assertEquals(0, options.getMonitoredEventBusHandlers().size());
+  }
+
 }

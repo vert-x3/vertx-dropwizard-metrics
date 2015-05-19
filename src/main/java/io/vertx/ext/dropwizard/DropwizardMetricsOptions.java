@@ -96,31 +96,20 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
 
-    monitoredEventBusHandlers = new ArrayList<>();
-    monitoredHttpServerUris = new ArrayList<>();
-    monitoredHttpClientUris = new ArrayList<>();
+    monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
+    monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
+    monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
+  }
 
-    JsonArray handlerAddressesArray = json.getJsonArray("monitoredHandlers");
-    if (handlerAddressesArray != null) {
-      for (Object o : handlerAddressesArray) {
-        monitoredEventBusHandlers.add(new Match((JsonObject) o));
-      }
-    }
+  private List<Match> loadMonitored(String arrayField, JsonObject json) {
+    List<Match> list = new ArrayList<>();
 
-    JsonArray httpServerUris = json.getJsonArray("monitoredServerUris");
-    if (httpServerUris != null) {
-      for (Object o : httpServerUris) {
-        monitoredHttpServerUris.add(new Match((JsonObject) o));
-      }
-    }
+    JsonArray monitored = json.getJsonArray(arrayField, new JsonArray());
+    monitored.forEach(object -> {
+      if (object instanceof JsonObject) list.add(new Match((JsonObject) object));
+    });
 
-    JsonArray httpClientUris = json.getJsonArray("monitoredClientUris");
-    if (httpClientUris != null) {
-      for (Object o : httpClientUris) {
-        monitoredHttpClientUris.add(new Match((JsonObject) o));
-      }
-    }
-
+    return list;
   }
 
   /**
