@@ -985,7 +985,7 @@ public class MetricsTest extends MetricsTestBase {
     awaitLatch(requestLatch);
     for (HttpServer server : servers) {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
-      assertEquals(3, (int)metrics.getJsonObject("connections").getInteger("count"));
+      assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
     }
   }
 
