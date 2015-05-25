@@ -10,25 +10,13 @@
 
 package io.vertx.ext.dropwizard.reporters;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metered;
-import com.codahale.metrics.MetricFilter;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricRegistryListener;
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.ext.dropwizard.ThroughputMeter;
+import io.vertx.ext.dropwizard.ThroughputTimer;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
+import javax.management.*;
 import java.io.Closeable;
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
@@ -341,6 +329,14 @@ public class JmxReporter implements Closeable {
   }
   //CHECKSTYLE:ON
 
+  //CHECKSTYLE:OFF
+  @SuppressWarnings("UnusedDeclaration")
+  public interface JmxThroughputMeterMBean extends JmxMeterMBean {
+    double getInstantThroughput();
+  }
+  //CHECKSTYLE:ON
+
+
   private static class JmxMeter extends AbstractBean implements JmxMeterMBean {
     private final Metered metric;
     private final double rateFactor;
@@ -389,6 +385,21 @@ public class JmxReporter implements Closeable {
     }
   }
 
+  private static class JmxThroughputMeter extends JmxMeter implements JmxThroughputMeterMBean {
+
+    private ThroughputMeter metric;
+
+    private JmxThroughputMeter(Metered metric, ObjectName objectName, TimeUnit rateUnit) {
+      super(metric, objectName, rateUnit);
+      this.metric = (ThroughputMeter) metric;
+    }
+
+    @Override
+    public double getInstantThroughput() {
+      return metric.getValue();
+    }
+  }
+
   // CHECKSTYLE:OFF
   @SuppressWarnings("UnusedDeclaration")
   public interface JmxTimerMBean extends JmxMeterMBean {
@@ -413,9 +424,18 @@ public class JmxReporter implements Closeable {
     double get999thPercentile();
 
     long[] values();
+
     String getDurationUnit();
   }
   // CHECKSTYLE:ON
+
+  // CHECKSTYLE:OFF
+  @SuppressWarnings("UnusedDeclaration")
+  public interface JmxThroughputTimerMBean extends JmxTimerMBean {
+    double getInstantThroughput();
+  }
+  // CHECKSTYLE:ON
+
 
   static class JmxTimer extends JmxMeter implements JmxTimerMBean {
     private final Timer metric;
@@ -490,6 +510,23 @@ public class JmxReporter implements Closeable {
     @Override
     public String getDurationUnit() {
       return durationUnit;
+    }
+  }
+
+  static class JmxThroughputTimer extends JmxTimer implements JmxThroughputTimerMBean {
+    private final ThroughputTimer metric;
+
+    private JmxThroughputTimer(Timer metric,
+                               ObjectName objectName,
+                               TimeUnit rateUnit,
+                               TimeUnit durationUnit) {
+      super(metric, objectName, rateUnit, durationUnit);
+      this.metric = (ThroughputTimer) metric;
+    }
+
+    @Override
+    public double getInstantThroughput() {
+      return metric.getValue();
     }
   }
 
@@ -597,7 +634,13 @@ public class JmxReporter implements Closeable {
       try {
         if (filter.matches(name, meter)) {
           final ObjectName objectName = createName("meters", name);
-          mBeanServer.registerMBean(new JmxMeter(meter, objectName, timeUnits.rateFor(name)), objectName);
+
+          if (meter instanceof ThroughputMeter) {
+            mBeanServer.registerMBean(new JmxThroughputMeter(meter, objectName, timeUnits.rateFor(name)), objectName);
+          } else {
+            mBeanServer.registerMBean(new JmxMeter(meter, objectName, timeUnits.rateFor(name)), objectName);
+          }
+
           registered.add(objectName);
         }
       } catch (InstanceAlreadyExistsException e) {
@@ -625,7 +668,13 @@ public class JmxReporter implements Closeable {
       try {
         if (filter.matches(name, timer)) {
           final ObjectName objectName = createName("timers", name);
-          mBeanServer.registerMBean(new JmxTimer(timer, objectName, timeUnits.rateFor(name), timeUnits.durationFor(name)), objectName);
+
+          if (timer instanceof ThroughputTimer) {
+            mBeanServer.registerMBean(new JmxThroughputTimer(timer, objectName, timeUnits.rateFor(name), timeUnits.durationFor(name)), objectName);
+          } else {
+            mBeanServer.registerMBean(new JmxTimer(timer, objectName, timeUnits.rateFor(name), timeUnits.durationFor(name)), objectName);
+          }
+
           registered.add(objectName);
         }
       } catch (InstanceAlreadyExistsException e) {

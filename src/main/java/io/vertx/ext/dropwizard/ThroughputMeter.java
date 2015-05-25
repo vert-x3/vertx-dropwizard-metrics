@@ -1,6 +1,5 @@
 package io.vertx.ext.dropwizard;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import io.vertx.ext.dropwizard.impl.InstantThroughput;
 
@@ -10,11 +9,10 @@ import io.vertx.ext.dropwizard.impl.InstantThroughput;
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class ThroughputMeter extends Meter implements Gauge<Long> {
+public class ThroughputMeter extends Meter {
 
   private final InstantThroughput instantThroughput = new InstantThroughput();
 
-  @Override
   public Long getValue() {
     return instantThroughput.count();
   }
