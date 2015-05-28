@@ -71,6 +71,15 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   }
 
   /**
+   * Copy constructor with base metrics options
+   *
+   * @param other The other {@link MetricsOptions} to copy when creating this
+   */
+  public DropwizardMetricsOptions(MetricsOptions other) {
+    super(other);
+  }
+
+  /**
    * Copy constructor
    *
    * @param other The other {@link DropwizardMetricsOptions} to copy when creating this
