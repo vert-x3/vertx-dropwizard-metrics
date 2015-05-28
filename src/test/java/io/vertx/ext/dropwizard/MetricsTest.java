@@ -51,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -969,20 +968,16 @@ public class MetricsTest extends MetricsTestBase {
     awaitLatch(listenLatch);
     HttpClient client = vertx.createHttpClient();
     BitSet bs = new BitSet();
-    CountDownLatch requestLatch = new CountDownLatch(1);
     for (int i = 0;i < size;i++) {
       client.get(8080, "localhost", "/", resp -> {
         assertEquals(200, resp.statusCode());
         int id = Integer.parseInt(resp.getHeader("id"));
         synchronized (bs) {
           bs.set(id);
-          if (bs.cardinality() == 3) {
-            requestLatch.countDown();
-          }
         }
       }).end();
     }
-    awaitLatch(requestLatch);
+    waitUntil(() -> bs.cardinality() == 3);
     for (HttpServer server : servers) {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
       assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
