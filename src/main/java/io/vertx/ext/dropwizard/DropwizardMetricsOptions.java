@@ -59,6 +59,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   private List<Match> monitoredEventBusHandlers;
   private List<Match> monitoredHttpServerUris;
   private List<Match> monitoredHttpClientUris;
+  private String configFileName;
 
   /**
    * Default constructor
@@ -231,6 +232,25 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   @Override
   public DropwizardMetricsOptions setEnabled(boolean enable) {
     return (DropwizardMetricsOptions) super.setEnabled(enable);
+  }
+
+  /**
+   * @return the file name for a config file to create an Options object from.
+   */
+  public String getConfigFileName() {
+    return configFileName;
+  }
+
+  /**
+   * Set the file name for a config file that contains options in JSON format, to be used to create a new options object.
+   * The file will be looked for on the file system first and then on the classpath if it's not found.
+   *
+   * @param configFileName the file name
+   * @return a reference to this, so the API can be used fluently
+   */
+  public DropwizardMetricsOptions setConfigFileName(String configFileName) {
+    this.configFileName = configFileName;
+    return this;
   }
 
   /**
