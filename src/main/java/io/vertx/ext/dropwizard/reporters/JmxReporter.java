@@ -12,7 +12,7 @@ package io.vertx.ext.dropwizard.reporters;
 
 import com.codahale.metrics.*;
 import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 

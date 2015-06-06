@@ -43,7 +43,7 @@ public class MetricsService {
   }
 
   /**
-   * Creates a metric service for a given {@link  io.vertx.rxjava.core.Vertx} instance.
+   * Creates a metric service for a given {@link io.vertx.rxjava.core.Vertx} instance.
    * @param vertx the vertx instance
    * @return the metrics service
    */

@@ -27,7 +27,7 @@ module VertxDropwizard
     # 
     #  Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
     #  dropwizard backend reports to a single server.
-    # @param [::Vertx::Measured] o
+    # @param [::Vertx::Measured] o 
     # @return [Hash{String => Object}] the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
     def get_metrics_snapshot(o=nil)
       if o.class.method_defined?(:j_del) && !block_given?
@@ -36,7 +36,7 @@ module VertxDropwizard
       raise ArgumentError, "Invalid arguments when calling get_metrics_snapshot(o)"
     end
     #  @param measured the measure object
-    # @param [::Vertx::Measured] measured
+    # @param [::Vertx::Measured] measured 
     # @return [String] the base name of the measured object
     def get_base_name(measured=nil)
       if measured.class.method_defined?(:j_del) && !block_given?
