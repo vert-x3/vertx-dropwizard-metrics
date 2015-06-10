@@ -59,7 +59,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   private List<Match> monitoredEventBusHandlers;
   private List<Match> monitoredHttpServerUris;
   private List<Match> monitoredHttpClientUris;
-  private String configFileName;
+  private String configPath;
 
   /**
    * Default constructor
@@ -94,7 +94,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     registryName = other.getRegistryName();
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
-    configFileName = other.getConfigFileName();
+    configPath = other.getConfigPath();
     monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
     monitoredHttpServerUris = new ArrayList<>(other.monitoredHttpServerUris);
     monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
@@ -110,7 +110,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     registryName = json.getString("registryName");
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
-    configFileName = json.getString("configFileName");
+    configPath = json.getString("configPath");
     monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
     monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
     monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
@@ -240,21 +240,21 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   }
 
   /**
-   * @return the file name for a config file to create an Options object from.
+   * @return the path for a config file to create an Options object from.
    */
-  public String getConfigFileName() {
-    return configFileName;
+  public String getConfigPath() {
+    return configPath;
   }
 
   /**
-   * Set the file name for a config file that contains options in JSON format, to be used to create a new options object.
+   * Set the path for a config file that contains options in JSON format, to be used to create a new options object.
    * The file will be looked for on the file system first and then on the classpath if it's not found.
    *
-   * @param configFileName the file name
+   * @param configPath the file name
    * @return a reference to this, so the API can be used fluently
    */
-  public DropwizardMetricsOptions setConfigFileName(String configFileName) {
-    this.configFileName = configFileName;
+  public DropwizardMetricsOptions setConfigPath(String configPath) {
+    this.configPath = configPath;
     return this;
   }
 

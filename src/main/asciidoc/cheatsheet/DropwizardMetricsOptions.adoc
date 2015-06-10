@@ -38,7 +38,7 @@ Add an monitored http server uri.+++
 |[[enabled]]`enabled`
 |`Boolean`
 |-
-|[[configFileName]]`configFileName`
+|[[configPath]]`configPath`
 |`String`
 |+++
 Set the file name for a config file that contains options in JSON format, to be used to create a new options object.

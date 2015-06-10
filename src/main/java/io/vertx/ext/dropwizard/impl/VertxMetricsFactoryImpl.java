@@ -61,8 +61,8 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
       }
     }
     // Check to see if a config file name has been set, and if it has load it and create new options file from it
-    if (metricsOptions.getConfigFileName() != null && !metricsOptions.getConfigFileName().isEmpty()) {
-      JsonObject loadedFromFile = loadOptionsFile(metricsOptions.getConfigFileName(), new FileResolver(vertx));
+    if (metricsOptions.getConfigPath() != null && !metricsOptions.getConfigPath().isEmpty()) {
+      JsonObject loadedFromFile = loadOptionsFile(metricsOptions.getConfigPath(), new FileResolver(vertx));
       if (!loadedFromFile.isEmpty()) {
         metricsOptions = new DropwizardMetricsOptions(loadedFromFile);
       }
@@ -82,8 +82,8 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     return metrics;
   }
 
-  private JsonObject loadOptionsFile(String optionsFileName, FileResolver fileResolver) {
-    File file = fileResolver.resolveFile(optionsFileName);
+  private JsonObject loadOptionsFile(String configPath, FileResolver fileResolver) {
+    File file = fileResolver.resolveFile(configPath);
     try (Scanner scanner = new Scanner(file)) {
       scanner.useDelimiter("\\A");
       String metricsConfigString = scanner.next();

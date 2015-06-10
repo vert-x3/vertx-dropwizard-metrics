@@ -6,7 +6,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.MatchType;
-import io.vertx.ext.dropwizard.impl.VertxMetricsFactoryImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.After;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testLoadingFromFile() throws Exception {
     String filePath = ClassLoader.getSystemResource("test_metrics_config.json").getFile();
-    DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigFileName(filePath);
+    DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigPath(filePath);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     // Verify our jmx domain isn't there already, just in case.
@@ -52,7 +51,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   public void testLoadingFromFileFromJson() throws Exception {
     String filePath = ClassLoader.getSystemResource("test_metrics_config.json").getFile();
     VertxOptions vertxOptions = new VertxOptions(new JsonObject().
-        put("metricsOptions", new JsonObject().put("configFileName", filePath)));
+        put("metricsOptions", new JsonObject().put("configPath", filePath)));
 
     // Verify our jmx domain isn't there already, just in case.
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
@@ -68,8 +67,8 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
   @Test
   public void testloadingFileFromClasspath() throws Exception {
-    String fileName = "test_metrics_config.json";
-    DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigFileName(fileName);
+    String path = "test_metrics_config.json";
+    DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigPath(path);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     // Verify our jmx domain isn't there already, just in case.
@@ -87,7 +86,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testLoadingWithJmxDisabled() throws Exception {
     String filePath = ClassLoader.getSystemResource("test_metrics_config_jmx_disabled.json").getFile();
-    DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigFileName(filePath);
+    DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigPath(filePath);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
@@ -122,7 +121,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     DropwizardMetricsOptions dmo = new DropwizardMetricsOptions()
         .setJmxEnabled(true)
         .setJmxDomain("non-file-jmx")
-        .setConfigFileName(filePath);
+        .setConfigPath(filePath);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
