@@ -50,6 +50,9 @@ public class MetricsOptionsTest extends VertxTestBase {
 
     assertNull(options.getRegistryName());
     assertEquals("bar", options.setRegistryName("bar").getRegistryName());
+
+    assertNull(options.getConfigFileName());
+    assertEquals("the_config_file", options.setConfigFileName("the_config_file").getConfigFileName());
   }
 
   @Test
@@ -61,15 +64,18 @@ public class MetricsOptionsTest extends VertxTestBase {
     boolean jmxEnabled = rand.nextBoolean();
     String jmxDomain = TestUtils.randomAlphaString(100);
     String name = TestUtils.randomAlphaString(100);
+    String configFileName = TestUtils.randomAlphaString(100);
     options.setEnabled(metricsEnabled);
     options.setJmxEnabled(jmxEnabled);
     options.setJmxDomain(jmxDomain);
     options.setRegistryName(name);
+    options.setConfigFileName(configFileName);
     options = new DropwizardMetricsOptions(options);
     assertEquals(metricsEnabled || jmxEnabled, options.isEnabled());
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
     assertEquals(name, options.getRegistryName());
+    assertEquals(configFileName, options.getConfigFileName());
   }
 
   @Test
@@ -84,11 +90,13 @@ public class MetricsOptionsTest extends VertxTestBase {
     boolean jmxEnabled = rand.nextBoolean();
     String jmxDomain = TestUtils.randomAlphaString(100);
     String registryName = TestUtils.randomAlphaString(100);
+    String configFileName = TestUtils.randomAlphaString(100);
     options = new DropwizardMetricsOptions(new JsonObject().
         put("enabled", metricsEnabled).
         put("registryName", registryName).
         put("jmxEnabled", jmxEnabled).
-        put("jmxDomain", jmxDomain)
+        put("jmxDomain", jmxDomain).
+        put("configFileName", configFileName)
     );
     assertEquals(metricsEnabled, options.isEnabled());
     assertEquals(registryName, options.getRegistryName());
@@ -117,13 +125,15 @@ public class MetricsOptionsTest extends VertxTestBase {
         .put("jmxDomain", "testJmxDomain")
         .put("monitoredServerUris", monitoredServerUris)
         .put("monitoredClientUris", monitoredClientUris)
-        .put("monitoredHandlers", monitoredHandlers);
+        .put("monitoredHandlers", monitoredHandlers)
+        .put("configFileName", "the_config_file");
 
     DropwizardMetricsOptions options = new DropwizardMetricsOptions(config);
 
     assertEquals("testRegistry", options.getRegistryName());
     assertTrue(options.isJmxEnabled());
     assertEquals("testJmxDomain", options.getJmxDomain());
+    assertEquals("the_config_file", options.getConfigFileName());
 
     assertEquals(2, options.getMonitoredHttpServerUris().size());
     assertEquals("/test/server/1", options.getMonitoredHttpServerUris().get(0).getValue());
