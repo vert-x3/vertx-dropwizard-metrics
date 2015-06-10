@@ -94,6 +94,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     registryName = other.getRegistryName();
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
+    configFileName = other.getConfigFileName();
     monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
     monitoredHttpServerUris = new ArrayList<>(other.monitoredHttpServerUris);
     monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
@@ -109,7 +110,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     registryName = json.getString("registryName");
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
-
+    configFileName = json.getString("configFileName");
     monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
     monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
     monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);

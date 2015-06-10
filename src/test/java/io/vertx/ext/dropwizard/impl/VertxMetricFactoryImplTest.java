@@ -49,6 +49,24 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   }
 
   @Test
+  public void testLoadingFromFileFromJson() throws Exception {
+    String filePath = ClassLoader.getSystemResource("test_metrics_config.json").getFile();
+    VertxOptions vertxOptions = new VertxOptions(new JsonObject().
+        put("metricsOptions", new JsonObject().put("configFileName", filePath)));
+
+    // Verify our jmx domain isn't there already, just in case.
+    assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
+
+    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    metrics = vmfi.metrics(vertx, vertxOptions);
+
+    List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
+
+    // If our file was loaded correctly, then our jmx domain will exist.
+    assertTrue(jmxDomains.contains("test-jmx-domain"));
+  }
+
+  @Test
   public void testloadingFileFromClasspath() throws Exception {
     String fileName = "test_metrics_config.json";
     DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigFileName(fileName);

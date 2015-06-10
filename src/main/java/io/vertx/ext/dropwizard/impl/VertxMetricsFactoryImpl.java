@@ -48,14 +48,6 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     DropwizardMetricsOptions metricsOptions;
     if (baseOptions instanceof DropwizardMetricsOptions) {
       metricsOptions = (DropwizardMetricsOptions) baseOptions;
-
-      // Check to see if a config file name has been set, and if it has load it and create new options file from it
-      if (metricsOptions.getConfigFileName() != null && !metricsOptions.getConfigFileName().isEmpty()) {
-        JsonObject loadedFromFile = loadOptionsFile(metricsOptions.getConfigFileName(), new FileResolver(vertx));
-        if (!loadedFromFile.isEmpty()) {
-          metricsOptions = new DropwizardMetricsOptions(loadedFromFile);
-        }
-      }
     } else {
       metricsOptions = new DropwizardMetricsOptions(baseOptions.toJson());
     }
@@ -66,6 +58,13 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
       if (other != null) {
         registry = other;
         shutdown = false;
+      }
+    }
+    // Check to see if a config file name has been set, and if it has load it and create new options file from it
+    if (metricsOptions.getConfigFileName() != null && !metricsOptions.getConfigFileName().isEmpty()) {
+      JsonObject loadedFromFile = loadOptionsFile(metricsOptions.getConfigFileName(), new FileResolver(vertx));
+      if (!loadedFromFile.isEmpty()) {
+        metricsOptions = new DropwizardMetricsOptions(loadedFromFile);
       }
     }
     VertxMetricsImpl metrics = new VertxMetricsImpl(registry, shutdown, options, metricsOptions);
