@@ -19,7 +19,7 @@ module VertxDropwizard
     # @return [::VertxDropwizard::MetricsService] the metrics service
     def self.create(vertx=nil)
       if vertx.class.method_defined?(:j_del) && !block_given?
-        return ::VertxDropwizard::MetricsService.new(Java::IoVertxExtDropwizard::MetricsService.java_method(:create, [Java::IoVertxCore::Vertx.java_class]).call(vertx.j_del))
+        return ::Vertx::Util::Utils.safe_create(Java::IoVertxExtDropwizard::MetricsService.java_method(:create, [Java::IoVertxCore::Vertx.java_class]).call(vertx.j_del),::VertxDropwizard::MetricsService)
       end
       raise ArgumentError, "Invalid arguments when calling create(vertx)"
     end

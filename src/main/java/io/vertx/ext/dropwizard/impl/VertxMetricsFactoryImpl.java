@@ -57,7 +57,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
         }
       }
     } else {
-      metricsOptions = new DropwizardMetricsOptions(baseOptions);
+      metricsOptions = new DropwizardMetricsOptions(baseOptions.toJson());
     }
     MetricRegistry registry = new MetricRegistry();
     boolean shutdown = true;

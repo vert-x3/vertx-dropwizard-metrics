@@ -79,7 +79,7 @@ var MetricsService = function(j_val) {
 MetricsService.create = function(vertx) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return new MetricsService(JMetricsService["create(io.vertx.core.Vertx)"](vertx._jdel));
+    return utils.convReturnVertxGen(JMetricsService["create(io.vertx.core.Vertx)"](vertx._jdel), MetricsService);
   } else utils.invalidArgs();
 };
 

@@ -77,6 +77,6 @@ public class MetricsService {
 
 
   public static MetricsService newInstance(io.vertx.ext.dropwizard.MetricsService arg) {
-    return new MetricsService(arg);
+    return arg != null ? new MetricsService(arg) : null;
   }
 }

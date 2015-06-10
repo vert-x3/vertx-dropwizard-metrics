@@ -1,7 +1,11 @@
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.impl;
 
 import io.vertx.core.VertxOptions;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.metrics.VertxMetrics;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.MatchType;
 import io.vertx.ext.dropwizard.impl.VertxMetricsFactoryImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.After;
@@ -110,5 +114,17 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
     assertFalse(jmxDomains.contains("test-jmx-domain"));
     assertTrue(jmxDomains.contains("non-file-jmx"));
+  }
+
+  @Test
+  public void testFromJson() throws Exception {
+    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions(
+        new JsonObject().put("metricsOptions", new JsonObject().put("enabled", true).put("monitoredClientUris", new JsonArray().add(new JsonObject().put("value", "http://www.foo.com"))))
+    ));
+    DropwizardMetricsOptions options = metrics.getOptions();
+    assertEquals(1, options.getMonitoredHttpClientUris().size());
+    assertEquals("http://www.foo.com", options.getMonitoredHttpClientUris().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientUris().get(0).getType());
   }
 }

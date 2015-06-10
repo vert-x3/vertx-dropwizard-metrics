@@ -61,7 +61,7 @@ can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + 
 [source,js]
 ----
 var metrics = metricsService.getMetricsSnapshot(vertx);
-metrics."vertx.eventbus.handlers";
+metrics.vertx.eventbus.handlers;
 
 ----
 
@@ -71,7 +71,7 @@ or from the measured component itself using just the metric name:
 ----
 var eventBus = vertx.eventBus();
 var metrics = metricsService.getMetricsSnapshot(eventBus);
-metrics."handlers";
+metrics.handlers;
 
 ----
 

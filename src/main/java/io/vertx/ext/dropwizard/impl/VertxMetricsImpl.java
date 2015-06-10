@@ -71,6 +71,10 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     }
   }
 
+  DropwizardMetricsOptions getOptions() {
+    return options;
+  }
+
   @Override
   String projectName(String name) {
     return name;

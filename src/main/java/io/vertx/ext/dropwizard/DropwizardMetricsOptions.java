@@ -78,6 +78,10 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions(MetricsOptions other) {
     super(other);
+    jmxEnabled = DEFAULT_JMX_ENABLED;
+    monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
+    monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
+    monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
   }
 
   /**

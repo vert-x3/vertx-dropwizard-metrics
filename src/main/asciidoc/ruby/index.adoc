@@ -61,7 +61,7 @@ can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + 
 [source,ruby]
 ----
 metrics = metricsService.get_metrics_snapshot(vertx)
-metrics["vertx.eventbus.handlers"]
+metrics['vertx.eventbus.handlers']
 
 ----
 
@@ -71,7 +71,7 @@ or from the measured component itself using just the metric name:
 ----
 eventBus = vertx.event_bus()
 metrics = metricsService.get_metrics_snapshot(eventBus)
-metrics["handlers"]
+metrics['handlers']
 
 ----
 
