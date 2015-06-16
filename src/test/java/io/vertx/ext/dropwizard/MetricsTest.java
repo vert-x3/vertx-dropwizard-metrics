@@ -601,22 +601,22 @@ public class MetricsTest extends MetricsTestBase {
       public void start() throws Exception {
         consumer = vertx.eventBus().consumer("foo").handler(msg -> {
           if (latch.getCount() == 13) {
-            while (true) {
+            // Wait until we have piled the 12 messages on the event loop
+            waitUntil(() -> {
               JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
               JsonObject pending = metrics.getJsonObject("messages.pending-local");
               int count = pending.getInteger("count");
               if (count == 12) {
-                assertEquals(12, (int)metrics.getJsonObject("messages.pending").getInteger("count"));
-                assertEquals(0, (int)metrics.getJsonObject("messages.pending-remote").getInteger("count"));
-                break;
+                int messagesPending = metrics.getJsonObject("messages.pending").getInteger("count");
+                assertTrue("Was expecting to have at least 12 pending messages: " + metrics, messagesPending >= 12);
+                assertEquals(0, (int) metrics.getJsonObject("messages.pending-remote").getInteger("count"));
+                return true;
               } else {
-                // Wait until we have piled the 12 messages on the event loop
+                return false;
               }
-            }
-            latch.countDown();
-          } else {
-            latch.countDown();;
+            });
           }
+          latch.countDown();
         });
       }
 
