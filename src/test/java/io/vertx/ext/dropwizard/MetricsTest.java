@@ -978,12 +978,10 @@ public class MetricsTest extends MetricsTestBase {
       }).end();
     }
     waitUntil(() -> bs.cardinality() == 3);
-    int totCount = 0;
     for (HttpServer server : servers) {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
-      totCount += metrics.getJsonObject("requests").getInteger("count");
+      assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
     }
-    assertEquals(3, totCount);
   }
 
   private void assertCount(JsonObject metric, long expected) {
