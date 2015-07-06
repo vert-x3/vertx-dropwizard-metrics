@@ -14,14 +14,24 @@
  *
  * == Getting started
  *
- * To enable metrics first setup maven to include this as a dependency
+ * To enable metrics, add the following dependency to the _dependencies_ section of your build descriptor:
  *
+ * * Maven (in your `pom.xml`):
+ *
+ * [source,xml,subs="+attributes"]
  * ----
  * <dependency>
- *   <groupId>io.vertx</groupId>
- *   <artifactId>vertx-metrics</artifactId>
- *   <version>${vertx.metrics.version}</version>
+ *   <groupId>{maven-groupId}</groupId>
+ *   <artifactId>{maven-artifactId}</artifactId>
+ *   <version>{maven-version}</version>
  * </dependency>
+ * ----
+ *
+ * * Gradle (in your `build.gradle` file):
+ *
+ * [source,groovy,subs="+attributes"]
+ * ----
+ * compile {maven-groupId}:{maven-artifactId}:{maven-version}
  * ----
  *
  * Then when you create vertx enable metrics using the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions}:
