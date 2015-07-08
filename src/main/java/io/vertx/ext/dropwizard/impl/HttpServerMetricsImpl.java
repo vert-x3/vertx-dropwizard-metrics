@@ -41,6 +41,11 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
+  public WebSocketMetric upgrade(RequestMetric requestMetric, ServerWebSocket serverWebSocket) {
+    return createWebSocketMetric();
+  }
+
+  @Override
   public void responseEnd(RequestMetric requestMetric, HttpServerResponse response) {
     end(requestMetric, response.getStatusCode());
   }

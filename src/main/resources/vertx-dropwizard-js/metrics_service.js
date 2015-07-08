@@ -17,6 +17,7 @@
 /** @module vertx-dropwizard-js/metrics_service */
 var utils = require('vertx-js/util/utils');
 var Measured = require('vertx-js/measured');
+var Vertx = require('vertx-js/vertx');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
