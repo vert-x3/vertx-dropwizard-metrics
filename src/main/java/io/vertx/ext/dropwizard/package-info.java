@@ -247,6 +247,7 @@
  * * `vertx.cluster-host` - A <<gauge>> of the cluster-host setting
  * * `vertx.cluster-port` - A <<gauge>> of the cluster-port setting
  * * `vertx.verticles` - A <<counter>> of the number of verticles currently deployed
+ * * `vertx.verticles.<verticle-name>` - A <<counter>> of the number of deployment of a particular verticle
  *
  * === Event bus metrics
  *
