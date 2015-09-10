@@ -10,6 +10,11 @@
 |===
 ^|Name | Type ^| Description
 
+|[[type]]`type`
+|`Enum`
+|+++
+Set the type of matching to apply.+++
+
 |[[value]]`value`
 |`String`
 |+++

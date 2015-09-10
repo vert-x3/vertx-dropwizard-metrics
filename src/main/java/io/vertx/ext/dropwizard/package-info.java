@@ -418,9 +418,9 @@
  * // Do whatever you need with the registry
  * ----
  */
-@GenModule(name = "vertx-dropwizard")
+@ModuleGen(name = "vertx-dropwizard", groupPackage = "io.vertx")
 @Document(fileName = "index.adoc")
 package io.vertx.ext.dropwizard;
 
-import io.vertx.codegen.annotations.GenModule;
+import io.vertx.codegen.annotations.ModuleGen;
 import io.vertx.docgen.Document;
