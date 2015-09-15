@@ -22,7 +22,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.ext.dropwizard.impl.MetricsServiceImpl;
 
-import java.util.Map;
+import java.util.Set;
 
 /**
  * The metrics service mainly allows to return a snapshot of measured objects.
@@ -38,26 +38,42 @@ public interface MetricsService {
    * @param vertx the vertx instance
    * @return the metrics service
    */
-  public static MetricsService create(Vertx vertx) {
+  static MetricsService create(Vertx vertx) {
     // We don't use Vertx instance for now but we might later
-    return new MetricsServiceImpl();
+    return new MetricsServiceImpl(vertx);
   }
-
-  /**
-   * Will return the metrics that correspond with this measured object, null if no metrics is available.<p/>
-   *
-   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
-   * dropwizard backend reports to a single server.
-   *
-   * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is
-   * the json data representing that metric
-   */
-  JsonObject getMetricsSnapshot(Measured o);
 
   /**
    * @param measured the measure object
    * @return the base name of the measured object
    */
   String getBaseName(Measured measured);
+
+  /**
+   * @return the known metrics names by this service
+   */
+  Set<String> metricsNames();
+
+  /**
+   * Will return the metrics that correspond with the {@code measured} object, null if no metrics is available.<p/>
+   *
+   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   * dropwizard backend reports to a single server.
+   *
+   * @return the map of metrics where the key is the name of the metric (excluding the base name unless for the Vert.x object)
+   * and the value is the json data representing that metric
+   */
+  JsonObject getMetricsSnapshot(Measured measured);
+
+  /**
+   * Will return the metrics that begins with the {@code baseName}, null if no metrics is available.<p/>
+   *
+   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   * dropwizard backend reports to a single server.
+   *
+   * @return the map of metrics where the key is the name of the metric and the value is the json data
+   * representing that metric
+   */
+  JsonObject getMetricsSnapshot(String baseName);
 
 }

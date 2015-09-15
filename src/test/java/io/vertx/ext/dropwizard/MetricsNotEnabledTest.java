@@ -27,6 +27,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
@@ -106,5 +107,10 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     assertNull(metrics);
 
     cleanup(server, client);
+  }
+
+  @Test
+  public void testMetricsNames() {
+    assertEquals(Collections.emptySet(), metricsService.metricsNames());
   }
 }

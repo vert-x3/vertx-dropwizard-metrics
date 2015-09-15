@@ -34,23 +34,6 @@ var MetricsService = function(j_val) {
   var that = this;
 
   /**
-   Will return the metrics that correspond with this measured object, null if no metrics is available.<p/>
-  
-   Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
-   dropwizard backend reports to a single server.
-
-   @public
-   @param o {Measured} 
-   @return {Object} the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
-   */
-  this.getMetricsSnapshot = function(o) {
-    var __args = arguments;
-    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-      return utils.convReturnJson(j_metricsService["getMetricsSnapshot(io.vertx.core.metrics.Measured)"](o._jdel));
-    } else utils.invalidArgs();
-  };
-
-  /**
    @param measured the measure object
 
    @public
@@ -61,6 +44,39 @@ var MetricsService = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       return j_metricsService["getBaseName(io.vertx.core.metrics.Measured)"](measured._jdel);
+    } else utils.invalidArgs();
+  };
+
+  /**
+   @return the known metrics names by this service
+
+   @public
+
+   @return {Array.<string>}
+   */
+  this.metricsNames = function() {
+    var __args = arguments;
+    if (__args.length === 0) {
+      return utils.convReturnSet(j_metricsService["metricsNames()"]());
+    } else utils.invalidArgs();
+  };
+
+  /**
+   Will return the metrics that begins with the <code>baseName</code>, null if no metrics is available.<p/>
+  
+   Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   dropwizard backend reports to a single server.
+
+   @public
+   @param baseName {string} 
+   @return {Object} the map of metrics where the key is the name of the metric and the value is the json data representing that metric
+   */
+  this.getMetricsSnapshot = function() {
+    var __args = arguments;
+    if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
+      return utils.convReturnJson(j_metricsService["getMetricsSnapshot(io.vertx.core.metrics.Measured)"](__args[0]._jdel));
+    }  else if (__args.length === 1 && typeof __args[0] === 'string') {
+      return utils.convReturnJson(j_metricsService["getMetricsSnapshot(java.lang.String)"](__args[0]));
     } else utils.invalidArgs();
   };
 

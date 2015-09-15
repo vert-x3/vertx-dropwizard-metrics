@@ -77,6 +77,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   String projectName(String name) {
+    // Special case for vertx we keep the name as is
     return name;
   }
 

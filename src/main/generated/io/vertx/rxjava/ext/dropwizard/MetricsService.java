@@ -21,6 +21,7 @@ import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.metrics.Measured;
 import io.vertx.rxjava.core.Vertx;
+import java.util.Set;
 import io.vertx.core.json.JsonObject;
 
 /**
@@ -53,25 +54,48 @@ public class MetricsService {
   }
 
   /**
-   * Will return the metrics that correspond with this measured object, null if no metrics is available.<p/>
-   *
-   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
-   * dropwizard backend reports to a single server.
-   * @param o 
-   * @return the map of metrics where the key is the name of the metric (excluding the base name) and the value is the json data representing that metric
-   */
-  public JsonObject getMetricsSnapshot(Measured o) { 
-    JsonObject ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) o.getDelegate());
-    return ret;
-  }
-
-  /**
    * @param measured the measure object
    * @param measured 
    * @return the base name of the measured object
    */
   public String getBaseName(Measured measured) { 
     String ret = this.delegate.getBaseName((io.vertx.core.metrics.Measured) measured.getDelegate());
+    return ret;
+  }
+
+  /**
+   * @return the known metrics names by this service
+   * @return 
+   */
+  public Set<String> metricsNames() { 
+    Set<String> ret = this.delegate.metricsNames();
+;
+    return ret;
+  }
+
+  /**
+   * Will return the metrics that correspond with the <code>measured</code> object, null if no metrics is available.<p/>
+   *
+   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   * dropwizard backend reports to a single server.
+   * @param measured 
+   * @return the map of metrics where the key is the name of the metric (excluding the base name unless for the Vert.x object) and the value is the json data representing that metric
+   */
+  public JsonObject getMetricsSnapshot(Measured measured) { 
+    JsonObject ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) measured.getDelegate());
+    return ret;
+  }
+
+  /**
+   * Will return the metrics that begins with the <code>baseName</code>, null if no metrics is available.<p/>
+   *
+   * Note: in the case of scaled servers, the JsonObject returns an aggregation of the metrics as the
+   * dropwizard backend reports to a single server.
+   * @param baseName 
+   * @return the map of metrics where the key is the name of the metric and the value is the json data representing that metric
+   */
+  public JsonObject getMetricsSnapshot(String baseName) { 
+    JsonObject ret = this.delegate.getMetricsSnapshot(baseName);
     return ret;
   }
 
