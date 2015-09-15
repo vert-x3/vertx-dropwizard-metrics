@@ -61,6 +61,24 @@ vertx = Vertx::Vertx.vertx({
 
 To see details about JMX see the <<jmx>> section at the bottom.
 
+== Command line activation
+
+When running Vert.x from the command line interface, metrics can be activated via JVM system properties. System
+properties beginning with _vertx.metrics.options._ are transmitted to the metrics options.
+
+The _vertx.metrics.options.enabled_ is a standard Vert.x Core option for enabling the metrics implementations, this
+options must be set to `true`.
+
+The `link:../cheatsheet/DropwizardMetricsOptions.html#registryName[vertx.metrics.options.registryName]`
+configures the <<dropwizard-registry,Dropwizard Registry>> to use.
+
+The `link:../cheatsheet/DropwizardMetricsOptions.html#jmxEnabled[vertx.metrics.options.jmxEnabled]` and
+`link:../cheatsheet/DropwizardMetricsOptions.html#jmxDomain[vertx.metrics.options.jmxDomain]`
+configures the <<jmx,JMX>> registration.
+
+The `link:../cheatsheet/DropwizardMetricsOptions.html#configPath[vertx.metrics.options.configPath]`
+option allows to reconfigure the metrics from a property file.
+
 == Metrics service
 
 == Naming
@@ -466,6 +484,7 @@ Please see the http://docs.oracle.com/javase/8/docs/technotes/guides/management/
 
 *If running Vert.x on a public server please be careful about exposing remote JMX access*
 
+[[dropwizard-registry]]
 == Accessing Dropwizard Registry
 
 When configuring the metrics service, an optional registry name can be specified for registering the underlying
