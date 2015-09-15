@@ -73,7 +73,13 @@ option allows to reconfigure the metrics from a property file.
 
 == Metrics service
 
-== Naming
+While Vert.x core defines an SPI for reporting metrics (implemented for instance in this project), it does not define
+an API for retrieving metrics (because some metrics collectors just do reporting and nothing more).
+
+The `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
+metrics data snapshots.
+
+=== Naming
 
 Each measured component listed below (except for Vertx) will have a base name associated with it. Each metric
 can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + `metricName` from Vertx:
@@ -95,7 +101,17 @@ metrics.getJsonObject("handlers");
 
 See more examples below on how to retrieve/use metrics for a specific component.
 
-== Retrieving metrics
+Metrics names can also be listed:
+
+[source,java]
+----
+Set<String> metricsNames = metricsService.metricsNames();
+for (String metricsName : metricsNames) {
+  System.out.println("Known metrics name " + metricsName);
+}
+----
+
+=== Retrieving metrics
 
 Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
 `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
@@ -116,12 +132,21 @@ without having to know the details of the naming scheme of every metric (somethi
 
 Since `link:../../apidocs/io/vertx/core/http/HttpServer.html[HttpServer]` implements `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
+
 [source,java]
 ----
 MetricsService metricsService = MetricsService.create(vertx);
 HttpServer server = vertx.createHttpServer();
 // set up server
 JsonObject metrics = metricsService.getMetricsSnapshot(server);
+----
+
+Metrics can also be retrieved using a base name:
+
+[source,java]
+----
+MetricsService metricsService = MetricsService.create(vertx);
+JsonObject metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message");
 ----
 
 == Data

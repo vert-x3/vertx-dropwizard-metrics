@@ -28,6 +28,7 @@ import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -88,16 +89,28 @@ public class MetricsExamples {
     metrics.getJsonObject("handlers");
   }
 
+  public void naming3(Vertx vertx, MetricsService metricsService) {
+    Set<String> metricsNames = metricsService.metricsNames();
+    for (String metricsName : metricsNames) {
+      System.out.println("Known metrics name " + metricsName);
+    }
+  }
+
   public void example1(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
     System.out.println(metrics);
   }
 
-  public void example3(Vertx vertx) {
+  public void example2(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
     HttpServer server = vertx.createHttpServer();
     // set up server
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
+  }
+
+  public void example3(Vertx vertx) {
+    MetricsService metricsService = MetricsService.create(vertx);
+    JsonObject metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message");
   }
 }
