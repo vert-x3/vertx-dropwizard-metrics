@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Helper {
 
-  static JsonObject convertMetric(Metric metric, TimeUnit rateUnit, TimeUnit durationUnit) {
+  public static JsonObject convertMetric(Metric metric, TimeUnit rateUnit, TimeUnit durationUnit) {
     if (metric instanceof ThroughputMeter) {
       return toJson((ThroughputMeter) metric, rateUnit);
     } else if (metric instanceof Timer) {
@@ -38,12 +38,12 @@ public class Helper {
   }
 
   private static JsonObject toJson(Gauge gauge) {
-    return new JsonObject().put("value", gauge.getValue());
+    return new JsonObject().put("type", "gauge").put("value", gauge.getValue());
   }
 
   private static JsonObject toJson(ThroughputMeter throughput, TimeUnit rateUnit) {
     JsonObject json = new JsonObject();
-
+    json.put("type", "meter");
     json.put("oneSecondRate", throughput.getValue());
 
     // Meter
@@ -53,12 +53,13 @@ public class Helper {
   }
 
   private static JsonObject toJson(Counter counter) {
-    return new JsonObject().put("count", counter.getCount());
+    return new JsonObject().put("type", "counter").put("count", counter.getCount());
   }
 
   private static JsonObject toJson(Histogram histogram) {
     Snapshot snapshot = histogram.getSnapshot();
     JsonObject json = new JsonObject();
+    json.put("type", "histogram");
     json.put("count", histogram.getCount());
 
     // Snapshot
@@ -69,6 +70,7 @@ public class Helper {
 
   private static  JsonObject toJson(Meter meter, TimeUnit rateUnit) {
     JsonObject json = new JsonObject();
+    json.put("type", "meter");
 
     // Meter
     populateMetered(json, meter, rateUnit);
@@ -76,9 +78,11 @@ public class Helper {
     return json;
   }
 
-  private static  JsonObject toJson(Timer timer, TimeUnit rateUnit, TimeUnit durationUnit) {
+  private static JsonObject toJson(Timer timer, TimeUnit rateUnit, TimeUnit durationUnit) {
     Snapshot snapshot = timer.getSnapshot();
     JsonObject json = new JsonObject();
+
+    json.put("type", "timer");
 
     // Meter
     populateMetered(json, timer, rateUnit);

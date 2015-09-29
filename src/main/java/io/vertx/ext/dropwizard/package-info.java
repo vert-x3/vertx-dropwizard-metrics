@@ -145,6 +145,7 @@
  * [source,javascript]
  * ----
  * {
+ *   "type"  : "gauge",
  *   "value" : value // any json value
  * }
  * ----
@@ -155,6 +156,7 @@
  * [source,$lang]
  * ----
  * {
+ *   "type"  : "counter",
  *   "count" : 1 // number
  * }
  * ----
@@ -165,6 +167,7 @@
  * [source,javascript]
  * ----
  * {
+ *   "type"   : "histogram",
  *   "count"  : 1 // long
  *   "min"    : 1 // long
  *   "max"    : 1 // long
@@ -185,6 +188,7 @@
  * [source,$lang]
  * ----
  * {
+ *   "type"              : "meter",
  *   "count"             : 1 // long
  *   "meanRate"          : 1.0 // double
  *   "oneMinuteRate"     : 1.0 // double
@@ -202,6 +206,7 @@
  * [source,$lang]
  * ----
  * {
+ *   "type"              : "meter",
  *   "count"             : 40 // long
  *   "meanRate"          : 2.0 // double
  *   "oneSecondRate"     : 3 // long - number of occurence for the last second
@@ -220,6 +225,8 @@
  * [source,$lang]
  * ----
  * {
+ *   "type": "timer",
+ *
  *   // histogram data
  *   "count"  : 1 // long
  *   "min"    : 1 // long
@@ -250,6 +257,8 @@
  * [source,$lang]
  * ----
  * {
+ *   "type": "timer",
+ *
  *   // histogram data
  *   "count"      : 1 // long
  *   "min"        : 1 // long

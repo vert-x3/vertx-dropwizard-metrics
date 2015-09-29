@@ -16,6 +16,13 @@
 
 package io.vertx.ext.dropwizard;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.SlidingTimeWindowReservoir;
+import com.codahale.metrics.Timer;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.VertxOptions;
@@ -40,6 +47,7 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
+import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,6 +68,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.vertx.test.core.TestUtils.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -1024,5 +1033,18 @@ public class MetricsTest extends MetricsTestBase {
     if (max != null) {
       assertEquals(name + " (max)", max, metric.getLong("max"));
     }
+  }
+
+  @Test
+  public void testJsonMetricsTypes() {
+    assertMetricType("counter", new Counter());
+    assertMetricType("histogram", new Histogram(new SlidingTimeWindowReservoir(10, TimeUnit.SECONDS)));
+    assertMetricType("gauge", (Gauge<String>) () -> "whatever");
+    assertMetricType("meter", new Meter());
+    assertMetricType("timer", new Timer());
+  }
+
+  private void assertMetricType(String expectedType, Metric metric) {
+    assertEquals(expectedType, Helper.convertMetric(metric, TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS).getString("type"));
   }
 }

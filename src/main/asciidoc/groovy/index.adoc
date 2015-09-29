@@ -33,7 +33,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 compile {maven-groupId}:{maven-artifactId}:{maven-version}
 ----
 
-Then when you create vertx enable metrics using the `link:../cheatsheet/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
+Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
 
 [source,groovy]
 ----
@@ -69,14 +69,14 @@ properties beginning with _vertx.metrics.options._ are transmitted to the metric
 The _vertx.metrics.options.enabled_ is a standard Vert.x Core option for enabling the metrics implementations, this
 options must be set to `true`.
 
-The `link:../cheatsheet/DropwizardMetricsOptions.html#registryName[vertx.metrics.options.registryName]`
+The `link:../dataobjects.html#DropwizardMetricsOptions#setRegistryName(java.lang.String)[vertx.metrics.options.registryName]`
 configures the <<dropwizard-registry,Dropwizard Registry>> to use.
 
-The `link:../cheatsheet/DropwizardMetricsOptions.html#jmxEnabled[vertx.metrics.options.jmxEnabled]` and
-`link:../cheatsheet/DropwizardMetricsOptions.html#jmxDomain[vertx.metrics.options.jmxDomain]`
+The `link:../dataobjects.html#DropwizardMetricsOptions#setJmxEnabled(boolean)[vertx.metrics.options.jmxEnabled]` and
+`link:../dataobjects.html#DropwizardMetricsOptions#setJmxDomain(java.lang.String)[vertx.metrics.options.jmxDomain]`
 configures the <<jmx,JMX>> registration.
 
-The `link:../cheatsheet/DropwizardMetricsOptions.html#configPath[vertx.metrics.options.configPath]`
+The `link:../dataobjects.html#DropwizardMetricsOptions#setConfigPath(java.lang.String)[vertx.metrics.options.configPath]`
 option allows to reconfigure the metrics from a property file.
 
 == Metrics service
@@ -349,7 +349,7 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../cheatsheet/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
+The monitored handlers can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
 [source,groovy]
