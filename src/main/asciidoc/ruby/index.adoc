@@ -20,9 +20,9 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>{maven-groupId}</groupId>
-  <artifactId>{maven-artifactId}</artifactId>
-  <version>{maven-version}</version>
+  <groupId>io.vertx</groupId>
+  <artifactId>vertx-dropwizard-metrics</artifactId>
+  <version>3.1.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -30,7 +30,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile {maven-groupId}:{maven-artifactId}:{maven-version}
+compile io.vertx:vertx-dropwizard-metrics:3.1.0-SNAPSHOT
 ----
 
 Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
@@ -177,6 +177,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [source,javascript]
 ----
 {
+  "type"  : "gauge",
   "value" : value // any json value
 }
 ----
@@ -187,6 +188,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [source,ruby]
 ----
 {
+  "type"  : "counter",
   "count" : 1 // number
 }
 ----
@@ -197,6 +199,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [source,javascript]
 ----
 {
+  "type"   : "histogram",
   "count"  : 1 // long
   "min"    : 1 // long
   "max"    : 1 // long
@@ -217,6 +220,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [source,ruby]
 ----
 {
+  "type"              : "meter",
   "count"             : 1 // long
   "meanRate"          : 1.0 // double
   "oneMinuteRate"     : 1.0 // double
@@ -234,6 +238,7 @@ Extends a <<meter>> to provide an instant throughput.
 [source,ruby]
 ----
 {
+  "type"              : "meter",
   "count"             : 40 // long
   "meanRate"          : 2.0 // double
   "oneSecondRate"     : 3 // long - number of occurence for the last second
@@ -252,6 +257,8 @@ A timer is basically a combination of Histogram + Meter.
 [source,ruby]
 ----
 {
+  "type": "timer",
+
   // histogram data
   "count"  : 1 // long
   "min"    : 1 // long
@@ -282,6 +289,8 @@ Extends a <<timer>> to provide an instant throughput metric.
 [source,ruby]
 ----
 {
+  "type": "timer",
+
   // histogram data
   "count"      : 1 // long
   "min"        : 1 // long
