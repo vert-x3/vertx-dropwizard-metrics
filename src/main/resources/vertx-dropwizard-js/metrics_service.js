@@ -44,7 +44,7 @@ var MetricsService = function(j_val) {
     var __args = arguments;
     if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
       return j_metricsService["getBaseName(io.vertx.core.metrics.Measured)"](measured._jdel);
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -58,7 +58,7 @@ var MetricsService = function(j_val) {
     var __args = arguments;
     if (__args.length === 0) {
       return utils.convReturnSet(j_metricsService["metricsNames()"]());
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   /**
@@ -77,7 +77,7 @@ var MetricsService = function(j_val) {
       return utils.convReturnJson(j_metricsService["getMetricsSnapshot(io.vertx.core.metrics.Measured)"](__args[0]._jdel));
     }  else if (__args.length === 1 && typeof __args[0] === 'string') {
       return utils.convReturnJson(j_metricsService["getMetricsSnapshot(java.lang.String)"](__args[0]));
-    } else utils.invalidArgs();
+    } else throw new TypeError('function invoked with invalid arguments');
   };
 
   // A reference to the underlying Java delegate
@@ -97,7 +97,7 @@ MetricsService.create = function(vertx) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
     return utils.convReturnVertxGen(JMetricsService["create(io.vertx.core.Vertx)"](vertx._jdel), MetricsService);
-  } else utils.invalidArgs();
+  } else throw new TypeError('function invoked with invalid arguments');
 };
 
 // We export the Constructor function
