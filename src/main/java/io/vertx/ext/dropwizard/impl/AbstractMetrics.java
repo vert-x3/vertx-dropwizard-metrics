@@ -100,10 +100,6 @@ public abstract class AbstractMetrics implements Metrics {
     return MetricRegistry.name(baseName, names);
   }
 
-  protected static String instanceName(String baseName, Object instance) {
-    return MetricRegistry.name(baseName, "@" + Integer.toHexString(instance.hashCode()));
-  }
-
   @Override
   public boolean isEnabled() {
     return true;
