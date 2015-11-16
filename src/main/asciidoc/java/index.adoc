@@ -492,12 +492,9 @@ so you can retrieve this registry and use according to your needs.
 [source,java]
 ----
 VertxOptions options = new VertxOptions().setMetricsOptions(
-  new MetricsServiceOptions().setEnabled(true).setRegistryName("the_name")
+    new DropwizardMetricsOptions().setEnabled(true).setRegistryName("my-registry")
 );
-Vertx vertx = Vertx.vertxt(options);
-
+Vertx vertx = Vertx.vertx(options);
 // Get the registry
-MetricRegistry registry = SharedMetricRegistries.getOrCreate("the_name");
-
-// Do whatever you need with the registry
+MetricRegistry registry = SharedMetricRegistries.getOrCreate("my-registry");}
 ----

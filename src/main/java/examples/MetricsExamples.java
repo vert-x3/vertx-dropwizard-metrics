@@ -16,18 +16,19 @@
 
 package examples;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.docgen.Source;
-import io.vertx.ext.dropwizard.MatchType;
-import io.vertx.ext.dropwizard.Match;
-import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.Match;
+import io.vertx.ext.dropwizard.MatchType;
+import io.vertx.ext.dropwizard.MetricsService;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -112,5 +113,15 @@ public class MetricsExamples {
   public void example3(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
     JsonObject metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message");
+  }
+
+  public void getRegistry() {
+    VertxOptions options = new VertxOptions().setMetricsOptions(
+        new DropwizardMetricsOptions().setEnabled(true).setRegistryName("my-registry")
+    );
+    Vertx vertx = Vertx.vertx(options);
+    // Get the registry
+    MetricRegistry registry = SharedMetricRegistries.getOrCreate("my-registry");
+    // Do whatever you need with the registry
   }
 }
