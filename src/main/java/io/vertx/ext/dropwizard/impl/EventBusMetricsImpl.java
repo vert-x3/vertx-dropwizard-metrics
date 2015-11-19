@@ -96,7 +96,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   }
 
   @Override
-  public HandlerMetric handlerRegistered(String address, boolean replyHandler) {
+  public HandlerMetric handlerRegistered(String address, String repliedAddress) {
     handlerCount.inc();
     if (handlerMatcher.match(address)) {
       return new HandlerMetric(address);

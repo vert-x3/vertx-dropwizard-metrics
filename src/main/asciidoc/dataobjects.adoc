@@ -14,11 +14,11 @@
 ^|Name | Type ^| Description
 |[[type]]`type`|`link:enums.html#MatchType[MatchType]`|
 +++
-Set the type of matching to apply.
+@return the matcher type
 +++
 |[[value]]`value`|`String`|
 +++
-Set the matched value.
+@return the matched value
 +++
 |===
 
@@ -36,33 +36,32 @@ Set the matched value.
 ^|Name | Type ^| Description
 |[[configPath]]`configPath`|`String`|
 +++
-Set the path for a config file that contains options in JSON format, to be used to create a new options object.
- The file will be looked for on the file system first and then on the classpath if it's not found.
+@return the path for a config file to create an Options object from.
 +++
 |[[enabled]]`enabled`|`Boolean`|-
 |[[jmxDomain]]`jmxDomain`|`String`|
 +++
-Set the JMX domain to use when JMX metrics are enabled.
+Get the JMX domain to use when JMX metrics are enabled.
 +++
 |[[jmxEnabled]]`jmxEnabled`|`Boolean`|
 +++
-Set whether JMX will be enabled on the Vert.x instance.
+Will JMX be enabled on the Vert.x instance?
 +++
 |[[monitoredEventBusHandlers]]`monitoredEventBusHandlers`|`Array of link:dataobjects.html#Match[Match]`|
 +++
-Add a monitored event bus handler.
+@return the list of monitored event bus handlers
 +++
 |[[monitoredHttpClientUris]]`monitoredHttpClientUris`|`Array of link:dataobjects.html#Match[Match]`|
 +++
-Add an monitored http client uri.
+@return the list of monitored http client uris
 +++
 |[[monitoredHttpServerUris]]`monitoredHttpServerUris`|`Array of link:dataobjects.html#Match[Match]`|
 +++
-Add an monitored http server uri.
+@return the list of monitored http server uris
 +++
 |[[registryName]]`registryName`|`String`|
 +++
-Set the name used for registering the metrics in the Dropwizard shared registry.
+An optional name used for registering the metrics in the Dropwizard shared registry.
 +++
 |===
 
