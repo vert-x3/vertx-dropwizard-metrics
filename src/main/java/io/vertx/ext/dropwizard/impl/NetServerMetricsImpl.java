@@ -52,7 +52,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   }
 
   @Override
-  public Timer.Context connected(SocketAddress remoteAddress) {
+  public Timer.Context connected(SocketAddress remoteAddress, String remoteName) {
     // Connection metrics
     openConnections.inc();
 
