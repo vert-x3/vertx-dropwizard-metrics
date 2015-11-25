@@ -119,6 +119,7 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-service-factory</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -132,6 +133,7 @@
           <version>1.4.0</version>
           <configuration>
             <executable>java</executable>
+            <classpathScope>test</classpathScope>
             <arguments>
               <argument>-classpath</argument>
               <classpath/>
