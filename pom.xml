@@ -53,6 +53,11 @@
       <artifactId>vertx-core</artifactId>
     </dependency>
     <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-shell</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
       <version>3.1.2</version>
@@ -111,6 +116,36 @@
       <scope>test</scope>
       <version>4.11</version>
     </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-factory</artifactId>
+    </dependency>
   </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Execute with mvn java:exec -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.4.0</version>
+          <configuration>
+            <executable>java</executable>
+            <arguments>
+              <argument>-classpath</argument>
+              <classpath/>
+              <argument>-Dvertx.metrics.options.enabled=true</argument>
+              <argument>io.vertx.core.Launcher</argument>
+              <argument>run</argument>
+              <argument>-conf</argument>
+              <argument>{"telnetOptions":{"port":5000}}</argument>
+              <argument>service:io.vertx.ext.shell</argument>
+            </arguments>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 </project>

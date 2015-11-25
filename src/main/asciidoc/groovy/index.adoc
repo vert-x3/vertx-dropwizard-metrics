@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]`,
-`link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/net/NetServer.html[NetServer]`, and even `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the `link:../../groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:../../groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]`,
+`link:../../groovydoc/io/vertx/groovy/core/net/NetServer.html[NetServer]`, and even `link:../../groovydoc/io/vertx/groovy/core/Vertx.html[Vertx]` itself.
 
 Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -84,7 +84,7 @@ option allows to reconfigure the metrics from a property file.
 While Vert.x core defines an SPI for reporting metrics (implemented for instance in this project), it does not define
 an API for retrieving metrics (because some metrics collectors just do reporting and nothing more).
 
-The `link:groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
+The `link:../../groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
 metrics data snapshots.
 
 === Naming
@@ -124,8 +124,8 @@ metricsNames.each { metricsName ->
 
 === Retrieving metrics
 
-Once enabled, the `link:groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
+Once enabled, the `link:../../groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+`link:../../groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
 represented by a `JsonObject`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
 [source,groovy]
@@ -143,7 +143,7 @@ consult the implementation documentation like https://github.com/vert-x3/vertx-m
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]` implements `link:../../vertx-core/groovy/groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
+Since `link:../../groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]` implements `link:../../groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
 
 [source,groovy]
