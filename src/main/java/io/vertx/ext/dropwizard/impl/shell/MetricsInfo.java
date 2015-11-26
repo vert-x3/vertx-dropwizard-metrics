@@ -38,7 +38,7 @@ import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.MetricsService;
-import io.vertx.ext.shell.command.Command;
+import io.vertx.ext.shell.command.AnnotatedCommand;
 import io.vertx.ext.shell.command.CommandProcess;
 
 /**
@@ -46,7 +46,7 @@ import io.vertx.ext.shell.command.CommandProcess;
  */
 @Name("metrics-info")
 @Summary("Show metrics info for the current Vert.x instance in Json format")
-public class MetricsInfo implements Command {
+public class MetricsInfo extends AnnotatedCommand {
 
   private String name;
 

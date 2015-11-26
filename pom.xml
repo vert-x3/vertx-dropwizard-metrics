@@ -135,6 +135,7 @@
             <executable>java</executable>
             <classpathScope>test</classpathScope>
             <arguments>
+              <!--<argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</argument>-->
               <argument>-classpath</argument>
               <classpath/>
               <argument>-Dvertx.metrics.options.enabled=true</argument>

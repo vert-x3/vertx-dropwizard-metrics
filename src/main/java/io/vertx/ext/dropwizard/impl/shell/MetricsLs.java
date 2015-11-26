@@ -35,7 +35,7 @@ package io.vertx.ext.dropwizard.impl.shell;
 import io.vertx.core.cli.annotations.Name;
 import io.vertx.core.cli.annotations.Summary;
 import io.vertx.ext.dropwizard.MetricsService;
-import io.vertx.ext.shell.command.Command;
+import io.vertx.ext.shell.command.AnnotatedCommand;
 import io.vertx.ext.shell.command.CommandProcess;
 
 /**
@@ -43,7 +43,7 @@ import io.vertx.ext.shell.command.CommandProcess;
  */
 @Name("metrics-ls")
 @Summary("List the known metrics for the current Vert.x instance")
-public class MetricsLs implements Command {
+public class MetricsLs extends AnnotatedCommand {
 
   @Override
   public void process(CommandProcess process) {
