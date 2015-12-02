@@ -563,8 +563,8 @@ public class MetricsTest extends MetricsTestBase {
     assertMinMax(metrics.getJsonObject("bytes-written"), (long) clientMin.length(), (long) clientMax.length());
 
     // Test server (bytes-read)
-    assertCount(metrics.getJsonObject("127.0.0.1:1236.bytes-read"), 2L);
-    assertMinMax(metrics.getJsonObject("127.0.0.1:1236.bytes-read"), (long) clientMin.length(), (long) clientMax.length());
+    assertCount(metrics.getJsonObject("localhost:1236.bytes-read"), 2L);
+    assertMinMax(metrics.getJsonObject("localhost:1236.bytes-read"), (long) clientMin.length(), (long) clientMax.length());
 
     CountDownLatch latch = new CountDownLatch(1);
     datagramSocket.close(ar -> {
