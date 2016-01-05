@@ -348,7 +348,7 @@ public class MetricsTest extends MetricsTestBase {
 
     metrics = metricsService.getMetricsSnapshot(client);
     assertNotNull(metrics);
-    assertTrue(metrics.isEmpty());
+    assertEquals(0, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
   }
 
   @Test
@@ -991,6 +991,34 @@ public class MetricsTest extends MetricsTestBase {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
       assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
     }
+  }
+
+  @Test
+  public void testMultiHttpClients() throws Exception {
+    int size = 3;
+    CountDownLatch started = new CountDownLatch(1);
+    vertx.createHttpServer().requestHandler(req -> {
+      req.response().end("done");
+    }).listen(8080, "localhost", ar -> {
+      assertTrue(ar.succeeded());
+      started.countDown();
+    });
+    CountDownLatch requested = new CountDownLatch(size);
+    awaitLatch(started);
+    HttpClient[] clients = new HttpClient[size];
+    for (int i = 0;i < size;i++) {
+      clients[i] = vertx.createHttpClient();
+      clients[i].getNow(8080, "localhost", "/", resp -> {
+        assertEquals(200, resp.statusCode());
+        resp.endHandler(v -> {
+          requested.countDown();
+        });
+      });
+    }
+    awaitLatch(requested);
+    JsonObject metrics = metricsService.getMetricsSnapshot(clients[0]);
+    assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
+    assertEquals(15, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
   }
 
   private void assertCount(JsonObject metric, long expected) {

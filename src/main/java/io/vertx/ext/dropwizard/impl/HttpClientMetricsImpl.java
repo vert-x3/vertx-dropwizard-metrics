@@ -16,7 +16,6 @@
 
 package io.vertx.ext.dropwizard.impl;
 
-import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpClientRequest;
@@ -31,41 +30,71 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends HttpMetricsImpl implements HttpClientMetrics<RequestMetric, WebSocketMetric, Timer.Context> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<RequestMetric, WebSocketMetric, Timer.Context> {
 
-  HttpClientMetricsImpl(AbstractMetrics metrics, String baseName, HttpClientOptions options, List<Match> monitoredUris) {
-    super(metrics, baseName, null, monitoredUris);
-    // max pool size gauge
-    int maxPoolSize = options.getMaxPoolSize();
-    gauge(() -> maxPoolSize, "connections", "max-pool-size");
+  private final HttpClientReporter clientReporter;
+  private final Matcher uriMatcher;
+  private final int maxPoolSize;
 
-    // connection pool ratio
-    RatioGauge gauge = new RatioGauge() {
-      @Override
-      protected Ratio getRatio() {
-        return Ratio.of(connections(), maxPoolSize);
-      }
-    };
-    gauge(gauge, "connections", "pool-ratio");
+  HttpClientMetricsImpl(HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris) {
+    super(clientReporter.registry, clientReporter.baseName);
+    this.clientReporter = clientReporter;
+    this.uriMatcher = new Matcher(monitoredUris);
+    clientReporter.incMaxPoolSize(maxPoolSize = options.getMaxPoolSize());
   }
 
   @Override
   public RequestMetric requestBegin(Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    return createRequestMetric(request.method(), request.uri());
+    return clientReporter.createRequestMetric(request.method(), request.uri());
   }
 
   @Override
   public void responseEnd(RequestMetric metric, HttpClientResponse response) {
-    end(metric, response.statusCode());
+    clientReporter.end(metric, response.statusCode(), metric.uri != null && uriMatcher.match(metric.uri));
   }
 
   @Override
   public WebSocketMetric connected(Timer.Context socketMetric, WebSocket webSocket) {
-    return createWebSocketMetric();
+    return clientReporter.createWebSocketMetric();
   }
 
   @Override
   public void disconnected(WebSocketMetric webSocketMetric) {
-    disconnect(webSocketMetric);
+    clientReporter.disconnect(webSocketMetric);
+  }
+
+  @Override
+  public Timer.Context connected(SocketAddress remoteAddress, String remoteName) {
+    return clientReporter.connected(remoteAddress, remoteName);
+  }
+
+  @Override
+  public void disconnected(Timer.Context socketMetric, SocketAddress remoteAddress) {
+    clientReporter.disconnected(socketMetric, remoteAddress);
+  }
+
+  @Override
+  public void bytesRead(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
+    clientReporter.bytesRead(socketMetric, remoteAddress, numberOfBytes);
+  }
+
+  @Override
+  public void bytesWritten(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
+    clientReporter.bytesWritten(socketMetric, remoteAddress, numberOfBytes);
+  }
+
+  @Override
+  public void exceptionOccurred(Timer.Context socketMetric, SocketAddress remoteAddress, Throwable t) {
+    clientReporter.exceptionOccurred(socketMetric, remoteAddress, t);
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return clientReporter.isEnabled();
+  }
+
+  @Override
+  public void close() {
+    clientReporter.decMaxPoolSize(maxPoolSize);
   }
 }

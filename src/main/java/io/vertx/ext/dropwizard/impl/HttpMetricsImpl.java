@@ -17,14 +17,13 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -36,13 +35,11 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   private ThroughputMeter[] responses;
   private final Counter openWebSockets;
 
-  private Matcher uriMatcher;
   private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
 
-  public HttpMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAdress, List<Match> monitoredUris) {
-    super(metrics, baseName, localAdress);
+  public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAdress) {
+    super(registry, baseName, localAdress);
     openWebSockets = counter("open-websockets");
-    uriMatcher = new Matcher(monitoredUris);
     requests = throughputTimer("requests");
     responses = new ThroughputMeter[]{
         throughputMeter("responses-1xx"),
@@ -78,7 +75,7 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
     return null;
   }
 
-  protected void end(RequestMetric metric, int statusCode) {
+  protected void end(RequestMetric metric, int statusCode, boolean monitorUri) {
     if (closed) {
       return;
     }
@@ -97,10 +94,10 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
     // Update specific method / uri request metrics
     if (metric.method != null) {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
-      if (metric.uri != null && uriMatcher.match(metric.uri)) {
+      if (metric.uri != null && monitorUri) {
         throughputTimer(metric.method.toString().toLowerCase() + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
       }
-    } else if (metric.uri != null && uriMatcher.match(metric.uri)) {
+    } else if (metric.uri != null && monitorUri) {
       throughputTimer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
     }
   }

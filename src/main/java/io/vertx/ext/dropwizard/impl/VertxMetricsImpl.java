@@ -54,6 +54,8 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final Counter verticles;
   private Handler<Void> doneHandler;
   private final boolean shutdown;
+  private HttpClientReporter httpClientReporter;
+
 
   VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions) {
     super(registry, BASE_NAME);
@@ -110,22 +112,25 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public HttpServerMetrics<?, ?, ?> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
-    return new HttpServerMetricsImpl(this, nameOf("http.servers"), this.options.getMonitoredHttpServerUris(), localAddress);
+    return new HttpServerMetricsImpl(registry, nameOf("http.servers"), this.options.getMonitoredHttpServerUris(), localAddress);
   }
 
   @Override
-  public HttpClientMetrics<?, ?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
-    return new HttpClientMetricsImpl(this, nameOf("http.clients"),options, this.options.getMonitoredHttpClientUris());
+  public synchronized HttpClientMetrics<?, ?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
+    if (httpClientReporter == null) {
+      httpClientReporter = new HttpClientReporter(registry, nameOf("http.clients"), null);
+    }
+    return new HttpClientMetricsImpl(httpClientReporter, options, this.options.getMonitoredHttpClientUris());
   }
 
   @Override
   public TCPMetrics<?> createMetrics(NetServer server, SocketAddress localAddress, NetServerOptions options) {
-    return new NetServerMetricsImpl(this, nameOf("net.servers"), localAddress);
+    return new NetServerMetricsImpl(registry, nameOf("net.servers"), localAddress);
   }
 
   @Override
   public TCPMetrics<?> createMetrics(NetClient client, NetClientOptions options) {
-    return new NetServerMetricsImpl(this, nameOf("net.clients"), null);
+    return new NetServerMetricsImpl(registry, nameOf("net.clients"), null);
   }
 
   @Override
@@ -139,6 +144,11 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
       RegistryHelper.shutdown(registry);
       if (options.getRegistryName() != null) {
         SharedMetricRegistries.remove(options.getRegistryName());
+      }
+    }
+    synchronized (this) {
+      if (httpClientReporter != null) {
+        httpClientReporter.close();
       }
     }
     if (doneHandler != null) {

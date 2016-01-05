@@ -35,8 +35,8 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   private Counter exceptions;
   protected volatile boolean closed;
 
-  NetServerMetricsImpl(AbstractMetrics metrics, String baseName, SocketAddress localAddress) {
-    super(metrics.registry(), localAddress != null ? (MetricRegistry.name(baseName, addressName(localAddress))) : (baseName));
+  NetServerMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
+    super(registry, localAddress != null ? (MetricRegistry.name(baseName, addressName(localAddress))) : (baseName));
 
     this.openConnections = counter("open-netsockets");
     this.connections = timer("connections");
