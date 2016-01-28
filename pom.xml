@@ -147,8 +147,33 @@
             </arguments>
           </configuration>
         </plugin>
+
       </plugins>
     </pluginManagement>
+    <plugins>
+      <plugin>
+        <!-- customize the maven clean plugin configuration to not erase src/main/asciidoc/images -->
+        <artifactId>maven-clean-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-clean</id>
+            <configuration>
+              <filesets>
+                <fileset>
+                  <directory>src/main/asciidoc</directory>
+                  <excludes>
+                    <exclude>images/**</exclude>
+                  </excludes>
+                </fileset>
+                <fileset>
+                  <directory>src/main/generated</directory>
+                </fileset>
+              </filesets>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
 
 </project>

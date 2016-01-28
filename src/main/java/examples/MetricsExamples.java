@@ -124,4 +124,12 @@ public class MetricsExamples {
     MetricRegistry registry = SharedMetricRegistries.getOrCreate("my-registry");
     // Do whatever you need with the registry
   }
+
+  public void example4() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new DropwizardMetricsOptions()
+            .setEnabled(true)
+            .setJmxEnabled(true)
+            .setJmxDomain("vertx-metrics")));
+  }
 }

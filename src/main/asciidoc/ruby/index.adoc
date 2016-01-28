@@ -544,3 +544,71 @@ registry = Java::ComCodahaleMetrics::SharedMetricRegistries.get_or_create("my-re
 # Do whatever you need with the registry
 }
 ----
+
+== Using Jolokia and Hawtio
+
+https://jolokia.org/[Jolokia] is a JMX-HTTP bridge giving an alternative to JSR-160 connectors. It is an agent based
+approach with support for many platforms. In addition to basic JMX operations it enhances JMX remoting with features like bulk requests.
+
+http://hawt.io/[Hawtio] is a modular web console consuming the data exposed by Jolokia. It lets you create dashboards
+and retrieve data from JMX such as memory, cpu, or any vert.x metrics.
+
+This section explains how to configure your vert.x application to retrieve the metrics in Hawtio.
+
+First, you need to configure your vert.x instance with the following options:
+
+[source,ruby]
+----
+require 'vertx/vertx'
+vertx = Vertx::Vertx.vertx({
+  'metricsOptions' => {
+    'enabled' => true,
+    'jmxEnabled' => true,
+    'jmxDomain' => "vertx-metrics"
+  }
+})
+ ()}}
+----
+
+You can change the domain to whatever you want. The same configuration can be used for clustered Vert.x instances.
+This configuration instructs vertx-dropwizard-metrics to expose the metrics in the local JMX MBean server, so
+Jolokia can retrieve them.
+
+Then you need, to _plug_ jolokia to expose the data. There are several ways to _plug_ jolokia. See
+https://jolokia.org/reference/html/architecture.html[for further details]. Here, we will explain how to use the
+Jolokia agent with the default configuration. Refer to the https://jolokia.org/reference/html/[the jolokia
+documentation] to configure it.
+
+The agent can either be attached when you start the application or attached on a running JVM (you would need
+special permission to access the process). In the first case, launch you application using:
+
+[source]
+----
+java -javaagent:/.../agents/jolokia-jvm.jar=port=7777,host=localhost -jar ...
+----
+
+The `-javaagent` specified the path of the jolokia agent. You can configure the port and host from the command
+line. Here it registers the REST endpoint on `http://localhost:7777`.
+
+You can also attach the agent on a running JVM with:
+
+[source]
+----
+java -jar jolokia-jvm.jar start PID
+----
+
+Replace `PID` with the process id of the JVM.
+
+Once Jolokia is configured and launched, you can consume the data from Hawtio.
+
+On Hawtio, enter the connection details as follow:
+
+image::../../images/hawtio-connect.png[]
+
+
+Then, you can go to the _JMX_ tab and you should find a _directory_ with the name you entered as JMX domain
+in the Vert.x configuration:
+
+image::../../images/hawtio-jmx.png[]
+
+From this, you can configure your dashboard and retrieve any metric exposed by vert.x.
