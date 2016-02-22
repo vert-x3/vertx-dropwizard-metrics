@@ -23,7 +23,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>19</version>
+    <version>20</version>
   </parent>
 
   <artifactId>vertx-dropwizard-metrics</artifactId>
@@ -114,7 +114,7 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
-      <version>4.11</version>
+      <version>4.12</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -150,30 +150,6 @@
 
       </plugins>
     </pluginManagement>
-    <plugins>
-      <plugin>
-        <!-- customize the maven clean plugin configuration to not erase src/main/asciidoc/images -->
-        <artifactId>maven-clean-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-clean</id>
-            <configuration>
-              <filesets>
-                <fileset>
-                  <directory>src/main/asciidoc</directory>
-                  <excludes>
-                    <exclude>images/**</exclude>
-                  </excludes>
-                </fileset>
-                <fileset>
-                  <directory>src/main/generated</directory>
-                </fileset>
-              </filesets>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
   </build>
 
 </project>
