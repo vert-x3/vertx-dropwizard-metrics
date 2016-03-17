@@ -10,6 +10,7 @@ import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.ThroughputMeter;
+import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -20,9 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class Helper {
 
   public static JsonObject convertMetric(Metric metric, TimeUnit rateUnit, TimeUnit durationUnit) {
-    if (metric instanceof ThroughputMeter) {
-      return toJson((ThroughputMeter) metric, rateUnit);
-    } else if (metric instanceof Timer) {
+    if (metric instanceof Timer) {
       return toJson((Timer) metric, rateUnit, durationUnit);
     } else if (metric instanceof Gauge) {
       return toJson((Gauge) metric);
@@ -39,17 +38,6 @@ public class Helper {
 
   private static JsonObject toJson(Gauge gauge) {
     return new JsonObject().put("type", "gauge").put("value", gauge.getValue());
-  }
-
-  private static JsonObject toJson(ThroughputMeter throughput, TimeUnit rateUnit) {
-    JsonObject json = new JsonObject();
-    json.put("type", "meter");
-    json.put("oneSecondRate", throughput.getValue());
-
-    // Meter
-    populateMetered(json, throughput, rateUnit);
-
-    return json;
   }
 
   private static JsonObject toJson(Counter counter) {
@@ -72,6 +60,12 @@ public class Helper {
     JsonObject json = new JsonObject();
     json.put("type", "meter");
 
+    //
+    if (meter instanceof ThroughputMeter) {
+      ThroughputMeter throughput = (ThroughputMeter) meter;
+      json.put("oneSecondRate", throughput.getValue());
+    }
+
     // Meter
     populateMetered(json, meter, rateUnit);
 
@@ -83,6 +77,11 @@ public class Helper {
     JsonObject json = new JsonObject();
 
     json.put("type", "timer");
+
+    if (timer instanceof ThroughputTimer) {
+      ThroughputTimer throughput = (ThroughputTimer) timer;
+      json.put("oneSecondRate", throughput.getValue());
+    }
 
     // Meter
     populateMetered(json, timer, rateUnit);

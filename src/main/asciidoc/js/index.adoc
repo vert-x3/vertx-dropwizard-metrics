@@ -30,7 +30,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile io.vertx:vertx-dropwizard-metrics:3.3.0-SNAPSHOT
+compile 'io.vertx:vertx-dropwizard-metrics:3.3.0-SNAPSHOT'
 ----
 
 Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:

@@ -148,6 +148,8 @@ public class MetricsTest extends MetricsTestBase {
     // Verify http server
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
     assertCount(metrics.getJsonObject("requests"), (long) requests); // requests
+    assertNotNull(metrics.getJsonObject("requests").getValue("oneSecondRate"));
+
     assertMinMax(metrics.getJsonObject("bytes-written"), (long) serverMin.length(), (long) serverMax.length());
     assertMinMax(metrics.getJsonObject("bytes-read"), (long) clientMin.length(), (long) clientMax.length());
     assertCount(metrics.getJsonObject("exceptions"), 0L);
