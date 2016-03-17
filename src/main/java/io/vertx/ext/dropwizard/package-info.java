@@ -56,14 +56,26 @@
  * properties beginning with _vertx.metrics.options._ are transmitted to the metrics options.
  *
  * The _vertx.metrics.options.enabled_ is a standard Vert.x Core option for enabling the metrics implementations, this
- * options must be set to `true`.
+ * options must be set to `true`:
+ *
+ * ----
+ * java -jar your-fat-jar -Dvertx.metrics.options.enabled=true
+ * ----
  *
  * The {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setRegistryName(java.lang.String) vertx.metrics.options.registryName}
- * configures the <<dropwizard-registry,Dropwizard Registry>> to use.
+ * configures the <<dropwizard-registry,Dropwizard Registry>> to use:
+ *
+ * ----
+ * java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=my-registry
+ * ----
  *
  * The {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setJmxEnabled(boolean) vertx.metrics.options.jmxEnabled} and
  * {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setJmxDomain(java.lang.String) vertx.metrics.options.jmxDomain}
- * configures the <<jmx,JMX>> registration.
+ * configures the <<jmx,JMX>> registration:
+ *
+ * ----
+ * java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.jmxEnabled=true ...
+ * ----
  *
  * The {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setConfigPath(java.lang.String) vertx.metrics.options.configPath}
  * option allows to reconfigure the metrics from a property file.

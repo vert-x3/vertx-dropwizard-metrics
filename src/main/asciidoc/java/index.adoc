@@ -59,14 +59,26 @@ When running Vert.x from the command line interface, metrics can be activated vi
 properties beginning with _vertx.metrics.options._ are transmitted to the metrics options.
 
 The _vertx.metrics.options.enabled_ is a standard Vert.x Core option for enabling the metrics implementations, this
-options must be set to `true`.
+options must be set to `true`:
+
+----
+java -jar your-fat-jar -Dvertx.metrics.options.enabled=true
+----
 
 The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setRegistryName-java.lang.String-[vertx.metrics.options.registryName]`
-configures the <<dropwizard-registry,Dropwizard Registry>> to use.
+configures the <<dropwizard-registry,Dropwizard Registry>> to use:
+
+----
+java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=my-registry
+----
 
 The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setJmxEnabled-boolean-[vertx.metrics.options.jmxEnabled]` and
 `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setJmxDomain-java.lang.String-[vertx.metrics.options.jmxDomain]`
-configures the <<jmx,JMX>> registration.
+configures the <<jmx,JMX>> registration:
+
+----
+java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.jmxEnabled=true ...
+----
 
 The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setConfigPath-java.lang.String-[vertx.metrics.options.configPath]`
 option allows to reconfigure the metrics from a property file.
@@ -502,7 +514,8 @@ MetricRegistry registry = SharedMetricRegistries.getOrCreate("my-registry");}
 == Using Jolokia and Hawtio
 
 https://jolokia.org/[Jolokia] is a JMX-HTTP bridge giving an alternative to JSR-160 connectors. It is an agent based
-approach with support for many platforms. In addition to basic JMX operations it enhances JMX remoting with features like bulk requests.
+approach with support for many platforms. In addition to basic JMX operations it enhances JMX remoting with features
+like bulk requests.
 
 http://hawt.io/[Hawtio] is a modular web console consuming the data exposed by Jolokia. It lets you create dashboards
 and retrieve data from JMX such as memory, cpu, or any vert.x metrics.
@@ -517,15 +530,15 @@ Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
     new DropwizardMetricsOptions()
         .setEnabled(true)
         .setJmxEnabled(true)
-        .setJmxDomain("vertx-metrics"))); ()}}
+        .setJmxDomain("vertx-metrics")));
 ----
 
 You can change the domain to whatever you want. The same configuration can be used for clustered Vert.x instances.
-This configuration instructs vertx-dropwizard-metrics to expose the metrics in the local JMX MBean server, so
+This configuration instructs vertx-dropwizard-metrics to expose the metrics in the local MBean server, so
 Jolokia can retrieve them.
 
 Then you need, to _plug_ jolokia to expose the data. There are several ways to _plug_ jolokia. See
-https://jolokia.org/reference/html/architecture.html[for further details]. Here, we will explain how to use the
+https://jolokia.org/reference/html/architecture.html[for further details]. Here, we explain how to use the
 Jolokia agent with the default configuration. Refer to the https://jolokia.org/reference/html/[the jolokia
 documentation] to configure it.
 
@@ -537,8 +550,8 @@ special permission to access the process). In the first case, launch you applica
 java -javaagent:/.../agents/jolokia-jvm.jar=port=7777,host=localhost -jar ...
 ----
 
-The `-javaagent` specified the path of the jolokia agent. You can configure the port and host from the command
-line. Here it registers the REST endpoint on `http://localhost:7777`.
+The `-javaagent` specifies the path to the jolokia agent jar file. You can configure the port and host from the
+command line. Here it registers the REST endpoint on `http://localhost:7777`.
 
 You can also attach the agent on a running JVM with:
 
@@ -551,10 +564,9 @@ Replace `PID` with the process id of the JVM.
 
 Once Jolokia is configured and launched, you can consume the data from Hawtio.
 
-On Hawtio, enter the connection details as follow:
+On Hawtio, enter the connection details as follows:
 
 image::../../images/hawtio-connect.png[]
-
 
 Then, you can go to the _JMX_ tab and you should find a _directory_ with the name you entered as JMX domain
 in the Vert.x configuration:
