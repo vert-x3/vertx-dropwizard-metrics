@@ -49,6 +49,15 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
+  public RequestMetric responsePushed(Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+    return requestBegin(socketMetric, localAddress, remoteAddress, request);
+  }
+
+  @Override
+  public void requestReset(RequestMetric requestMetric) {
+  }
+
+  @Override
   public void responseEnd(RequestMetric metric, HttpClientResponse response) {
     clientReporter.end(metric, response.statusCode(), metric.uri != null && uriMatcher.match(metric.uri));
   }

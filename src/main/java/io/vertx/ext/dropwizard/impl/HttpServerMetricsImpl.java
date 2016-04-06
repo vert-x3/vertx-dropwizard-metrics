@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
@@ -52,6 +53,15 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   @Override
   public void responseEnd(RequestMetric requestMetric, HttpServerResponse response) {
     end(requestMetric, response.getStatusCode(), requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
+  }
+
+  @Override
+  public void requestReset(RequestMetric requestMetric) {
+  }
+
+  @Override
+  public RequestMetric responsePushed(Timer.Context socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
+    return new RequestMetric(method, uri);
   }
 
   @Override
