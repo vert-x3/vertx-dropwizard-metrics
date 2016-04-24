@@ -30,7 +30,6 @@ class DatagramSocketMetricsImpl extends AbstractMetrics implements DatagramSocke
   private Histogram bytesRead;
   private Histogram bytesWritten;
   private Counter exceptions;
-  private String serverName;
 
   DatagramSocketMetricsImpl(AbstractMetrics metrics, String baseName) {
     super(metrics.registry(), baseName);
@@ -47,8 +46,8 @@ class DatagramSocketMetricsImpl extends AbstractMetrics implements DatagramSocke
   }
 
   @Override
-  public void listening(SocketAddress localAddress) {
-    serverName = NetServerMetricsImpl.addressName(localAddress);
+  public void listening(String localName, SocketAddress localAddress) {
+    String serverName = localName + ':' + localAddress.port();
     bytesRead = histogram(serverName, "bytes-read");
   }
 

@@ -17,7 +17,6 @@
 package io.vertx.rxjava.ext.dropwizard;
 
 import java.util.Map;
-import io.vertx.lang.rxjava.InternalHelper;
 import rx.Observable;
 import io.vertx.rxjava.core.metrics.Measured;
 import io.vertx.rxjava.core.Vertx;
@@ -49,7 +48,7 @@ public class MetricsService {
    * @return the metrics service
    */
   public static MetricsService create(Vertx vertx) { 
-    MetricsService ret= MetricsService.newInstance(io.vertx.ext.dropwizard.MetricsService.create((io.vertx.core.Vertx) vertx.getDelegate()));
+    MetricsService ret = MetricsService.newInstance(io.vertx.ext.dropwizard.MetricsService.create((io.vertx.core.Vertx)vertx.getDelegate()));
     return ret;
   }
 
@@ -59,7 +58,7 @@ public class MetricsService {
    * @return the base name of the measured object
    */
   public String getBaseName(Measured measured) { 
-    String ret = this.delegate.getBaseName((io.vertx.core.metrics.Measured) measured.getDelegate());
+    String ret = delegate.getBaseName((io.vertx.core.metrics.Measured)measured.getDelegate());
     return ret;
   }
 
@@ -68,8 +67,7 @@ public class MetricsService {
    * @return 
    */
   public Set<String> metricsNames() { 
-    Set<String> ret = this.delegate.metricsNames();
-;
+    Set<String> ret = delegate.metricsNames();
     return ret;
   }
 
@@ -82,7 +80,7 @@ public class MetricsService {
    * @return the map of metrics where the key is the name of the metric (excluding the base name unless for the Vert.x object) and the value is the json data representing that metric
    */
   public JsonObject getMetricsSnapshot(Measured measured) { 
-    JsonObject ret = this.delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured) measured.getDelegate());
+    JsonObject ret = delegate.getMetricsSnapshot((io.vertx.core.metrics.Measured)measured.getDelegate());
     return ret;
   }
 
@@ -95,7 +93,7 @@ public class MetricsService {
    * @return the map of metrics where the key is the name of the metric and the value is the json data representing that metric
    */
   public JsonObject getMetricsSnapshot(String baseName) { 
-    JsonObject ret = this.delegate.getMetricsSnapshot(baseName);
+    JsonObject ret = delegate.getMetricsSnapshot(baseName);
     return ret;
   }
 
