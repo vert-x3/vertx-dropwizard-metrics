@@ -34,6 +34,7 @@ import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.core.spi.metrics.PoolMetrics;
 import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.core.net.NetClient;
@@ -136,6 +137,33 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   @Override
   public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
     return new DatagramSocketMetricsImpl(this, nameOf("datagram"));
+  }
+
+  @Override
+  public <P> PoolMetrics<?> createMetrics(P pool, String name, int size) {
+    // Todo 
+    return new PoolMetrics<Object>() {
+      @Override
+      public Object taskSubmitted() {
+        return null;
+      }
+      @Override
+      public void taskRejected(Object task) {
+      }
+      @Override
+      public void taskBegin(Object task) {
+      }
+      @Override
+      public void taskEnd(Object task, boolean succeeded) {
+      }
+      @Override
+      public boolean isEnabled() {
+        return false;
+      }
+      @Override
+      public void close() {
+      }
+    };
   }
 
   @Override
