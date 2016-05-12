@@ -43,10 +43,12 @@ import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -156,30 +158,9 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public <P> PoolMetrics<?> createMetrics(P pool, String name, int size) {
-    // Todo
-    return new PoolMetrics<Object>() {
-      @Override
-      public Object taskSubmitted() {
-        return null;
-      }
-      @Override
-      public void taskRejected(Object task) {
-      }
-      @Override
-      public void taskBegin(Object task) {
-      }
-      @Override
-      public void taskEnd(Object task, boolean succeeded) {
-      }
-      @Override
-      public boolean isEnabled() {
-        return false;
-      }
-      @Override
-      public void close() {
-      }
-    };
+  public <P> PoolMetrics<?> createMetrics(P pool, String poolType, String poolName, int maxPoolSize) {
+    String baseName = nameOf("pool", poolType, poolName);
+    return new PoolMetricsImpl(registry, baseName, maxPoolSize);
   }
 
   @Override

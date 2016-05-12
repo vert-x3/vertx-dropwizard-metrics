@@ -24,8 +24,10 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
@@ -1137,5 +1139,54 @@ public class MetricsTest extends MetricsTestBase {
 
   private void assertMetricType(String expectedType, Metric metric) {
     assertEquals(expectedType, Helper.convertMetric(metric, TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS).getString("type"));
+  }
+
+  @Test
+  public void testThreadPoolMetrics() throws Exception {
+
+    int size = 5;
+
+    WorkerExecutor exec = vertx.createWorkerExecutor("the-executor", size);
+    JsonObject metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("queued"), 0);
+    assertCount(metrics.getJsonObject("in-use"), 0);
+    assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)0D);
+
+    //
+    CountDownLatch latch1 = new CountDownLatch(1);
+    CountDownLatch latch2 = new CountDownLatch(5);
+    for (int i = 0; i < size;i++) {
+      exec.<Boolean>executeBlocking(fut -> {
+        try {
+          latch2.countDown();
+          fut.complete(latch1.await(10, TimeUnit.SECONDS));
+        } catch (InterruptedException e) {
+          fut.fail(e);
+        }
+      }, false, ar -> {
+        assertTrue(ar.succeeded());
+        assertTrue(ar.result());
+      });
+    }
+
+    awaitLatch(latch2);
+    metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("queued"), 0);
+    assertCount(metrics.getJsonObject("in-use"), size);
+    assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
+
+    CountDownLatch done = new CountDownLatch(1);
+    exec.executeBlocking(Future::complete, false, ar -> done.countDown());
+    metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("queued"), 1);
+    assertCount(metrics.getJsonObject("in-use"), size);
+    assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
+
+    latch1.countDown();
+    awaitLatch(done);
+    metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("queued"), 0);
+    assertCount(metrics.getJsonObject("in-use"), 0);
+    assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)0D);
   }
 }
