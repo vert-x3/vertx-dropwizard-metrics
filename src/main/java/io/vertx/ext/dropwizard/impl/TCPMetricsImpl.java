@@ -26,7 +26,7 @@ import io.vertx.core.spi.metrics.TCPMetrics;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context> {
+class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context> {
 
   private Counter openConnections;
   private Timer connections;
@@ -35,8 +35,8 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
   private Counter exceptions;
   protected volatile boolean closed;
 
-  NetServerMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
-    super(registry, localAddress != null ? (MetricRegistry.name(baseName, addressName(localAddress))) : (baseName));
+  TCPMetricsImpl(MetricRegistry registry, String baseName) {
+    super(registry, baseName);
 
     this.openConnections = counter("open-netsockets");
     this.connections = timer("connections");
@@ -107,7 +107,7 @@ class NetServerMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.C
     return openConnections.getCount();
   }
 
-  protected static String addressName(SocketAddress address) {
+  static String addressName(SocketAddress address) {
     if (address == null) return null;
 
     return address.host() + ":" + address.port();

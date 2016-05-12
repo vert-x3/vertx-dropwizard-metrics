@@ -106,7 +106,8 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     metrics = metricsService.getMetricsSnapshot(client);
     assertNull(metrics);
 
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test

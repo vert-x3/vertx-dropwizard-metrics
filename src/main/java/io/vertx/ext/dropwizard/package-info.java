@@ -379,7 +379,8 @@
  *
  * === Http client metrics
  *
- * Base name: `vertx.http.clients.@<id>`
+ * Base name: `vertx.http.clients` (by default) or `vertx.http.clients.<id>` where `<id>` is a non empty string
+ * configured by {@link io.vertx.core.http.HttpClientOptions#setMetricsName}.
  *
  * Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
  *
@@ -405,7 +406,8 @@
  *
  * === Net client metrics
  *
- * Base name: `vertx.net.clients.@<id>`
+ * Base name: `vertx.net.clients` (by default) or `vertx.net.clients.<id>` where `<id>` is a non empty string
+ * configured by {@link io.vertx.core.net.NetClientOptions#setMetricsName}.
  *
  * Net client includes all the metrics of a <<net-server-metrics,Net Server>>
  *

@@ -17,11 +17,19 @@
 package io.vertx.ext.dropwizard;
 
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.NetClient;
+import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
+import io.vertx.core.net.NetServerOptions;
 import io.vertx.test.core.VertxTestBase;
 
+import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -33,10 +41,79 @@ import java.util.concurrent.CountDownLatch;
  */
 public class MetricsTestBase extends VertxTestBase {
 
-  protected void cleanup(HttpServer server, HttpClient client) throws Exception {
-    if (client != null) {
+  private List<Callable<Void>> toClose = new ArrayList<>();
+
+  protected HttpServer createHttpServer() {
+    return createHttpServer(new HttpServerOptions());
+  }
+
+  protected HttpServer createHttpServer(HttpServerOptions options) {
+    HttpServer server = vertx.createHttpServer(options);
+    toClose.add(() -> {
+      CountDownLatch latch = new CountDownLatch(1);
+      server.close(ar -> {
+        latch.countDown();
+      });
+      awaitLatch(latch);
+      return null;
+    });
+    return server;
+  }
+
+  protected HttpClient createHttpClient() {
+    return createHttpClient(new HttpClientOptions());
+  }
+
+  protected HttpClient createHttpClient(HttpClientOptions options) {
+    HttpClient client = vertx.createHttpClient(options);
+    toClose.add(() -> {
       client.close();
+      return null;
+    });
+    return client;
+  }
+
+  protected NetServer createNetServer() {
+    return createNetServer(new HttpServerOptions());
+  }
+
+  protected NetServer createNetServer(NetServerOptions options) {
+    NetServer server = vertx.createNetServer(options);
+    toClose.add(() -> {
+      CountDownLatch latch = new CountDownLatch(1);
+      server.close(ar -> {
+        latch.countDown();
+      });
+      awaitLatch(latch);
+      return null;
+    });
+    return server;
+  }
+
+  protected NetClient createNetClient() {
+    return createNetClient(new NetClientOptions());
+  }
+
+  protected NetClient createNetClient(NetClientOptions options) {
+    NetClient client = vertx.createNetClient(options);
+    toClose.add(() -> {
+      CountDownLatch latch = new CountDownLatch(1);
+      client.close();
+      awaitLatch(latch);
+      return null;
+    });
+    return client;
+  }
+
+  @Override
+  protected void tearDown() throws Exception {
+    for (Callable<Void> c : toClose) {
+      c.call();
     }
+    super.tearDown();
+  }
+
+  protected void cleanup(HttpServer server) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
     if (server != null) {
       server.close(ar -> {
@@ -46,10 +123,13 @@ public class MetricsTestBase extends VertxTestBase {
     awaitLatch(latch);
   }
 
-  protected void cleanup(NetServer server, NetClient client) throws Exception {
+  protected void cleanup(HttpClient client) throws Exception {
     if (client != null) {
       client.close();
     }
+  }
+
+  protected void cleanup(NetServer server) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
     if (server != null) {
       server.close(ar -> {
@@ -59,4 +139,9 @@ public class MetricsTestBase extends VertxTestBase {
     awaitLatch(latch);
   }
 
+  protected void cleanup(NetClient client) throws Exception {
+    if (client != null) {
+      client.close();
+    }
+  }
 }

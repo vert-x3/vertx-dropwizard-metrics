@@ -49,6 +49,7 @@ import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
+import io.vertx.test.core.TestUtils;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -161,7 +162,8 @@ public class MetricsTest extends MetricsTestBase {
     assertMinMax(metrics.getJsonObject("bytes-read"), (long) serverMin.length(), (long) serverMax.length());
     assertCount(metrics.getJsonObject("exceptions"), 0L);
 
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -221,7 +223,8 @@ public class MetricsTest extends MetricsTestBase {
     assertMinMax(metrics.getJsonObject("bytes-read"), serverWrittenBytes.get(), serverWrittenBytes.get());
     assertCount(metrics.getJsonObject("exceptions"), 0L);
 
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -275,7 +278,8 @@ public class MetricsTest extends MetricsTestBase {
 
     await();
 
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -314,7 +318,8 @@ public class MetricsTest extends MetricsTestBase {
       doTest.handle(ar.result());
     });
     awaitLatch(latch);
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -413,8 +418,8 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject(name), 2L);
     assertMinMax(metrics.getJsonObject(name), (long) serverMin.length(), (long) serverMax.length());
 
-
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -446,7 +451,33 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("bytes-read"), 1L);
     assertMinMax(metrics.getJsonObject("bytes-read"), (long) content.length(), (long) content.length());
 
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
+  }
+
+  @Test
+  public void testNamedHttpClientMetrics() throws Exception {
+    String name = TestUtils.randomAlphaString(10);
+    HttpClient client = vertx.createHttpClient(new HttpClientOptions().setMetricsName(name));
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
+      req.response().end();
+    }).listen(ar -> {
+      assertTrue(ar.succeeded());
+      client.request(HttpMethod.GET, 8080, "localhost", "/file", resp -> {
+        resp.bodyHandler(buff -> {
+          testComplete();
+        });
+      }).end();
+    });
+
+    await();
+
+    String baseName = "vertx.http.clients." + name;
+    JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
+    assertCount(metrics.getJsonObject(baseName + ".bytes-read"), 1L);
+
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -493,7 +524,36 @@ public class MetricsTest extends MetricsTestBase {
     assertMinMax(metrics.getJsonObject("bytes-written"), (long) clientData.length(), (long) clientData.length());
     assertMinMax(metrics.getJsonObject("bytes-read"), (long) serverData.length(), (long) serverData.length());
 
-    cleanup(server, clientRef.get());
+    cleanup(clientRef.get());
+    cleanup(server);
+  }
+
+  @Test
+  public void testNamedNetClientMetrics() throws Exception {
+    String name = TestUtils.randomAlphaString(10);
+    NetClient client = vertx.createNetClient(new NetClientOptions().setMetricsName(name));
+    NetServer server = vertx.createNetServer(new NetServerOptions().setHost("localhost").setPort(8080)).connectHandler(socket -> {
+      socket.handler(socket::write);
+    }).listen(ar -> {
+      assertTrue(ar.succeeded());
+      client.connect(8080, "localhost", ar2 -> {
+        assertTrue(ar2.succeeded());
+        NetSocket socket = ar2.result();
+        socket.handler(buff -> {
+          testComplete();
+        });
+        socket.write("whatever");
+      });
+    });
+
+    await();
+
+    String baseName = "vertx.net.clients." + name;
+    JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
+    assertCount(metrics.getJsonObject(baseName + ".bytes-read"), 1L);
+
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test
@@ -532,7 +592,8 @@ public class MetricsTest extends MetricsTestBase {
     assertNotNull(metrics);
     assertTrue(metrics.isEmpty());
 
-    cleanup(server, client);
+    cleanup(client);
+    cleanup(server);
   }
 
   @Test

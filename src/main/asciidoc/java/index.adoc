@@ -408,7 +408,8 @@ Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
 
 === Http client metrics
 
-Base name: `vertx.http.clients.@<id>`
+Base name: `vertx.http.clients` (by default) or `vertx.http.clients.<id>` where `<id>` is a non empty string
+configured by `link:../../apidocs/io/vertx/core/http/HttpClientOptions.html#setMetricsName-java.lang.String-[setMetricsName]`.
 
 Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
 
@@ -434,7 +435,8 @@ Base name: `vertx.net.servers.<host>:<port>`
 
 === Net client metrics
 
-Base name: `vertx.net.clients.@<id>`
+Base name: `vertx.net.clients` (by default) or `vertx.net.clients.<id>` where `<id>` is a non empty string
+configured by `link:../../apidocs/io/vertx/core/net/NetClientOptions.html#setMetricsName-java.lang.String-[setMetricsName]`.
 
 Net client includes all the metrics of a <<net-server-metrics,Net Server>>
 

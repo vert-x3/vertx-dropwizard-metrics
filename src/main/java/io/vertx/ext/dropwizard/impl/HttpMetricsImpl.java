@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-abstract class HttpMetricsImpl extends NetServerMetricsImpl {
+abstract class HttpMetricsImpl extends TCPMetricsImpl {
 
   private ThroughputTimer requests;
   private ThroughputMeter[] responses;
@@ -38,7 +38,7 @@ abstract class HttpMetricsImpl extends NetServerMetricsImpl {
   private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
 
   public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAdress) {
-    super(registry, baseName, localAdress);
+    super(registry, baseName);
     openWebSockets = counter("open-websockets");
     requests = throughputTimer("requests");
     responses = new ThroughputMeter[]{

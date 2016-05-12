@@ -441,7 +441,8 @@ vertx = Vertx::Vertx.vertx({
 
 === Http client metrics
 
-Base name: `vertx.http.clients.@<id>`
+Base name: `vertx.http.clients` (by default) or `vertx.http.clients.<id>` where `<id>` is a non empty string
+configured by `link:../../vertx-core/dataobjects.html#HttpClientOptions#set_metrics_name-instance_method[metricsName]`.
 
 Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
 
@@ -467,7 +468,8 @@ Base name: `vertx.net.servers.<host>:<port>`
 
 === Net client metrics
 
-Base name: `vertx.net.clients.@<id>`
+Base name: `vertx.net.clients` (by default) or `vertx.net.clients.<id>` where `<id>` is a non empty string
+configured by `link:../../vertx-core/dataobjects.html#NetClientOptions#set_metrics_name-instance_method[metricsName]`.
 
 Net client includes all the metrics of a <<net-server-metrics,Net Server>>
 
