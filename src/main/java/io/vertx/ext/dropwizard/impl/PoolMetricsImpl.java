@@ -67,5 +67,6 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
 
   @Override
   public void close() {
+    removeAll();
   }
 }

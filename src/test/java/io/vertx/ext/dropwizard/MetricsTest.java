@@ -26,6 +26,7 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.buffer.Buffer;
@@ -1150,7 +1151,7 @@ public class MetricsTest extends MetricsTestBase {
 
     int size = 5;
 
-    WorkerExecutor exec = vertx.createWorkerExecutor("the-executor", size);
+    WorkerExecutor exec = vertx.createSharedWorkerExecutor("the-executor", size);
     JsonObject metrics = metricsService.getMetricsSnapshot(exec);
 
     assertMetricType("counter", metrics.getJsonObject("queued"));
@@ -1209,5 +1210,22 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("queued"), 0);
     assertCount(metrics.getJsonObject("in-use"), 0);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)0D);
+  }
+
+  @Test
+  public void testThreadPoolMetricsOnClose() throws Exception {
+    WorkerExecutor exec = vertx.createSharedWorkerExecutor("the-executor", 10);
+    assertTrue(metricsService.getMetricsSnapshot(exec).size() > 0);
+    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread").size() > 0);
+    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").size() > 0);
+    exec.close();
+    assertTrue(metricsService.getMetricsSnapshot(exec).size() == 0);
+    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread").size() > 0);
+    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").size() > 0);
+    CountDownLatch latch = new CountDownLatch(1);
+    vertx.close(ar -> latch.countDown());
+    awaitLatch(latch);
+    assertEquals(new JsonObject(), metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread"));
+    assertEquals(new JsonObject(), metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking"));
   }
 }

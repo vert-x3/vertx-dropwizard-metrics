@@ -159,7 +159,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public <P> PoolMetrics<?> createMetrics(P pool, String poolType, String poolName, int maxPoolSize) {
-    String baseName = nameOf("pool", poolType, poolName);
+    String baseName = nameOf("pools", poolType, poolName);
     return new PoolMetricsImpl(registry, baseName, maxPoolSize);
   }
 
