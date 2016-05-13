@@ -483,6 +483,26 @@ Base name: `vertx.datagram`
 * `<host>:<port>.bytes-read` - A <<histogram>> of the number of bytes read.
 ** This metric will only be available if the datagram socket is listening
 
+=== Pool metrics
+
+Base name: `vertx.pool.<type>.<name>` where `type` is the type of the pool (e.g _worker_, _datasource_) and
+`name` is the name of the pool (e.g `vert.x-worker-thread`).
+
+Pools of type _worker_ are blocking worker pools. Vert.x exposes its worker as _vert.x-worker-thread_ and
+_vert.x-internal-blocking_. Named worker executor created with `link:../../jsdoc/worker_executor-WorkerExecutor.html[WorkerExecutor]` are exposed.
+
+Datasource created with Vert.x JDBC clients are exposed as _datasource_.
+
+* `delay` - A <<timer>> measuring the duration of the delay to obtain the resource, i.e the time in the queue
+* `queued` - A <<counter>> of the actual number of waiters in the queue
+* `usage` - A <<timer>> measuring the duration of the usage of the resource
+* `in-use` - A <<count>> of the actual number of resources used
+* `pool-ratio` - A ratio <<gauge>> of the in use resource / pool size
+* `max-pool-size` - A <<gauge>> of the max pool size
+
+The `pool-ratio` and the `max_pool_size` won't be present when the measured pool's max pool size could not
+be determined.
+
 [[jmx]]
 == JMX
 

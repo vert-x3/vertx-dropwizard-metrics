@@ -353,7 +353,7 @@ public class MetricsTest extends MetricsTestBase {
 
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
     assertNotNull(metrics);
-    assertTrue(metrics.isEmpty());
+    waitUntil(metrics::isEmpty);
 
     metrics = metricsService.getMetricsSnapshot(client);
     assertNotNull(metrics);
@@ -1138,7 +1138,11 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   private void assertMetricType(String expectedType, Metric metric) {
-    assertEquals(expectedType, Helper.convertMetric(metric, TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS).getString("type"));
+    assertMetricType(expectedType, Helper.convertMetric(metric, TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS));
+  }
+
+  private void assertMetricType(String expectedType, JsonObject metric) {
+    assertEquals(expectedType, metric.getString("type"));
   }
 
   @Test
@@ -1148,9 +1152,20 @@ public class MetricsTest extends MetricsTestBase {
 
     WorkerExecutor exec = vertx.createWorkerExecutor("the-executor", size);
     JsonObject metrics = metricsService.getMetricsSnapshot(exec);
+
+    assertMetricType("counter", metrics.getJsonObject("queued"));
+    assertMetricType("counter", metrics.getJsonObject("in-use"));
+    assertMetricType("timer", metrics.getJsonObject("usage"));
+    assertMetricType("timer", metrics.getJsonObject("delay"));
+    assertMetricType("gauge", metrics.getJsonObject("pool-ratio"));
+    assertMetricType("gauge", metrics.getJsonObject("max-pool-size"));
+
+    assertCount(metrics.getJsonObject("usage"), 0);
+    assertCount(metrics.getJsonObject("delay"), 0);
     assertCount(metrics.getJsonObject("queued"), 0);
     assertCount(metrics.getJsonObject("in-use"), 0);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)0D);
+    assertEquals(metrics.getJsonObject("max-pool-size").getInteger("value"), (Integer)5);
 
     //
     CountDownLatch latch1 = new CountDownLatch(1);
@@ -1171,6 +1186,8 @@ public class MetricsTest extends MetricsTestBase {
 
     awaitLatch(latch2);
     metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("usage"), 0);
+    assertCount(metrics.getJsonObject("delay"), 5);
     assertCount(metrics.getJsonObject("queued"), 0);
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
@@ -1178,6 +1195,8 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch done = new CountDownLatch(1);
     exec.executeBlocking(Future::complete, false, ar -> done.countDown());
     metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("usage"), 0);
+    assertCount(metrics.getJsonObject("delay"), 5);
     assertCount(metrics.getJsonObject("queued"), 1);
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
@@ -1185,6 +1204,8 @@ public class MetricsTest extends MetricsTestBase {
     latch1.countDown();
     awaitLatch(done);
     metrics = metricsService.getMetricsSnapshot(exec);
+    assertCount(metrics.getJsonObject("usage"), 6);
+    assertCount(metrics.getJsonObject("delay"), 6);
     assertCount(metrics.getJsonObject("queued"), 0);
     assertCount(metrics.getJsonObject("in-use"), 0);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)0D);

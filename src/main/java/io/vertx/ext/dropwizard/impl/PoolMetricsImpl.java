@@ -13,14 +13,14 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
 
   private final Timer delay;
   private Counter queued;
-  private final Timer usageTime;
+  private final Timer usage;
   private Counter inUse;
 
   public PoolMetricsImpl(MetricRegistry registry, String baseName, int maxSize) {
     super(registry, baseName);
     this.queued = counter("queued");
     this.delay = timer("delay");
-    this.usageTime = timer("usage-time");
+    this.usage = timer("usage");
     this.inUse = counter("in-use");
     if (maxSize > 0) {
       RatioGauge gauge = new RatioGauge() {
@@ -30,6 +30,7 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
         }
       };
       gauge(gauge, "pool-ratio");
+      gauge(() -> maxSize, "max-pool-size");
     }
   }
 
@@ -50,7 +51,7 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
     queued.dec();
     inUse.inc();
     context.stop();
-    return usageTime.time();
+    return usage.time();
   }
 
   @Override
