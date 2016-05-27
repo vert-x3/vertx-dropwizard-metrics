@@ -57,17 +57,6 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
   /**
    * Provides a request metric that to measure http request latency and more.
    *
-   * @param method the http method or null if it's not to be recorded
-   * @param uri the request uri or path of the request, or null if it's not to be recorded
-   * @return the request metric to be measured
-   */
-  protected RequestMetric createRequestMetric(HttpMethod method, String uri) {
-    return new RequestMetric(method, uri);
-  }
-
-  /**
-   * Provides a request metric that to measure http request latency and more.
-   *
    * @return the web socket metric to be measured
    */
   protected WebSocketMetric createWebSocketMetric() {
@@ -75,9 +64,16 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     return null;
   }
 
-  protected void end(RequestMetric metric, int statusCode, boolean monitorUri) {
+  /**
+   * Signal end of request
+   *
+   * @param metric the request metric
+   * @param statusCode the status code, {@code 0} means a reset
+   * @param monitorUri the monitored uri
+   */
+  protected long end(RequestMetric metric, int statusCode, boolean monitorUri) {
     if (closed) {
-      return;
+      return 0;
     }
 
     long duration = System.nanoTime() - metric.start;
@@ -100,6 +96,8 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     } else if (metric.uri != null && monitorUri) {
       throughputTimer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
     }
+
+    return duration;
   }
 
   protected void disconnect(WebSocketMetric metric) {

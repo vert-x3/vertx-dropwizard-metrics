@@ -64,7 +64,6 @@ public abstract class AbstractMetrics implements Metrics {
    * the json data representing that metric
    */
   public JsonObject metrics(String baseName) {
-    System.out.println("registry.getMetrics() = " + registry.getMetrics());
     Map<String, Object> map = registry.getMetrics().
         entrySet().
         stream().

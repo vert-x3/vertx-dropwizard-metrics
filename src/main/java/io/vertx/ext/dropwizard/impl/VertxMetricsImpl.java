@@ -123,7 +123,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public synchronized HttpClientMetrics<?, ?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
+  public synchronized HttpClientMetrics<?, ?, ?, ?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
     String name = options.getMetricsName();
     String baseName;
     if (name != null && name.length() > 0) {
@@ -132,7 +132,15 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
       baseName = "http.clients";
     }
     HttpClientReporter reporter = clientReporters.computeIfAbsent(baseName, n -> new HttpClientReporter(registry, baseName, null));
-    return new HttpClientMetricsImpl(reporter, options, this.options.getMonitoredHttpClientUris());
+    return new HttpClientMetricsImpl(this, reporter, options, this.options.getMonitoredHttpClientUris());
+  }
+
+  synchronized void closed(HttpClientMetricsImpl metrics) {
+    HttpClientReporter reporter = metrics.clientReporter;
+    if (reporter.decMaxPoolSize(metrics.maxPoolSize)) {
+      clientReporters.remove(reporter.baseName);
+      reporter.close();
+    }
   }
 
   @Override

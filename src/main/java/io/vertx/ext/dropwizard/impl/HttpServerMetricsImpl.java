@@ -42,7 +42,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public RequestMetric requestBegin(Timer.Context socketMetric, HttpServerRequest request) {
-    return createRequestMetric(request.method(), request.uri());
+    return new RequestMetric(request.method(), request.uri());
   }
 
   @Override

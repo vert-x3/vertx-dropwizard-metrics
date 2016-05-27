@@ -24,6 +24,7 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
@@ -53,6 +54,8 @@ import io.vertx.core.net.NetSocket;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
 import io.vertx.test.core.TestUtils;
+import io.vertx.test.fakemetrics.FakeHttpClientMetrics;
+import io.vertx.test.fakemetrics.FakeMetricsBase;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -62,9 +65,12 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -358,7 +364,7 @@ public class MetricsTest extends MetricsTestBase {
 
     metrics = metricsService.getMetricsSnapshot(client);
     assertNotNull(metrics);
-    assertEquals(0, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
+    assertNull(metrics.getJsonObject("connections.max-pool-size"));
   }
 
   @Test
@@ -1060,31 +1066,103 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testMultiHttpClients() throws Exception {
-    int size = 3;
+  public void testHttpClientConnectionQueue() throws Exception {
     CountDownLatch started = new CountDownLatch(1);
+    List<Runnable> requests = new ArrayList<>();
     vertx.createHttpServer().requestHandler(req -> {
-      req.response().end("done");
+      Context ctx = vertx.getOrCreateContext();
+      requests.add(() -> {
+        ctx.runOnContext(v -> {
+          req.response().end();
+        });
+      });
     }).listen(8080, "localhost", ar -> {
       assertTrue(ar.succeeded());
       started.countDown();
     });
-    CountDownLatch requested = new CountDownLatch(size);
     awaitLatch(started);
-    HttpClient[] clients = new HttpClient[size];
-    for (int i = 0;i < size;i++) {
-      clients[i] = vertx.createHttpClient();
-      clients[i].getNow(8080, "localhost", "/", resp -> {
-        assertEquals(200, resp.statusCode());
-        resp.endHandler(v -> {
-          requested.countDown();
-        });
+    HttpClient client = vertx.createHttpClient();
+    for (int i = 0;i < 7;i++) {
+      client.getNow(8080, "localhost", "/somepath", resp -> {
       });
     }
-    awaitLatch(requested);
+    waitUntil(() -> requests.size() == 5);
+    JsonObject metrics = metricsService.getMetricsSnapshot(client);
+    assertEquals(2, (int)metrics.getJsonObject("endpoint.localhost:8080.queued").getInteger("count"));
+    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.delay").getInteger("count"));
+    List<Runnable> todo = new ArrayList<>(requests);
+    requests.clear();
+    todo.forEach(Runnable::run);
+    waitUntil(() -> requests.size() == 2);
+    metrics = metricsService.getMetricsSnapshot(client);
+    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.queued").getInteger("count"));
+    assertEquals(2, (int)metrics.getJsonObject("endpoint.localhost:8080.delay").getInteger("count"));
+  }
+
+  @Test
+  public void testMultiHttpClients() throws Exception {
+    int size = 3;
+    CountDownLatch requestsLatch = new CountDownLatch(size);
+    CountDownLatch started = new CountDownLatch(1);
+    List<Runnable> requests = Collections.synchronizedList(new ArrayList<>());
+    vertx.createHttpServer().requestHandler(req -> {
+      requests.add(() -> req.response().end());
+      requestsLatch.countDown();
+    }).listen(8080, "localhost", ar -> {
+      assertTrue(ar.succeeded());
+      started.countDown();
+    });
+    awaitLatch(started);
+    HttpClient[] clients = new HttpClient[size];
+    CountDownLatch closedLatch = new CountDownLatch(size);
+    CountDownLatch responseLatch = new CountDownLatch(size);
+    for (int i = 0;i < size;i++) {
+      clients[i] = vertx.createHttpClient();
+      HttpClientRequest req = clients[i].get(8080, "localhost", "/", resp -> {
+        responseLatch.countDown();
+      });
+      req.connectionHandler(conn -> {
+        conn.closeHandler(v -> {
+          System.out.println("closed!!!!");
+          closedLatch.countDown();
+        });
+      });
+      req.end();
+    }
+    awaitLatch(requestsLatch);
     JsonObject metrics = metricsService.getMetricsSnapshot(clients[0]);
-    assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
+    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
+    assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
+    assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.open-netsockets").getInteger("count"));
     assertEquals(15, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
+    requests.forEach(Runnable::run);
+    awaitLatch(responseLatch);
+    metrics = metricsService.getMetricsSnapshot(clients[0]);
+    assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
+    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
+    assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.open-netsockets").getInteger("count"));
+    assertEquals(15, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
+    clients[2].close();
+    waitUntil(() -> closedLatch.getCount() == 2);
+    metrics = metricsService.getMetricsSnapshot(clients[0]);
+    assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
+    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
+    assertEquals(2, (int)metrics.getJsonObject("endpoint.localhost:8080.open-netsockets").getInteger("count"));
+    assertEquals(10, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
+    clients[1].close();
+    waitUntil(() -> closedLatch.getCount() == 1);
+    metrics = metricsService.getMetricsSnapshot(clients[0]);
+    assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
+    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
+    assertEquals(1, (int)metrics.getJsonObject("endpoint.localhost:8080.open-netsockets").getInteger("count"));
+    assertEquals(5, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
+    clients[0].close();
+    waitUntil(() -> closedLatch.getCount() == 0);
+    metrics = metricsService.getMetricsSnapshot(clients[0]);
+    assertNull(metrics.getJsonObject("endpoint.localhost:8080.usage\""));
+    assertNull(metrics.getJsonObject("endpoint.localhost:8080.in-use"));
+    assertNull(metrics.getJsonObject("endpoint.localhost:8080.open-netsockets"));
+    assertNull(metrics.getJsonObject("connections.max-pool-size"));
   }
 
   private void assertCount(JsonObject metric, long expected) {

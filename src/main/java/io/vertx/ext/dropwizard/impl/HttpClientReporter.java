@@ -9,7 +9,7 @@ import io.vertx.core.net.SocketAddress;
  */
 class HttpClientReporter extends HttpMetricsImpl {
 
-  volatile int totalMaxPoolSize;
+  int totalMaxPoolSize;
 
   public HttpClientReporter(MetricRegistry registry, String baseName, SocketAddress localAdress) {
     super(registry, baseName, localAdress);
@@ -31,9 +31,8 @@ class HttpClientReporter extends HttpMetricsImpl {
     totalMaxPoolSize += maxPoolSize;
   }
 
-  void decMaxPoolSize(int maxPoolSize) {
+  boolean decMaxPoolSize(int maxPoolSize) {
     totalMaxPoolSize -= maxPoolSize;
+    return totalMaxPoolSize == 0;
   }
-
-
 }

@@ -26,44 +26,86 @@ import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.dropwizard.Match;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<RequestMetric, WebSocketMetric, Timer.Context> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Timer.Context, EndpointMetric, Timer.Context> {
 
-  private final HttpClientReporter clientReporter;
+  private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
-  private final int maxPoolSize;
+  final HttpClientReporter clientReporter;
+  final int maxPoolSize;
 
-  HttpClientMetricsImpl(HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris) {
+  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris) {
     super(clientReporter.registry, clientReporter.baseName);
+    this.owner = owner;
     this.clientReporter = clientReporter;
     this.uriMatcher = new Matcher(monitoredUris);
     clientReporter.incMaxPoolSize(maxPoolSize = options.getMaxPoolSize());
   }
 
   @Override
-  public RequestMetric requestBegin(Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    return clientReporter.createRequestMetric(request.method(), request.uri());
+  public EndpointMetric createEndpoint(String host, int port, int maxPoolSize) {
+    return new EndpointMetric(clientReporter, host, port);
   }
 
   @Override
-  public RequestMetric responsePushed(Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    return requestBegin(socketMetric, localAddress, remoteAddress, request);
+  public void closeEndpoint(String host, int port, EndpointMetric endpointMetric) {
+    endpointMetric.close(clientReporter);
   }
 
   @Override
-  public void requestReset(RequestMetric requestMetric) {
+  public Timer.Context enqueueRequest(EndpointMetric endpointMetric) {
+    endpointMetric.queued.inc();
+    return endpointMetric.delay.time();
   }
 
   @Override
-  public void responseEnd(RequestMetric metric, HttpClientResponse response) {
-    clientReporter.end(metric, response.statusCode(), metric.uri != null && uriMatcher.match(metric.uri));
+  public void dequeueRequest(EndpointMetric endpointMetric, Timer.Context taskMetric) {
+    endpointMetric.queued.dec();
+    taskMetric.stop();
   }
 
   @Override
-  public WebSocketMetric connected(Timer.Context socketMetric, WebSocket webSocket) {
+  public void endpointConnected(EndpointMetric endpointMetric, Timer.Context socketMetric) {
+    endpointMetric.openConnections.inc();
+  }
+
+  @Override
+  public void endpointDisconnected(EndpointMetric endpointMetric, Timer.Context socketMetric) {
+    endpointMetric.openConnections.dec();
+  }
+
+  @Override
+  public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+    endpointMetric.inUse.inc();
+    return new HttpClientRequestMetric(endpointMetric, request.method(), request.uri());
+  }
+
+  @Override
+  public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+    endpointMetric.inUse.inc();
+    return requestBegin(endpointMetric, socketMetric, localAddress, remoteAddress, request);
+  }
+
+  @Override
+  public void requestReset(HttpClientRequestMetric requestMetric) {
+    requestMetric.endpointMetric.inUse.dec();
+    long duration = clientReporter.end(requestMetric, 0, requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
+    requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
+  }
+
+  @Override
+  public void responseEnd(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
+    requestMetric.endpointMetric.inUse.dec();
+    long duration = clientReporter.end(requestMetric, response.statusCode(), requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
+    requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
+  }
+
+  @Override
+  public WebSocketMetric connected(EndpointMetric endpointMetric, Timer.Context socketMetric, WebSocket webSocket) {
     return clientReporter.createWebSocketMetric();
   }
 
@@ -104,6 +146,6 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
 
   @Override
   public void close() {
-    clientReporter.decMaxPoolSize(maxPoolSize);
+    owner.closed(this);
   }
 }
