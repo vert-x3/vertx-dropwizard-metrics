@@ -23,10 +23,12 @@ import com.codahale.metrics.Timer;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.TCPMetrics;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context> {
+class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
 
   private Counter openConnections;
   private Timer connections;
@@ -52,7 +54,7 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context
   }
 
   @Override
-  public Timer.Context connected(SocketAddress remoteAddress, String remoteName) {
+  public Long connected(SocketAddress remoteAddress, String remoteName) {
     // Connection metrics
     openConnections.inc();
 
@@ -65,13 +67,13 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context
     }
 
     //
-    return connections.time();
+    return System.nanoTime();
   }
 
   @Override
-  public void disconnected(Timer.Context ctx, SocketAddress remoteAddress) {
+  public void disconnected(Long ctx, SocketAddress remoteAddress) {
     openConnections.dec();
-    ctx.stop();
+    connections.update(System.nanoTime() - ctx, TimeUnit.NANOSECONDS);
 
     // Remote address connection metrics
     Counter counter = counter("open-connections", remoteAddress.host());
@@ -87,17 +89,17 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Timer.Context
   }
 
   @Override
-  public void bytesRead(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesRead(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     bytesRead.update(numberOfBytes);
   }
 
   @Override
-  public void bytesWritten(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesWritten(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     bytesWritten.update(numberOfBytes);
   }
 
   @Override
-  public void exceptionOccurred(Timer.Context socketMetric, SocketAddress remoteAddress, Throwable t) {
+  public void exceptionOccurred(Long socketMetric, SocketAddress remoteAddress, Throwable t) {
     exceptions.inc();
   }
 

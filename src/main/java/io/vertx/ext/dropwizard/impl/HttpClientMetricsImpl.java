@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Timer.Context, EndpointMetric, Timer.Context> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long, EndpointMetric, Timer.Context> {
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
@@ -69,23 +69,23 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public void endpointConnected(EndpointMetric endpointMetric, Timer.Context socketMetric) {
+  public void endpointConnected(EndpointMetric endpointMetric,Long socketMetric) {
     endpointMetric.openConnections.inc();
   }
 
   @Override
-  public void endpointDisconnected(EndpointMetric endpointMetric, Timer.Context socketMetric) {
+  public void endpointDisconnected(EndpointMetric endpointMetric, Long socketMetric) {
     endpointMetric.openConnections.dec();
   }
 
   @Override
-  public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+  public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     endpointMetric.inUse.inc();
     return new HttpClientRequestMetric(endpointMetric, request.method(), request.uri());
   }
 
   @Override
-  public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, Timer.Context socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+  public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     endpointMetric.inUse.inc();
     return requestBegin(endpointMetric, socketMetric, localAddress, remoteAddress, request);
   }
@@ -105,7 +105,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public WebSocketMetric connected(EndpointMetric endpointMetric, Timer.Context socketMetric, WebSocket webSocket) {
+  public WebSocketMetric connected(EndpointMetric endpointMetric, Long socketMetric, WebSocket webSocket) {
     return clientReporter.createWebSocketMetric();
   }
 
@@ -115,27 +115,27 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public Timer.Context connected(SocketAddress remoteAddress, String remoteName) {
+  public Long connected(SocketAddress remoteAddress, String remoteName) {
     return clientReporter.connected(remoteAddress, remoteName);
   }
 
   @Override
-  public void disconnected(Timer.Context socketMetric, SocketAddress remoteAddress) {
+  public void disconnected(Long socketMetric, SocketAddress remoteAddress) {
     clientReporter.disconnected(socketMetric, remoteAddress);
   }
 
   @Override
-  public void bytesRead(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesRead(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     clientReporter.bytesRead(socketMetric, remoteAddress, numberOfBytes);
   }
 
   @Override
-  public void bytesWritten(Timer.Context socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
+  public void bytesWritten(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     clientReporter.bytesWritten(socketMetric, remoteAddress, numberOfBytes);
   }
 
   @Override
-  public void exceptionOccurred(Timer.Context socketMetric, SocketAddress remoteAddress, Throwable t) {
+  public void exceptionOccurred(Long socketMetric, SocketAddress remoteAddress, Throwable t) {
     clientReporter.exceptionOccurred(socketMetric, remoteAddress, t);
   }
 
