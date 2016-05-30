@@ -58,13 +58,13 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
 
   @Override
   public Timer.Context enqueueRequest(EndpointMetric endpointMetric) {
-    endpointMetric.queued.inc();
-    return endpointMetric.delay.time();
+    endpointMetric.queueSize.inc();
+    return endpointMetric.queueDelay.time();
   }
 
   @Override
   public void dequeueRequest(EndpointMetric endpointMetric, Timer.Context taskMetric) {
-    endpointMetric.queued.dec();
+    endpointMetric.queueSize.dec();
     taskMetric.stop();
   }
 
@@ -82,6 +82,17 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     endpointMetric.inUse.inc();
     return new HttpClientRequestMetric(endpointMetric, request.method(), request.uri());
+  }
+
+  @Override
+  public void requestEnd(HttpClientRequestMetric requestMetric) {
+    requestMetric.requestEnd = System.nanoTime();
+  }
+
+  @Override
+  public void responseBegin(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
+    long waitTime = System.nanoTime() - requestMetric.requestEnd;
+    requestMetric.endpointMetric.ttfb.update(waitTime, TimeUnit.NANOSECONDS);
   }
 
   @Override

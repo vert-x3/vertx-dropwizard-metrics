@@ -76,7 +76,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
       return 0;
     }
 
-    long duration = System.nanoTime() - metric.start;
+    long duration = System.nanoTime() - metric.requestBegin;
     int responseStatus = statusCode / 100;
 
     //

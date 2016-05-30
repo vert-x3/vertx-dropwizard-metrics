@@ -9,11 +9,11 @@ class RequestMetric {
 
   final HttpMethod method;
   final String uri;
-  long start;
+  long requestBegin;
 
   RequestMetric(HttpMethod method, String uri) {
     this.method = method;
     this.uri = uri;
-    start = System.nanoTime();
+    requestBegin = System.nanoTime();
   }
 }

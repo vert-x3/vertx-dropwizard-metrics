@@ -392,6 +392,19 @@
  * * `responses-4xx` - A <<meter>> of the 4xx response code
  * * `responses-5xx` - A <<meter>> of the 5xx response code
  *
+ * The http client manages a pool of connection for each remote endpoint with a queue of pending requests
+ *
+ * Endpoint metrics are available too:
+ *
+ * * `endpoint.<host:port>.queue-delay` - A <<timer>> of the wait time of a pending request in the queue
+ * * `endpoint.<host:port>.queue-size` - A <<counter>> of the actual queue size
+ * * `endpoint.<host:port>.open-netsockets` - A <<counter>> of the actual number of open sockets to the endpoint
+ * * `endpoint.<host:port>.usage` - A <<timer>> of the delay between the request starts and the response ends
+ * * `endpoint.<host:port>.in-use` - A <<counter>> of the actual number of request/response
+ * * `endpoint.<host:port>.ttfb` - A <<timer>> of the wait time between the request ended and its response begins
+ *
+ * where <host> is the endpoint host name possibly unresolved and <port> the TCP port.
+ *
  * [[net-server-metrics]]
  * === Net server metrics
  *
@@ -431,8 +444,8 @@
  *
  * Datasource created with Vert.x JDBC clients are exposed as _datasource_.
  *
- * * `delay` - A <<timer>> measuring the duration of the delay to obtain the resource, i.e the time in the queue
- * * `queued` - A <<counter>> of the actual number of waiters in the queue
+ * * `queue-delay` - A <<timer>> measuring the duration of the delay to obtain the resource, i.e the wait time in the queue
+ * * `queue-size` - A <<counter>> of the actual number of waiters in the queue
  * * `usage` - A <<timer>> measuring the duration of the usage of the resource
  * * `in-use` - A <<count>> of the actual number of resources used
  * * `pool-ratio` - A ratio <<gauge>> of the in use resource / pool size

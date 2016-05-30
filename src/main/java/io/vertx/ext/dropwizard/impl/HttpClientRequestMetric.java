@@ -8,6 +8,7 @@ import io.vertx.core.http.HttpMethod;
 public class HttpClientRequestMetric extends RequestMetric {
 
   final EndpointMetric endpointMetric;
+  long requestEnd;
 
   public HttpClientRequestMetric(EndpointMetric endpointMetric, HttpMethod method, String uri) {
     super(method, uri);

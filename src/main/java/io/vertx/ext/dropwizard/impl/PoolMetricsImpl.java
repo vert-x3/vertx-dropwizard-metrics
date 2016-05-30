@@ -11,15 +11,15 @@ import io.vertx.core.spi.metrics.PoolMetrics;
  */
 public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Timer.Context> {
 
-  private final Timer delay;
-  private Counter queued;
+  private final Timer queueDelay;
+  private Counter queueSize;
   private final Timer usage;
   private Counter inUse;
 
   public PoolMetricsImpl(MetricRegistry registry, String baseName, int maxSize) {
     super(registry, baseName);
-    this.queued = counter("queued");
-    this.delay = timer("delay");
+    this.queueSize = counter("queue-size");
+    this.queueDelay = timer("queue-delay");
     this.usage = timer("usage");
     this.inUse = counter("in-use");
     if (maxSize > 0) {
@@ -36,19 +36,19 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
 
   @Override
   public Timer.Context submitted() {
-    queued.inc();
-    return delay.time();
+    queueSize.inc();
+    return queueDelay.time();
   }
 
   @Override
   public void rejected(Timer.Context context) {
-    queued.dec();
+    queueSize.dec();
     context.stop();
   }
 
   @Override
   public Timer.Context begin(Timer.Context context) {
-    queued.dec();
+    queueSize.dec();
     inUse.inc();
     context.stop();
     return usage.time();
