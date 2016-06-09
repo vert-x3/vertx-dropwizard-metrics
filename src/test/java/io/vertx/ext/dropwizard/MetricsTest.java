@@ -1113,11 +1113,11 @@ public class MetricsTest extends MetricsTestBase {
     for (int i = 0;i < size;i++) {
       clients[i] = vertx.createHttpClient();
       HttpClientRequest req = clients[i].get(8080, "localhost", "/", resp -> {
-        responseLatch.countDown();
+        vertx.runOnContext(rlv -> responseLatch.countDown());
       });
       req.connectionHandler(conn -> {
         conn.closeHandler(v -> {
-          closedLatch.countDown();
+          vertx.runOnContext(clv -> closedLatch.countDown());
         });
       });
       req.end();
