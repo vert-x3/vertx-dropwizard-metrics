@@ -385,7 +385,7 @@ vertx = Vertx::Vertx.vertx({
       },
       {
         'value' => "business-.*",
-        'type' => :REGEX
+        'type' => "REGEX"
       }
     ]
   }
@@ -429,7 +429,7 @@ vertx = Vertx::Vertx.vertx({
       },
       {
         'value' => "/foo/.*",
-        'type' => :REGEX
+        'type' => "REGEX"
       }
     ]
   }

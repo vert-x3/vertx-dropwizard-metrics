@@ -386,7 +386,7 @@ def vertx = Vertx.vertx([
       ],
       [
         value:"business-.*",
-        type:MatchType.REGEX
+        type:"REGEX"
       ]
     ]
   ]
@@ -431,7 +431,7 @@ def vertx = Vertx.vertx([
       ],
       [
         value:"/foo/.*",
-        type:MatchType.REGEX
+        type:"REGEX"
       ]
     ]
   ]

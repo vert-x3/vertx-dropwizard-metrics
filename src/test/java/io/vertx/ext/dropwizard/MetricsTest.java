@@ -27,7 +27,6 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.buffer.Buffer;
@@ -54,8 +53,6 @@ import io.vertx.core.net.NetSocket;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
 import io.vertx.test.core.TestUtils;
-import io.vertx.test.fakemetrics.FakeHttpClientMetrics;
-import io.vertx.test.fakemetrics.FakeMetricsBase;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -68,9 +65,7 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,7 +73,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.vertx.test.core.TestUtils.*;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -1119,11 +1113,11 @@ public class MetricsTest extends MetricsTestBase {
     for (int i = 0;i < size;i++) {
       clients[i] = vertx.createHttpClient();
       HttpClientRequest req = clients[i].get(8080, "localhost", "/", resp -> {
-        responseLatch.countDown();
+        vertx.runOnContext(rlv -> responseLatch.countDown());
       });
       req.connectionHandler(conn -> {
         conn.closeHandler(v -> {
-          closedLatch.countDown();
+          vertx.runOnContext(clv -> closedLatch.countDown());
         });
       });
       req.end();
