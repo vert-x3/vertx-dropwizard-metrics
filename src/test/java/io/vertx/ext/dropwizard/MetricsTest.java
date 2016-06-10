@@ -582,7 +582,7 @@ public class MetricsTest extends MetricsTestBase {
     client.close();
     server.close(ar -> {
       assertTrue(ar.succeeded());
-      testComplete();
+      vertx.runOnContext(v -> testComplete());
     });
 
     await();
