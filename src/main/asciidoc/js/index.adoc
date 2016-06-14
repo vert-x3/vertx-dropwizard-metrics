@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:../../jsdoc/measured-Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:../../jsdoc/http_server-HttpServer.html[HttpServer]`,
-`link:../../jsdoc/net_server-NetServer.html[NetServer]`, and even `link:../../jsdoc/vertx-Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the `link:../../jsdoc/module-vertx-js_measured-Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:../../jsdoc/module-vertx-js_http_server-HttpServer.html[HttpServer]`,
+`link:../../jsdoc/module-vertx-js_net_server-NetServer.html[NetServer]`, and even `link:../../jsdoc/module-vertx-js_vertx-Vertx.html[Vertx]` itself.
 
 Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -22,7 +22,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-dropwizard-metrics</artifactId>
-  <version>3.3.0-SNAPSHOT</version>
+  <version>3.3.0.CR2</version>
 </dependency>
 ----
 
@@ -30,7 +30,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-dropwizard-metrics:3.3.0-SNAPSHOT'
+compile 'io.vertx:vertx-dropwizard-metrics:3.3.0.CR2'
 ----
 
 Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
@@ -96,7 +96,7 @@ option allows to reconfigure the metrics from a property file.
 While Vert.x core defines an SPI for reporting metrics (implemented for instance in this project), it does not define
 an API for retrieving metrics (because some metrics collectors just do reporting and nothing more).
 
-The `link:../../jsdoc/metrics_service-MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
+The `link:../../jsdoc/module-vertx-dropwizard-js_metrics_service-MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
 metrics data snapshots.
 
 === Naming
@@ -136,8 +136,8 @@ Array.prototype.forEach.call(metricsNames, function(metricsName) {
 
 === Retrieving metrics
 
-Once enabled, the `link:../../jsdoc/metrics_service-MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:../../jsdoc/measured-Measured.html[Measured]` object which provides a map of the metric name to the data,
+Once enabled, the `link:../../jsdoc/module-vertx-dropwizard-js_metrics_service-MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+`link:../../jsdoc/module-vertx-js_measured-Measured.html[Measured]` object which provides a map of the metric name to the data,
 represented by a `JsonObject`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
 [source,js]
@@ -155,7 +155,7 @@ consult the implementation documentation like https://github.com/vert-x3/vertx-m
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:../../jsdoc/http_server-HttpServer.html[HttpServer]` implements `link:../../jsdoc/measured-Measured.html[Measured]`, you can easily grab all metrics
+Since `link:../../jsdoc/module-vertx-js_http_server-HttpServer.html[HttpServer]` implements `link:../../jsdoc/module-vertx-js_measured-Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
 
 [source,js]
@@ -502,7 +502,7 @@ Base name: `vertx.pool.<type>.<name>` where `type` is the type of the pool (e.g 
 `name` is the name of the pool (e.g `vert.x-worker-thread`).
 
 Pools of type _worker_ are blocking worker pools. Vert.x exposes its worker as _vert.x-worker-thread_ and
-_vert.x-internal-blocking_. Named worker executor created with `link:../../jsdoc/worker_executor-WorkerExecutor.html[WorkerExecutor]` are exposed.
+_vert.x-internal-blocking_. Named worker executor created with `link:../../jsdoc/module-vertx-js_worker_executor-WorkerExecutor.html[WorkerExecutor]` are exposed.
 
 Datasource created with Vert.x JDBC clients are exposed as _datasource_.
 
