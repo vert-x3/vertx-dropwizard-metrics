@@ -582,7 +582,7 @@ public class MetricsTest extends MetricsTestBase {
     client.close();
     server.close(ar -> {
       assertTrue(ar.succeeded());
-      testComplete();
+      vertx.runOnContext(v -> testComplete());
     });
 
     await();
@@ -665,7 +665,8 @@ public class MetricsTest extends MetricsTestBase {
   public void testEventBusMetricsWithHandler() throws Exception {
     long messages = 13;
 
-    CountDownLatch latch = new CountDownLatch((int) messages);
+    CountDownLatch gate = new CountDownLatch(1);
+    CountDownLatch allLatch = new CountDownLatch((int) messages);
     AtomicReference<String> deploymentID = new AtomicReference<>();
 
     vertx.deployVerticle(new AbstractVerticle() {
@@ -675,23 +676,14 @@ public class MetricsTest extends MetricsTestBase {
       @Override
       public void start() throws Exception {
         consumer = vertx.eventBus().consumer("foo").handler(msg -> {
-          if (latch.getCount() == 13) {
-            // Wait until we have piled the 12 messages on the event loop
-            waitUntil(() -> {
-              JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-              JsonObject pending = metrics.getJsonObject("messages.pending-local");
-              int count = pending.getInteger("count");
-              if (count == 12) {
-                int messagesPending = metrics.getJsonObject("messages.pending").getInteger("count");
-                assertTrue("Was expecting to have at least 12 pending messages: " + metrics, messagesPending >= 12);
-                assertEquals(0, (int) metrics.getJsonObject("messages.pending-remote").getInteger("count"));
-                return true;
-              } else {
-                return false;
-              }
-            });
+          try {
+            gate.await();
+          } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Unexpected interrupt", e);
+          } finally {
+            vertx.runOnContext(v -> allLatch.countDown());
           }
-          latch.countDown();
         });
       }
 
@@ -707,8 +699,26 @@ public class MetricsTest extends MetricsTestBase {
       }
     });
 
+    // Wait until we have piled the (n-1) messages on the event loop
+    waitUntil(() -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+      JsonObject pending = metrics.getJsonObject("messages.pending-local");
+      int count = pending.getInteger("count");
+      if (count == messages - 1) {
+        int messagesPending = metrics.getJsonObject("messages.pending").getInteger("count");
+        assertTrue("Was expecting to have at least " + (messages - 1) + " pending messages: " + metrics, messagesPending >= messages - 1);
+        assertEquals(0, (int) metrics.getJsonObject("messages.pending-remote").getInteger("count"));
+        return true;
+      } else {
+        return false;
+      }
+    });
+
+    // Open the gate
+    gate.countDown();
+
     // Wait until all messages have been processed
-    awaitLatch(latch);
+    awaitLatch(allLatch);
 
     // Check global metrics
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
