@@ -1226,6 +1226,7 @@ public class MetricsTest extends MetricsTestBase {
   public void testThreadPoolMetrics() throws Exception {
 
     int size = 5;
+    CountDownLatch done = new CountDownLatch(6);
 
     WorkerExecutor exec = vertx.createSharedWorkerExecutor("the-executor", size);
     JsonObject metrics = metricsService.getMetricsSnapshot(exec);
@@ -1245,23 +1246,24 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(metrics.getJsonObject("max-pool-size").getInteger("value"), (Integer)5);
 
     //
-    CountDownLatch latch1 = new CountDownLatch(1);
-    CountDownLatch latch2 = new CountDownLatch(5);
+    CountDownLatch gate = new CountDownLatch(1);
+    CountDownLatch latch = new CountDownLatch(5);
     for (int i = 0; i < size;i++) {
       exec.<Boolean>executeBlocking(fut -> {
         try {
-          latch2.countDown();
-          fut.complete(latch1.await(10, TimeUnit.SECONDS));
+          latch.countDown();
+          fut.complete(gate.await(10, TimeUnit.SECONDS));
         } catch (InterruptedException e) {
           fut.fail(e);
         }
       }, false, ar -> {
         assertTrue(ar.succeeded());
         assertTrue(ar.result());
+        vertx.runOnContext(v -> done.countDown());
       });
     }
 
-    awaitLatch(latch2);
+    awaitLatch(latch);
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 0);
     assertCount(metrics.getJsonObject("queue-delay"), 5);
@@ -1269,8 +1271,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
 
-    CountDownLatch done = new CountDownLatch(1);
-    exec.executeBlocking(Future::complete, false, ar -> done.countDown());
+    exec.executeBlocking(Future::complete, false, ar -> vertx.runOnContext(v -> done.countDown()));
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 0);
     assertCount(metrics.getJsonObject("queue-delay"), 5);
@@ -1278,7 +1279,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
 
-    latch1.countDown();
+    gate.countDown();
     awaitLatch(done);
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 6);
