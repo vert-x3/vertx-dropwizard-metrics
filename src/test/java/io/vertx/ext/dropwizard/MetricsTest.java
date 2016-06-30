@@ -898,6 +898,30 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
+  public void testPendingCount() {
+    Context ctx = vertx.getOrCreateContext();
+    ctx.runOnContext(v -> {
+      EventBus eb = vertx.eventBus();
+      MessageConsumer<Object> consumer = eb.consumer("foo");
+      consumer.handler(msg -> {
+        fail("should not be called");
+      });
+      eb.send("foo", "the_message", new DeliveryOptions().setSendTimeout(30), ar -> {
+        assertFalse(ar.succeeded());
+        JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+        assertCount(metrics.getJsonObject("messages.pending"), 0L);
+        assertCount(metrics.getJsonObject("messages.pending-local"), 0L);
+        testComplete();
+      });
+      JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+      assertCount(metrics.getJsonObject("messages.pending"), 1L);
+      assertCount(metrics.getJsonObject("messages.pending-local"), 1L);
+      consumer.unregister();
+    });
+    await();
+  }
+
+  @Test
   public void testVertxMetrics() throws Exception {
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
     assertNotNull(metrics.getJsonObject("vertx.event-loop-size"));

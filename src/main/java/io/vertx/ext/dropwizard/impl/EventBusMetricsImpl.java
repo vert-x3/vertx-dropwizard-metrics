@@ -19,6 +19,7 @@ package io.vertx.ext.dropwizard.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
@@ -113,6 +114,22 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   }
 
   @Override
+  public void scheduleMessage(HandlerMetric handler, boolean local) {
+    pending.inc();
+    if (local) {
+      pendingLocal.inc();
+      if (handler != null) {
+        handler.pendingLocalCount++;
+      }
+    } else {
+      pendingRemote.inc();
+      if (handler != null) {
+        handler.pendingRemoteCount++;
+      }
+    }
+  }
+
+  @Override
   public void beginHandleMessage(HandlerMetric handler, boolean local) {
     pending.dec();
     if (local) {
@@ -122,6 +139,11 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     }
     if (handler != null) {
       handler.start = System.nanoTime();
+      if (local) {
+        handler.pendingLocalCount--;
+      } else {
+        handler.pendingRemoteCount--;
+      }
     }
   }
 
@@ -153,14 +175,11 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   @Override
   public void messageReceived(String address, boolean publish, boolean local, int handlers) {
-    pending.inc(handlers);
     receivedMessages.mark();
     if (local) {
       receivedLocalMessages.mark();
-      pendingLocal.inc(handlers);
     } else {
       receivedRemoteMessages.mark();
-      pendingRemote.inc(handlers);
     }
     if (handlers > 0) {
       deliveredMessages.mark();
@@ -178,6 +197,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     final Timer timer;
     final String name;
     long start;
+    long pendingLocalCount;
+    long pendingRemoteCount;
 
     public HandlerMetric(String address) {
       this.address = address;
@@ -203,6 +224,9 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
     void remove() {
       while (true) {
+        EventBusMetricsImpl.this.pending.dec(pendingLocalCount + pendingRemoteCount);
+        EventBusMetricsImpl.this.pendingLocal.dec(pendingLocalCount);
+        EventBusMetricsImpl.this.pendingRemote.dec(pendingRemoteCount);
         HandlerTimer existing = handlerTimers.get(address);
         HandlerTimer next = existing.dec();
         if (next.refCount == 0) {
