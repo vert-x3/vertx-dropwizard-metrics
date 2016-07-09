@@ -132,7 +132,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
       baseName = "http.clients";
     }
     HttpClientReporter reporter = clientReporters.computeIfAbsent(baseName, n -> new HttpClientReporter(registry, baseName, null));
-    return new HttpClientMetricsImpl(this, reporter, options, this.options.getMonitoredHttpClientUris());
+    return new HttpClientMetricsImpl(this, reporter, options, this.options.getMonitoredHttpClientUris(), this.options.getMonitoredHttpClientEndpoint());
   }
 
   synchronized void closed(HttpClientMetricsImpl metrics) {
