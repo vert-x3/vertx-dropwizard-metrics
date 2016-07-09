@@ -17,9 +17,12 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.DerivativeGauge;
+import com.codahale.metrics.ExponentiallyDecayingReservoir;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import io.vertx.core.json.JsonObject;
@@ -106,31 +109,59 @@ public abstract class AbstractMetrics implements Metrics {
   }
 
   protected <T> Gauge<T> gauge(Gauge<T> gauge, String... names) {
-    return registry.register(nameOf(names), gauge);
+    try {
+      return registry.register(nameOf(names), gauge);
+    } catch (IllegalArgumentException e) {
+      return gauge;
+    }
   }
 
   protected Counter counter(String... names) {
-    return registry.counter(nameOf(names));
+    try {
+      return registry.counter(nameOf(names));
+    } catch (Exception e) {
+      return new Counter();
+    }
   }
 
   protected Histogram histogram(String... names) {
-    return registry.histogram(nameOf(names));
+    try {
+      return registry.histogram(nameOf(names));
+    } catch (Exception e) {
+      return new Histogram(new ExponentiallyDecayingReservoir());
+    }
   }
 
   protected Meter meter(String... names) {
-    return registry.meter(nameOf(names));
+    try {
+      return registry.meter(nameOf(names));
+    } catch (Exception e) {
+      return new Meter();
+    }
   }
 
   protected Timer timer(String... names) {
-    return registry.timer(nameOf(names));
+    try {
+      return registry.timer(nameOf(names));
+    } catch (Exception e) {
+      return new Timer();
+    }
   }
 
   protected ThroughputMeter throughputMeter(String... names) {
-    return RegistryHelper.throughputMeter(registry, nameOf(names));
+    try {
+      return RegistryHelper.throughputMeter(registry, nameOf(names));
+    } catch (Exception e) {
+      return new ThroughputMeter();
+    }
   }
 
   protected ThroughputTimer throughputTimer(String... names) {
-    return RegistryHelper.throughputTimer(registry, nameOf(names));
+    try {
+      return RegistryHelper.throughputTimer(registry, nameOf(names));
+    } catch (Exception e) {
+      return new ThroughputTimer();
+    }
   }
 
   protected void remove(String... names) {
