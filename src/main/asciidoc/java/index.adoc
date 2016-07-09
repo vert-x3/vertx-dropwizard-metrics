@@ -434,6 +434,24 @@ Endpoint metrics are available too:
 
 where <host> is the endpoint host name possibly unresolved and <port> the TCP port.
 
+The monitored endpoints are configurable via a match performed on the server `$host:$port`.
+The default for this setting is to monitor no endpoints.
+
+The monitored endpoints can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
+a specific hostname match or a regex match:
+
+[source,java]
+----
+Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+    new DropwizardMetricsOptions().
+        setEnabled(true).
+        addMonitoredHttpClientEndpoint(
+            new Match().setValue("some-host:80")).
+        addMonitoredHttpClientEndpoint(
+            new Match().setValue("another-host:.*").setType(MatchType.REGEX))
+));
+----
+
 [[net-server-metrics]]
 === Net server metrics
 
