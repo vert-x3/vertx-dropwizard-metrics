@@ -30,14 +30,6 @@ Set whether JMX will be enabled on the Vert.x instance.
 +++
 Add a monitored event bus handler.
 +++
-|[[monitoredHttpClientEndpoint]]`monitoredHttpClientEndpoint`|`Array of link:dataobjects.html#Match[Match]`|
-+++
-@return the list of monitored http client endpoints
-+++
-|[[monitoredHttpClientEndpoints]]`monitoredHttpClientEndpoints`|`Array of link:dataobjects.html#Match[Match]`|
-+++
-Add an monitored http client endpoint.
-+++
 |[[monitoredHttpClientUris]]`monitoredHttpClientUris`|`Array of link:dataobjects.html#Match[Match]`|
 +++
 Add an monitored http client uri.

@@ -100,8 +100,7 @@ public class MetricsTest extends MetricsTestBase {
                 addMonitoredEventBusHandler(new Match().setValue("foo")).
                 addMonitoredEventBusHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
                 addMonitoredHttpServerUri(new Match().setValue("/get")).
-                addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX)).
-                addMonitoredHttpClientEndpoint(new Match().setValue("localhost:8080"))
+                addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX))
         );
   }
 
