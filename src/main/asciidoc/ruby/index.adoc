@@ -467,32 +467,6 @@ Endpoint metrics are available too:
 
 where <host> is the endpoint host name possibly unresolved and <port> the TCP port.
 
-The monitored endpoints are configurable via a match performed on the server `$host:$port`.
-The default for this setting is to monitor no endpoints.
-
-The monitored endpoints can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
-a specific hostname match or a regex match:
-
-[source,ruby]
-----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'monitoredHttpClientEndpoints' => [
-      {
-        'value' => "some-host:80"
-      },
-      {
-        'value' => "another-host:.*",
-        'type' => "REGEX"
-      }
-    ]
-  }
-})
-
-----
-
 [[net-server-metrics]]
 === Net server metrics
 

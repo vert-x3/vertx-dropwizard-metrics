@@ -79,17 +79,6 @@ public class MetricsExamples {
     ));
   }
 
-  public void setupMonitoredEndpoints() {
-    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-        new DropwizardMetricsOptions().
-            setEnabled(true).
-            addMonitoredHttpClientEndpoint(
-                new Match().setValue("some-host:80")).
-            addMonitoredHttpClientEndpoint(
-                new Match().setValue("another-host:.*").setType(MatchType.REGEX))
-    ));
-  }
-
   public void naming1(Vertx vertx, MetricsService metricsService) {
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
     metrics.getJsonObject("vertx.eventbus.handlers");
