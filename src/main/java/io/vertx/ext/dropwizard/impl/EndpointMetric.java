@@ -28,6 +28,11 @@ public class EndpointMetric {
   }
 
   void close(HttpClientReporter reporter) {
-    reporter.remove("endpoint", name);
+    reporter.remove("endpoint", name, "queue-delay");
+    reporter.remove("endpoint", name, "queue-size");
+    reporter.remove("endpoint", name, "open-netsockets");
+    reporter.remove("endpoint", name, "usage");
+    reporter.remove("endpoint", name, "ttfb");
+    reporter.remove("endpoint", name, "in-use");
   }
 }
