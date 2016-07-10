@@ -22,7 +22,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-dropwizard-metrics</artifactId>
-  <version>3.3.1</version>
+  <version>3.3.2</version>
 </dependency>
 ----
 
@@ -30,7 +30,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-dropwizard-metrics:3.3.1'
+compile 'io.vertx:vertx-dropwizard-metrics:3.3.2'
 ----
 
 Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
@@ -466,6 +466,32 @@ Endpoint metrics are available too:
 * `endpoint.<host:port>.ttfb` - A <<timer>> of the wait time between the request ended and its response begins
 
 where <host> is the endpoint host name possibly unresolved and <port> the TCP port.
+
+The monitored endpoints are configurable via a match performed on the server `$host:$port`.
+The default for this setting is to monitor no endpoints.
+
+The monitored endpoints can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+a specific hostname match or a regex match:
+
+[source,js]
+----
+var Vertx = require("vertx-js/vertx");
+var vertx = Vertx.vertx({
+  "metricsOptions" : {
+    "enabled" : true,
+    "monitoredHttpClientEndpoints" : [
+      {
+        "value" : "some-host:80"
+      },
+      {
+        "value" : "another-host:.*",
+        "type" : "REGEX"
+      }
+    ]
+  }
+});
+
+----
 
 [[net-server-metrics]]
 === Net server metrics
