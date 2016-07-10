@@ -35,52 +35,70 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
+  private final Matcher endpointMatcher;
   final HttpClientReporter clientReporter;
   final int maxPoolSize;
 
-  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris) {
+  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris, List<Match> monitoredEndpoints) {
     super(clientReporter.registry, clientReporter.baseName);
     this.owner = owner;
     this.clientReporter = clientReporter;
     this.uriMatcher = new Matcher(monitoredUris);
+    this.endpointMatcher = new Matcher(monitoredEndpoints);
     clientReporter.incMaxPoolSize(maxPoolSize = options.getMaxPoolSize());
   }
 
   @Override
   public EndpointMetric createEndpoint(String host, int port, int maxPoolSize) {
-    return new EndpointMetric(clientReporter, host, port);
+    String name = host + ":" + port;
+    if (endpointMatcher.match(name)) {
+      return new EndpointMetric(clientReporter, name);
+    } else {
+      return null;
+    }
   }
 
   @Override
   public void closeEndpoint(String host, int port, EndpointMetric endpointMetric) {
-    endpointMetric.close(clientReporter);
   }
 
   @Override
   public Timer.Context enqueueRequest(EndpointMetric endpointMetric) {
-    endpointMetric.queueSize.inc();
-    return endpointMetric.queueDelay.time();
+    if (endpointMetric != null) {
+      endpointMetric.queueSize.inc();
+      return endpointMetric.queueDelay.time();
+    } else {
+      return null;
+    }
   }
 
   @Override
   public void dequeueRequest(EndpointMetric endpointMetric, Timer.Context taskMetric) {
-    endpointMetric.queueSize.dec();
-    taskMetric.stop();
+    if (endpointMetric != null) {
+      endpointMetric.queueSize.dec();
+      taskMetric.stop();
+    }
   }
 
   @Override
   public void endpointConnected(EndpointMetric endpointMetric,Long socketMetric) {
-    endpointMetric.openConnections.inc();
+    if (endpointMetric != null) {
+      endpointMetric.openConnections.inc();
+    }
   }
 
   @Override
   public void endpointDisconnected(EndpointMetric endpointMetric, Long socketMetric) {
-    endpointMetric.openConnections.dec();
+    if (endpointMetric != null) {
+      endpointMetric.openConnections.dec();
+    }
   }
 
   @Override
   public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    endpointMetric.inUse.inc();
+    if (endpointMetric != null) {
+      endpointMetric.inUse.inc();
+    }
     return new HttpClientRequestMetric(endpointMetric, request.method(), request.uri());
   }
 
@@ -92,27 +110,35 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   @Override
   public void responseBegin(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
     long waitTime = System.nanoTime() - requestMetric.requestEnd;
-    requestMetric.endpointMetric.ttfb.update(waitTime, TimeUnit.NANOSECONDS);
+    if (requestMetric.endpointMetric != null) {
+      requestMetric.endpointMetric.ttfb.update(waitTime, TimeUnit.NANOSECONDS);
+    }
   }
 
   @Override
   public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    endpointMetric.inUse.inc();
+    if (endpointMetric != null) {
+      endpointMetric.inUse.inc();
+    }
     return requestBegin(endpointMetric, socketMetric, localAddress, remoteAddress, request);
   }
 
   @Override
   public void requestReset(HttpClientRequestMetric requestMetric) {
-    requestMetric.endpointMetric.inUse.dec();
     long duration = clientReporter.end(requestMetric, 0, requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
-    requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
+    if (requestMetric.endpointMetric != null) {
+      requestMetric.endpointMetric.inUse.dec();
+      requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
+    }
   }
 
   @Override
   public void responseEnd(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
-    requestMetric.endpointMetric.inUse.dec();
     long duration = clientReporter.end(requestMetric, response.statusCode(), requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
-    requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
+    if (requestMetric.endpointMetric != null) {
+      requestMetric.endpointMetric.inUse.dec();
+      requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
+    }
   }
 
   @Override

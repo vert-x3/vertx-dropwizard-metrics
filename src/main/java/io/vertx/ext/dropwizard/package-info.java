@@ -405,6 +405,17 @@
  *
  * where <host> is the endpoint host name possibly unresolved and <port> the TCP port.
  *
+ * The monitored endpoints are configurable via a match performed on the server `$host:$port`.
+ * The default for this setting is to monitor no endpoints.
+ *
+ * The monitored endpoints can be configured in the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions} via
+ * a specific hostname match or a regex match:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMonitoredEndpoints()}
+ * ----
+ *
  * [[net-server-metrics]]
  * === Net server metrics
  *

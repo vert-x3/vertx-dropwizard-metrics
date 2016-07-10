@@ -53,12 +53,18 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_URIS = Collections.emptyList();
 
+  /**
+   * The default monitored http client endpoints : empty by default
+   */
+  public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS = Collections.emptyList();
+
   private String registryName;
   private boolean jmxEnabled;
   private String jmxDomain;
   private List<Match> monitoredEventBusHandlers;
   private List<Match> monitoredHttpServerUris;
   private List<Match> monitoredHttpClientUris;
+  private List<Match> monitoredHttpClientEndpoints;
   private String configPath;
 
   /**
@@ -69,6 +75,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
     monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
     monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
+    monitoredHttpClientEndpoints = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS);
   }
 
   /**
@@ -82,6 +89,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
     monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
     monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
+    monitoredHttpClientEndpoints = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS);
   }
 
   /**
@@ -98,6 +106,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
     monitoredHttpServerUris = new ArrayList<>(other.monitoredHttpServerUris);
     monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
+    monitoredHttpClientEndpoints = new ArrayList<>(other.monitoredHttpClientEndpoints);
   }
 
   /**
@@ -114,6 +123,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
     monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
     monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
+    monitoredHttpClientEndpoints = loadMonitored("monitoredClientEndpoints", json);
   }
 
   private List<Match> loadMonitored(String arrayField, JsonObject json) {
@@ -268,4 +278,23 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredHttpClientUris.add(match);
     return this;
   }
+
+  /**
+   * Add an monitored http client endpoint.
+   *
+   * @param match the handler match
+   * @return a reference to this, so the API can be used fluently
+   */
+  public DropwizardMetricsOptions addMonitoredHttpClientEndpoint(Match match) {
+    monitoredHttpClientEndpoints.add(match);
+    return this;
+  }
+
+  /**
+   * @return the list of monitored http client endpoints
+   */
+  public List<Match> getMonitoredHttpClientEndpoint() {
+    return monitoredHttpClientEndpoints;
+  }
+
 }
