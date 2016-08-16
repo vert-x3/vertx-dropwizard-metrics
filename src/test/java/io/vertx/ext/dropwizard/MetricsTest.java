@@ -50,6 +50,7 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.NetSocket;
+import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
 import io.vertx.test.core.TestUtils;
@@ -457,6 +458,18 @@ public class MetricsTest extends MetricsTestBase {
 
     cleanup(client);
     cleanup(server);
+  }
+
+  @Test
+  public void testHttpClientMetricsName() throws Exception {
+    String name = TestUtils.randomAlphaString(10);
+    HttpClient namedClient = vertx.createHttpClient(new HttpClientOptions().setMetricsName(name));
+    assertEquals(AbstractMetrics.unwrap(namedClient).baseName(), "vertx.http.clients." + name);
+    cleanup(namedClient);
+
+    HttpClient unnamedClient = vertx.createHttpClient();
+    assertEquals(AbstractMetrics.unwrap(unnamedClient).baseName(), "vertx.http.clients");
+    cleanup(unnamedClient);
   }
 
   @Test
