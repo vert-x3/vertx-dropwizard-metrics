@@ -7,3 +7,8 @@ Metrics Service Provider implementations for Vert.x using [Dropwizard metrics](h
 ## Documentation
 
 See https://github.com/vert-x3/vertx-dropwizard-metrics/blob/master/src/main/asciidoc/java/index.adoc
+
+
+## Using Vert.x Dropwizard Metrics as an OSGi Metrics
+
+To use this project as an OSGi bundle check https://github.com/vert-x3/issues/issues/178#issuecomment-241643262
