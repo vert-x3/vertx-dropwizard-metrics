@@ -54,7 +54,6 @@ public class MetricsService {
 
   /**
    * @param measured the measure object
-   * @param measured 
    * @return the base name of the measured object
    */
   public String getBaseName(Measured measured) { 
@@ -64,7 +63,6 @@ public class MetricsService {
 
   /**
    * @return the known metrics names by this service
-   * @return 
    */
   public Set<String> metricsNames() { 
     Set<String> ret = delegate.metricsNames();

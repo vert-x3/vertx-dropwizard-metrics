@@ -34,10 +34,9 @@ var MetricsService = function(j_val) {
   var that = this;
 
   /**
-   @param measured the measure object
 
    @public
-   @param measured {Measured} 
+   @param measured {Measured} the measure object 
    @return {string} the base name of the measured object
    */
   this.getBaseName = function(measured) {
@@ -48,11 +47,10 @@ var MetricsService = function(j_val) {
   };
 
   /**
-   @return the known metrics names by this service
 
    @public
 
-   @return {Array.<string>}
+   @return {Array.<string>} the known metrics names by this service
    */
   this.metricsNames = function() {
     var __args = arguments;

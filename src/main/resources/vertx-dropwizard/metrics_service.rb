@@ -24,8 +24,7 @@ module VertxDropwizard
       end
       raise ArgumentError, "Invalid arguments when calling create(vertx)"
     end
-    #  @param measured the measure object
-    # @param [::Vertx::Measured] measured 
+    # @param [::Vertx::Measured] measured the measure object
     # @return [String] the base name of the measured object
     def get_base_name(measured=nil)
       if measured.class.method_defined?(:j_del) && !block_given?
@@ -33,8 +32,7 @@ module VertxDropwizard
       end
       raise ArgumentError, "Invalid arguments when calling get_base_name(measured)"
     end
-    #  @return the known metrics names by this service
-    # @return [Set<String>]
+    # @return [Set<String>] the known metrics names by this service
     def metrics_names
       if !block_given?
         return ::Vertx::Util::Utils.to_set(@j_del.java_method(:metricsNames, []).call()).map! { |elt| elt }

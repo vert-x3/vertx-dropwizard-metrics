@@ -32,7 +32,7 @@ Add a monitored event bus handler.
 +++
 |[[monitoredHttpClientEndpoint]]`monitoredHttpClientEndpoint`|`Array of link:dataobjects.html#Match[Match]`|
 +++
-@return the list of monitored http client endpoints
+
 +++
 |[[monitoredHttpClientEndpoints]]`monitoredHttpClientEndpoints`|`Array of link:dataobjects.html#Match[Match]`|
 +++
