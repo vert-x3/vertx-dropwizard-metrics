@@ -11,4 +11,12 @@ See https://github.com/vert-x3/vertx-dropwizard-metrics/blob/master/src/main/asc
 
 ## Using Vert.x Dropwizard Metrics as an OSGi Metrics
 
-To use this project as an OSGi bundle check https://github.com/vert-x3/issues/issues/178#issuecomment-241643262
+To use this project as an OSGi bundle check these examples:
+
+* using a bridge classloader to load Vert.x and the VertxMetricFactory using the same classloader:
+ https://github.com/vert-x3/issues/issues/178#issuecomment-241643262
+ 
+* using a class dealing with the Vert.x SPI:
+ https://github.com/vert-x3/issues/issues/178#issuecomment-241974500
+ 
+ 
