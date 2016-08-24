@@ -37,7 +37,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
 
   private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
 
-  public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAdress) {
+  public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
     super(registry, baseName);
     openWebSockets = counter("open-websockets");
     requests = throughputTimer("requests");
