@@ -58,15 +58,19 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
     // Connection metrics
     openConnections.inc();
 
-    // Remote address connection metrics
-    counter("open-connections", remoteAddress.host()).inc();
+    // On network outage the remoteAddress can be null.
+    // Do not report the open-connections when it's null
+    if (remoteAddress != null) {
+      // Remote address connection metrics
+      counter("open-connections", remoteAddress.host()).inc();
+
+    }
 
     // A little clunky, but it's possible we got here after closed has been called
     if (closed) {
       removeAll();
     }
 
-    //
     return System.nanoTime();
   }
 
@@ -75,11 +79,15 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
     openConnections.dec();
     connections.update(System.nanoTime() - ctx, TimeUnit.NANOSECONDS);
 
-    // Remote address connection metrics
-    Counter counter = counter("open-connections", remoteAddress.host());
-    counter.dec();
-    if (counter.getCount() == 0) {
-      remove("open-connections", remoteAddress.host());
+    // On network outage the remoteAddress can be null.
+    // Do not report the open-connections when it's null
+    if (remoteAddress != null) {
+      // Remote address connection metrics
+      Counter counter = counter("open-connections", remoteAddress.host());
+      counter.dec();
+      if (counter.getCount() == 0) {
+        remove("open-connections", remoteAddress.host());
+      }
     }
 
     // A little clunky, but it's possible we got here after closed has been called
