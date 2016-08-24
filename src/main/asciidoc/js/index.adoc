@@ -581,6 +581,14 @@ var vertx = Vertx.vertx({
 
 ----
 
+In the command line, just append the following system properties to your application (works for the `vertx` cli and
+fat jars):
+
+[source]
+----
+-Dvertx.metrics.options.jmxEnabled=true -Dvertx.metrics.options.jmxDomain=vertx
+----
+
 == Enabling remote JMX
 
 If you want the metrics to be exposed remotely over JMX, then you need to set, at minimum the following system property:
@@ -685,3 +693,44 @@ in the Vert.x configuration:
 image::../../images/hawtio-jmx.png[]
 
 From this, you can configure your dashboard and retrieve any metric exposed by vert.x.
+
+== Using Jolokia and JMX4Perl to expose metrics to Nagios
+
+http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[Check_jmx4perl] is a Nagios plugin using jmx4perl for
+accessing JMX data remotely. It lets you expose the Vert.x metrics to Nagios.
+
+First you need to start your application with the Jolokia JVM agent attached to it. There are several ways to
+attach jolokia. See https://jolokia.org/reference/html/architecture.html[for further details]. Here, we explain how
+to use the Jolokia agent with the default configuration. Refer to the https://jolokia.org/reference/html/[the jolokia
+documentation] to configure it.
+
+The agent can either be attached when you start the application or attached on a running JVM (you would need
+special permission to access the process). In the first case, launch you application using:
+
+[source]
+----
+java -javaagent:/.../agents/jolokia-jvm.jar=port=7777,host=localhost -jar ...
+----
+
+The `-javaagent` specifies the path to the jolokia agent jar file. You can configure the port and host from the
+command line. Here it registers the REST endpoint on `http://localhost:7777`.
+
+You can also attach the agent on a running JVM with:
+
+[source]
+----
+java -jar jolokia-jvm.jar start PID
+----
+
+Replace `PID` with the process id of the JVM.
+
+Once Jolokia is started, you can configure your Nagios check such as:
+
+[source]
+----
+check_jmx4perl --url http://10.0.2.2:8778/jolokia --name eventloops --mbean vertx:name=vertx.event-loop-size
+--attribute Value --warning 4
+----
+
+Check http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[check_jmx4perl documentation] to get more
+details about check configuration.
