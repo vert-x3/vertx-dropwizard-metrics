@@ -180,7 +180,9 @@
             io.vertx.rxjava.ext.auth.*;resolution:=optional,\
             rx.*;resolution:=optional,\
             io.vertx.ext.shell.*;resolution:=optional,\
-            *
+	    *
+	    Require-Capability: osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"
+	    Provide-Capability: osgi.serviceloader; osgi.serviceloader=io.vertx.core.spi.VertxMetricsFactory
           -exportcontents: !*impl, !examples, *
           ]]></bnd>
         </configuration>
