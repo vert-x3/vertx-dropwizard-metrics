@@ -20,3 +20,6 @@ To use this project as an OSGi bundle check these examples:
  https://github.com/vert-x3/issues/issues/178#issuecomment-241974500
  
  
+You can also use Apache Aries SPY-Fly to expose a `io.vertx.core.spi.VertxMetricsFactory` service and manage the classloading for you. 
+ 
+ 
