@@ -181,6 +181,8 @@
             rx.*;resolution:=optional,\
             io.vertx.ext.shell.*;resolution:=optional,\
             *
+          Require-Capability: osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"; resolution:="optional"
+          Provide-Capability: osgi.serviceloader; osgi.serviceloader=io.vertx.core.spi.VertxMetricsFactory
           -exportcontents: !*impl, !examples, *
           ]]></bnd>
         </configuration>
