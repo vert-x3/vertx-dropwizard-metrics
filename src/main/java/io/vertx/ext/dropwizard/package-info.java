@@ -481,7 +481,7 @@
  * `vertx` or `vertx.bat` script:
  *
  * ----
- * JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.options.jmxEnabled=true"
+ * JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true"
  * ----
  *
  * You can configure the domain under which the MBeans will be created:
