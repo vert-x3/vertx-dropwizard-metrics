@@ -293,10 +293,10 @@ public class MetricsTest extends MetricsTestBase {
     test(300, "responses-3xx");
     test(404, "responses-4xx");
     test(500, "responses-5xx");
-
   }
 
   private void test(int code, String metricName) throws Exception {
+    CountDownLatch closeLatch = new CountDownLatch(2);
     CountDownLatch latch = new CountDownLatch(1);
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
     Handler<HttpServer> doTest = (server) -> {
@@ -314,10 +314,14 @@ public class MetricsTest extends MetricsTestBase {
           }
           latch.countDown();
         });
+      }).connectionHandler(connection -> {
+        connection.closeHandler(v -> closeLatch.countDown());
       }).end();
     };
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().setStatusCode(code).end();
+    }).connectionHandler(connection -> {
+      connection.closeHandler(v -> closeLatch.countDown());
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       doTest.handle(ar.result());
@@ -325,6 +329,7 @@ public class MetricsTest extends MetricsTestBase {
     awaitLatch(latch);
     cleanup(client);
     cleanup(server);
+    awaitLatch(closeLatch);
   }
 
   @Test
