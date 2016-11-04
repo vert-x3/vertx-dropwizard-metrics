@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:../../groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:../../groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]`,
-`link:../../groovydoc/io/vertx/groovy/core/net/NetServer.html[NetServer]`, and even `link:../../groovydoc/io/vertx/groovy/core/Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:../../apidocs/io/vertx/core/http/HttpServer.html[HttpServer]`,
+`link:../../apidocs/io/vertx/core/net/NetServer.html[NetServer]`, and even `link:../../apidocs/io/vertx/core/Vertx.html[Vertx]` itself.
 
 Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -33,11 +33,11 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 compile 'io.vertx:vertx-dropwizard-metrics:3.4.0-SNAPSHOT'
 ----
 
-Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
+Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
 [source,groovy]
 ----
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true
@@ -50,7 +50,7 @@ You can also enable JMX:
 
 [source,groovy]
 ----
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     jmxEnabled:true
@@ -73,22 +73,22 @@ options must be set to `true`:
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#setRegistryName(java.lang.String)[vertx.metrics.options.registryName]`
+The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setRegistryName-java.lang.String-[vertx.metrics.options.registryName]`
 configures the <<dropwizard-registry,Dropwizard Registry>> to use:
 
 ----
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=my-registry
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#setJmxEnabled(boolean)[vertx.metrics.options.jmxEnabled]` and
-`link:../dataobjects.html#DropwizardMetricsOptions#setJmxDomain(java.lang.String)[vertx.metrics.options.jmxDomain]`
+The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setJmxEnabled-boolean-[vertx.metrics.options.jmxEnabled]` and
+`link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setJmxDomain-java.lang.String-[vertx.metrics.options.jmxDomain]`
 configures the <<jmx,JMX>> registration:
 
 ----
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.jmxEnabled=true ...
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#setConfigPath(java.lang.String)[vertx.metrics.options.configPath]`
+The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setConfigPath-java.lang.String-[vertx.metrics.options.configPath]`
 option allows to reconfigure the metrics from a property file.
 
 == Metrics service
@@ -96,7 +96,7 @@ option allows to reconfigure the metrics from a property file.
 While Vert.x core defines an SPI for reporting metrics (implemented for instance in this project), it does not define
 an API for retrieving metrics (because some metrics collectors just do reporting and nothing more).
 
-The `link:../../groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
+The `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
 metrics data snapshots.
 
 === Naming
@@ -136,31 +136,31 @@ metricsNames.each { metricsName ->
 
 === Retrieving metrics
 
-Once enabled, the `link:../../groovydoc/io/vertx/groovy/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:../../groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
-represented by a `JsonObject`. So for example if we were to print out all metrics
+Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+`link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
+represented by a `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
 [source,groovy]
 ----
-import io.vertx.groovy.ext.dropwizard.MetricsService
+import io.vertx.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def metrics = metricsService.getMetricsSnapshot(vertx)
 println(metrics)
 
 ----
 
-NOTE: For details on the actual contents of the data (the actual metric) represented by the `JsonObject`
+NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`
 consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
 
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:../../groovydoc/io/vertx/groovy/core/http/HttpServer.html[HttpServer]` implements `link:../../groovydoc/io/vertx/groovy/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
+Since `link:../../apidocs/io/vertx/core/http/HttpServer.html[HttpServer]` implements `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
 
 [source,groovy]
 ----
-import io.vertx.groovy.ext.dropwizard.MetricsService
+import io.vertx.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def server = vertx.createHttpServer()
 // set up server
@@ -172,7 +172,7 @@ Metrics can also be retrieved using a base name:
 
 [source,groovy]
 ----
-import io.vertx.groovy.ext.dropwizard.MetricsService
+import io.vertx.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message")
 
@@ -370,13 +370,13 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
 [source,groovy]
 ----
 import io.vertx.ext.dropwizard.MatchType
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -421,7 +421,7 @@ Http URI metrics must be explicitely configured in the options either by exact m
 [source,groovy]
 ----
 import io.vertx.ext.dropwizard.MatchType
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -444,7 +444,7 @@ def vertx = Vertx.vertx([
 === Http client metrics
 
 Base name: `vertx.http.clients` (by default) or `vertx.http.clients.<id>` where `<id>` is a non empty string
-configured by `link:../../vertx-core/dataobjects.html#HttpClientOptions#setMetricsName(java.lang.String)[metricsName]`.
+configured by `link:../../apidocs/io/vertx/core/http/HttpClientOptions.html#setMetricsName-java.lang.String-[setMetricsName]`.
 
 Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
 
@@ -472,13 +472,13 @@ where <host> is the endpoint host name possibly unresolved and <port> the TCP po
 The monitored endpoints are configurable via a match performed on the server `$host:$port`.
 The default for this setting is to monitor no endpoints.
 
-The monitored endpoints can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+The monitored endpoints can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific hostname match or a regex match:
 
 [source,groovy]
 ----
 import io.vertx.ext.dropwizard.MatchType
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -511,7 +511,7 @@ Base name: `vertx.net.servers.<host>:<port>`
 === Net client metrics
 
 Base name: `vertx.net.clients` (by default) or `vertx.net.clients.<id>` where `<id>` is a non empty string
-configured by `link:../../vertx-core/dataobjects.html#NetClientOptions#setMetricsName(java.lang.String)[metricsName]`.
+configured by `link:../../apidocs/io/vertx/core/net/NetClientOptions.html#setMetricsName-java.lang.String-[setMetricsName]`.
 
 Net client includes all the metrics of a <<net-server-metrics,Net Server>>
 
@@ -531,7 +531,7 @@ Base name: `vertx.pool.<type>.<name>` where `type` is the type of the pool (e.g 
 `name` is the name of the pool (e.g `vert.x-worker-thread`).
 
 Pools of type _worker_ are blocking worker pools. Vert.x exposes its worker as _vert.x-worker-thread_ and
-_vert.x-internal-blocking_. Named worker executor created with `link:../../groovydoc/io/vertx/groovy/core/WorkerExecutor.html[WorkerExecutor]` are exposed.
+_vert.x-internal-blocking_. Named worker executor created with `link:../../apidocs/io/vertx/core/WorkerExecutor.html[WorkerExecutor]` are exposed.
 
 Datasource created with Vert.x JDBC clients are exposed as _datasource_.
 
@@ -554,7 +554,7 @@ If you want JMX, then you need to enabled that:
 
 [source,groovy]
 ----
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     jmxEnabled:true
@@ -574,7 +574,7 @@ You can configure the domain under which the MBeans will be created:
 
 [source,groovy]
 ----
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     jmxEnabled:true,
@@ -615,7 +615,7 @@ so you can retrieve this registry and use according to your needs.
 
 [source,groovy]
 ----
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def options = [
   metricsOptions:[
     enabled:true,
@@ -644,7 +644,7 @@ First, you need to configure your vert.x instance with the following options:
 
 [source,groovy]
 ----
-import io.vertx.groovy.core.Vertx
+import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
