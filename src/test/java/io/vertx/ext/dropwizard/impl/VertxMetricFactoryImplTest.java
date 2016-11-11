@@ -144,4 +144,18 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     assertEquals("http://www.foo.com", options.getMonitoredHttpClientUris().get(0).getValue());
     assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientUris().get(0).getType());
   }
+
+  @Test
+  public void testDefaultBaseName() {
+    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions()));
+    assertEquals("vertx", metrics.baseName());
+  }
+
+  @Test
+  public void testOverrideBaseName() {
+    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions().setBaseName("Foo")));
+    assertEquals("Foo", metrics.baseName());
+  }
 }
