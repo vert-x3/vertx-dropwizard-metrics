@@ -12,9 +12,9 @@
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[baseName]]`baseName`|`String`|-
+|[[baseName]]`baseName`|`String`|
 +++
-Set the base name for metrics. Defaults to "vertx"
+Set a custom baseName for metrics.
 +++
 |[[configPath]]`configPath`|`String`|
 +++
