@@ -134,6 +134,17 @@ metricsNames.each { metricsName ->
 
 ----
 
+`baseName` defaults to `vertx`, but can be set to a custom value:
+
+[source,groovy]
+----
+def metricsOptions = [
+  baseName:"foo"
+]
+
+----
+
+
 === Retrieving metrics
 
 Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any

@@ -114,6 +114,13 @@
  * {@link examples.MetricsExamples#naming3}
  * ----
  *
+ * `baseName` defaults to `vertx`, but can be set to a custom value:
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#baseName}
+ * ----
+ *
  * === Retrieving metrics
  *
  * Once enabled, the {@link io.vertx.ext.dropwizard.MetricsService} allows to retrieve metrics snapshots from any
