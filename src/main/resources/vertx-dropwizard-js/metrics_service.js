@@ -84,6 +84,25 @@ var MetricsService = function(j_val) {
   this._jdel = j_metricsService;
 };
 
+MetricsService._jclass = utils.getJavaClass("io.vertx.ext.dropwizard.MetricsService");
+MetricsService._jtype = {
+  accept: function(obj) {
+    return MetricsService._jclass.isInstance(obj._jdel);
+  },
+  wrap: function(jdel) {
+    var obj = Object.create(MetricsService.prototype, {});
+    MetricsService.apply(obj, arguments);
+    return obj;
+  },
+  unwrap: function(obj) {
+    return obj._jdel;
+  }
+};
+MetricsService._create = function(jdel) {
+  var obj = Object.create(MetricsService.prototype, {});
+  MetricsService.apply(obj, arguments);
+  return obj;
+}
 /**
  Creates a metric service for a given {@link Vertx} instance.
 
@@ -94,9 +113,8 @@ var MetricsService = function(j_val) {
 MetricsService.create = function(vertx) {
   var __args = arguments;
   if (__args.length === 1 && typeof __args[0] === 'object' && __args[0]._jdel) {
-    return utils.convReturnVertxGen(JMetricsService["create(io.vertx.core.Vertx)"](vertx._jdel), MetricsService);
+    return utils.convReturnVertxGen(MetricsService, JMetricsService["create(io.vertx.core.Vertx)"](vertx._jdel));
   } else throw new TypeError('function invoked with invalid arguments');
 };
 
-// We export the Constructor function
 module.exports = MetricsService;
