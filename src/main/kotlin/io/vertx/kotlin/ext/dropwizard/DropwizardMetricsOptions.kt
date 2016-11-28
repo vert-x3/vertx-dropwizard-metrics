@@ -3,31 +3,31 @@ package io.vertx.kotlin.ext.dropwizard
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions
 
 fun DropwizardMetricsOptions(
-        configPath: String? = null,
-    enabled: Boolean? = null,
-    jmxDomain: String? = null,
-    jmxEnabled: Boolean? = null,
-    registryName: String? = null): DropwizardMetricsOptions = io.vertx.ext.dropwizard.DropwizardMetricsOptions().apply {
+    configPath: String? = null,
+  enabled: Boolean? = null,
+  jmxDomain: String? = null,
+  jmxEnabled: Boolean? = null,
+  registryName: String? = null): DropwizardMetricsOptions = io.vertx.ext.dropwizard.DropwizardMetricsOptions().apply {
 
-    if (configPath != null) {
-        this.configPath = configPath
-    }
+  if (configPath != null) {
+    this.configPath = configPath
+  }
 
-    if (enabled != null) {
-        this.isEnabled = enabled
-    }
+  if (enabled != null) {
+    this.isEnabled = enabled
+  }
 
-    if (jmxDomain != null) {
-        this.jmxDomain = jmxDomain
-    }
+  if (jmxDomain != null) {
+    this.jmxDomain = jmxDomain
+  }
 
-    if (jmxEnabled != null) {
-        this.isJmxEnabled = jmxEnabled
-    }
+  if (jmxEnabled != null) {
+    this.isJmxEnabled = jmxEnabled
+  }
 
-    if (registryName != null) {
-        this.registryName = registryName
-    }
+  if (registryName != null) {
+    this.registryName = registryName
+  }
 
 }
 
