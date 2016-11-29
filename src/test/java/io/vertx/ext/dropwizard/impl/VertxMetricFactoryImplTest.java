@@ -51,7 +51,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   public void testLoadingFromFileFromJson() throws Exception {
     String filePath = ClassLoader.getSystemResource("test_metrics_config.json").getFile();
     VertxOptions vertxOptions = new VertxOptions(new JsonObject().
-        put("metricsOptions", new JsonObject().put("configPath", filePath)));
+      put("metricsOptions", new JsonObject().put("configPath", filePath)));
 
     // Verify our jmx domain isn't there already, just in case.
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
@@ -101,8 +101,8 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testWithNoConfigFile() throws Exception {
     DropwizardMetricsOptions dmo = new DropwizardMetricsOptions()
-        .setJmxEnabled(true)
-        .setJmxDomain("non-file-jmx");
+      .setJmxEnabled(true)
+      .setJmxDomain("non-file-jmx");
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
@@ -119,9 +119,9 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     String filePath = "/i/am/not/here/missingfile.json";
 
     DropwizardMetricsOptions dmo = new DropwizardMetricsOptions()
-        .setJmxEnabled(true)
-        .setJmxDomain("non-file-jmx")
-        .setConfigPath(filePath);
+      .setJmxEnabled(true)
+      .setJmxDomain("non-file-jmx")
+      .setConfigPath(filePath);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
@@ -137,7 +137,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   public void testFromJson() throws Exception {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
     VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions(
-        new JsonObject().put("metricsOptions", new JsonObject().put("enabled", true).put("monitoredClientUris", new JsonArray().add(new JsonObject().put("value", "http://www.foo.com"))))
+      new JsonObject().put("metricsOptions", new JsonObject().put("enabled", true).put("monitoredHttpClientUris", new JsonArray().add(new JsonObject().put("value", "http://www.foo.com"))))
     ));
     DropwizardMetricsOptions options = metrics.getOptions();
     assertEquals(1, options.getMonitoredHttpClientUris().size());

@@ -120,10 +120,10 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
     configPath = json.getString("configPath");
-    monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
-    monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
-    monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
-    monitoredHttpClientEndpoints = loadMonitored("monitoredClientEndpoints", json);
+    monitoredEventBusHandlers = loadMonitored("monitoredEventBusHandlers", json);
+    monitoredHttpServerUris = loadMonitored("monitoredHttpServerUris", json);
+    monitoredHttpClientUris = loadMonitored("monitoredHttpClientUris", json);
+    monitoredHttpClientEndpoints = loadMonitored("monitoredHttpClientEndpoints", json);
   }
 
   private List<Match> loadMonitored(String arrayField, JsonObject json) {
@@ -192,7 +192,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   /**
    * Set the JMX domain to use when JMX metrics are enabled.
    *
-   * @param jmxDomain  the JMX domain
+   * @param jmxDomain the JMX domain
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions setJmxDomain(String jmxDomain) {
