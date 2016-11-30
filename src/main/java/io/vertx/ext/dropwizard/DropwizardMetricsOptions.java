@@ -19,6 +19,8 @@ package io.vertx.ext.dropwizard;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.metrics.MetricsOptions;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.List;
  */
 @DataObject
 public class DropwizardMetricsOptions extends MetricsOptions {
+  private static final Logger log = LoggerFactory.getLogger(DropwizardMetricsOptions.class);
 
   /**
    * The default value of JMX enabled = false
@@ -120,10 +123,30 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
     configPath = json.getString("configPath");
-    monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
-    monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
-    monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
-    monitoredHttpClientEndpoints = loadMonitored("monitoredClientEndpoints", json);
+    if (json.containsKey("monitoredHandlers") && !json.containsKey("monitoredEventBusHandlers")) {
+      log.warn("JSON config: monitoredHandlers field is deprecated, use monitoredEventBusHandlers instead");
+      monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
+    } else {
+      monitoredEventBusHandlers = loadMonitored("monitoredEventBusHandlers", json);
+    }
+    if (json.containsKey("monitoredServerUris") && !json.containsKey("monitoredHttpServerUris")) {
+      log.warn("JSON config: monitoredServerUris field is deprecated, use monitoredHttpServerUris instead");
+      monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
+    } else {
+      monitoredHttpServerUris = loadMonitored("monitoredHttpServerUris", json);
+    }
+    if (json.containsKey("monitoredClientUris") && !json.containsKey("monitoredHttpClientUris")) {
+      log.warn("JSON config: monitoredClientUris field is deprecated, use monitoredHttpClientUris instead");
+      monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
+    } else {
+      monitoredHttpClientUris = loadMonitored("monitoredHttpClientUris", json);
+    }
+    if (json.containsKey("monitoredClientEndpoints") && !json.containsKey("monitoredHttpClientEndpoints")) {
+      log.warn("JSON config: monitoredClientEndpoints field is deprecated, use monitoredHttpClientEndpoints instead");
+      monitoredHttpClientEndpoints = loadMonitored("monitoredClientEndpoints", json);
+    } else {
+      monitoredHttpClientEndpoints = loadMonitored("monitoredHttpClientEndpoints", json);
+    }
   }
 
   private List<Match> loadMonitored(String arrayField, JsonObject json) {
@@ -192,7 +215,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   /**
    * Set the JMX domain to use when JMX metrics are enabled.
    *
-   * @param jmxDomain  the JMX domain
+   * @param jmxDomain the JMX domain
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions setJmxDomain(String jmxDomain) {
