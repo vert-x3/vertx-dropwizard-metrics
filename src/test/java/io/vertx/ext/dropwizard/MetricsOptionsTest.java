@@ -92,11 +92,11 @@ public class MetricsOptionsTest extends VertxTestBase {
     String registryName = TestUtils.randomAlphaString(100);
     String configPath = TestUtils.randomAlphaString(100);
     options = new DropwizardMetricsOptions(new JsonObject().
-        put("enabled", metricsEnabled).
-        put("registryName", registryName).
-        put("jmxEnabled", jmxEnabled).
-        put("jmxDomain", jmxDomain).
-        put("configPath", configPath)
+      put("enabled", metricsEnabled).
+      put("registryName", registryName).
+      put("jmxEnabled", jmxEnabled).
+      put("jmxDomain", jmxDomain).
+      put("configPath", configPath)
     );
     assertEquals(metricsEnabled, options.isEnabled());
     assertEquals(registryName, options.getRegistryName());
@@ -107,26 +107,26 @@ public class MetricsOptionsTest extends VertxTestBase {
   @Test
   public void testFullJsonOptions() throws Exception {
 
-    JsonArray monitoredServerUris = new JsonArray()
-        .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"))
-        .add(new JsonObject().put("value", "^/server/test/2/.*").put("type", "REGEX"));
+    JsonArray monitoredHttpServerUris = new JsonArray()
+      .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"))
+      .add(new JsonObject().put("value", "^/server/test/2/.*").put("type", "REGEX"));
 
-    JsonArray monitoredClientUris = new JsonArray()
-        .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
-        .add(new JsonObject().put("value", "^/client/test/2/.*").put("type", "REGEX"));
+    JsonArray monitoredHttpClientUris = new JsonArray()
+      .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
+      .add(new JsonObject().put("value", "^/client/test/2/.*").put("type", "REGEX"));
 
-    JsonArray monitoredHandlers = new JsonArray()
-        .add(new JsonObject().put("value", "test.address.1").put("type", "EQUALS"))
-        .add(new JsonObject().put("value", "^test.2.*").put("type", "REGEX"));
+    JsonArray monitoredEventBusHandlers = new JsonArray()
+      .add(new JsonObject().put("value", "test.address.1").put("type", "EQUALS"))
+      .add(new JsonObject().put("value", "^test.2.*").put("type", "REGEX"));
 
     JsonObject config = new JsonObject()
-        .put("registryName", "testRegistry")
-        .put("jmxEnabled", true)
-        .put("jmxDomain", "testJmxDomain")
-        .put("monitoredServerUris", monitoredServerUris)
-        .put("monitoredClientUris", monitoredClientUris)
-        .put("monitoredHandlers", monitoredHandlers)
-        .put("configPath", "the_config_file");
+      .put("registryName", "testRegistry")
+      .put("jmxEnabled", true)
+      .put("jmxDomain", "testJmxDomain")
+      .put("monitoredHttpServerUris", monitoredHttpServerUris)
+      .put("monitoredHttpClientUris", monitoredHttpClientUris)
+      .put("monitoredEventBusHandlers", monitoredEventBusHandlers)
+      .put("configPath", "the_config_file");
 
     DropwizardMetricsOptions options = new DropwizardMetricsOptions(config);
 
@@ -156,19 +156,19 @@ public class MetricsOptionsTest extends VertxTestBase {
 
   @Test
   public void testInvalidAndEmptyMonitoredEntries() throws Exception {
-    JsonArray monitoredServerUris = new JsonArray()
-        .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"));
+    JsonArray monitoredHttpServerUris = new JsonArray()
+      .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"));
 
-    JsonArray monitoredClientUris = new JsonArray()
-        .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
-        .add("Just a string");
+    JsonArray monitoredHttpClientUris = new JsonArray()
+      .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
+      .add("Just a string");
 
     JsonObject config = new JsonObject()
-        .put("registryName", "testRegistry")
-        .put("jmxEnabled", true)
-        .put("jmxDomain", "testJmxDomain")
-        .put("monitoredServerUris", monitoredServerUris)
-        .put("monitoredClientUris", monitoredClientUris);
+      .put("registryName", "testRegistry")
+      .put("jmxEnabled", true)
+      .put("jmxDomain", "testJmxDomain")
+      .put("monitoredHttpServerUris", monitoredHttpServerUris)
+      .put("monitoredHttpClientUris", monitoredHttpClientUris);
 
     DropwizardMetricsOptions options = new DropwizardMetricsOptions(config);
 
