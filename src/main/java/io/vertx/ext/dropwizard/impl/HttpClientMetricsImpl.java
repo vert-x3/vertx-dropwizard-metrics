@@ -125,7 +125,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
 
   @Override
   public void requestReset(HttpClientRequestMetric requestMetric) {
-    long duration = clientReporter.end(requestMetric, 0, requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
+    long duration = clientReporter.end(requestMetric, 0, uriMatcher);
     if (requestMetric.endpointMetric != null) {
       requestMetric.endpointMetric.inUse.dec();
       requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
@@ -134,7 +134,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
 
   @Override
   public void responseEnd(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
-    long duration = clientReporter.end(requestMetric, response.statusCode(), requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
+    long duration = clientReporter.end(requestMetric, response.statusCode(), uriMatcher);
     if (requestMetric.endpointMetric != null) {
       requestMetric.endpointMetric.inUse.dec();
       requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);

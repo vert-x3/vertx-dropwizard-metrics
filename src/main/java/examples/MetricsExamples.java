@@ -75,7 +75,8 @@ public class MetricsExamples {
             addMonitoredHttpServerUri(
                 new Match().setValue("/")).
             addMonitoredHttpServerUri(
-                new Match().setValue("/foo/.*").setType(MatchType.REGEX))
+                new Match().setValue("/foo/.*").setType(MatchType.REGEX)).
+            addMonitoredHttpServerUri(new Match().setValue("/users/.*").setIdentifier("users").setType(MatchType.REGEX))
     ));
   }
 

@@ -102,6 +102,7 @@ public class MetricsTest extends MetricsTestBase {
                 addMonitoredEventBusHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
                 addMonitoredHttpServerUri(new Match().setValue("/get")).
                 addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX)).
+                addMonitoredHttpServerUri(new Match().setValue("/users/.*").setIdentifier("users").setType(MatchType.REGEX)).
                 addMonitoredHttpClientEndpoint(new Match().setValue("localhost:8080"))
         );
   }
@@ -244,6 +245,9 @@ public class MetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       client.request(HttpMethod.GET, 8080, "localhost", "/get", resp -> latch.countDown()).end();
+      client.request(HttpMethod.GET, 8080, "localhost", "/users/1", resp -> latch.countDown()).end();
+      client.request(HttpMethod.GET, 8080, "localhost", "/users/2", resp -> latch.countDown()).end();
+      client.request(HttpMethod.GET, 8080, "localhost", "/users/3", resp -> latch.countDown()).end();
       client.request(HttpMethod.POST, 8080, "localhost", "/post", resp -> latch.countDown()).end();
       client.request(HttpMethod.PUT, 8080, "localhost", "/put", resp -> latch.countDown()).end();
       client.request(HttpMethod.DELETE, 8080, "localhost", "/delete", resp -> latch.countDown()).end();
@@ -260,8 +264,12 @@ public class MetricsTest extends MetricsTestBase {
     vertx.setTimer(100, id -> {
       // Gather metrics
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
-      assertCount(metrics.getJsonObject("get-requests"), 1L);
+      assertCount(metrics.getJsonObject("get-requests"), 4L);
       assertCount(metrics.getJsonObject("get-requests./get"), 1L);
+      assertCount(metrics.getJsonObject("get-requests.users"), 3L);
+      assertNull(metrics.getJsonObject("get-requests./users/1"));
+      assertNull(metrics.getJsonObject("get-requests./users/2"));
+      assertNull(metrics.getJsonObject("get-requests./users/3"));
       assertCount(metrics.getJsonObject("post-requests"), 1L);
       assertCount(metrics.getJsonObject("post-requests./post"), 1L);
       assertCount(metrics.getJsonObject("put-requests"), 1L);
@@ -1032,7 +1040,7 @@ public class MetricsTest extends MetricsTestBase {
 
     await();
   }
-  
+
   @Test
   public void testMetricsCleanupedOnVertxClose() throws Exception {
     CountDownLatch latch1 = new CountDownLatch(1);
