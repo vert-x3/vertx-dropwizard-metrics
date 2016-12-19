@@ -14,18 +14,18 @@ class Matcher {
 
   private final Set<String> equalsMatches;
   private final Pattern[] regexMatches;
-  private final Map<String, String> equealsMatchesWithIdentifier;
+  private final Map<String, String> equalsMatchesWithIdentifier;
   private final Map<Pattern, String> regexMatchesWithIdentifier;
 
   Matcher(List<Match> matches) {
     equalsMatches = new HashSet<>();
-    equealsMatchesWithIdentifier = new HashMap<>();
+    equalsMatchesWithIdentifier = new HashMap<>();
     regexMatchesWithIdentifier = new HashMap<>();
 
     for (Match match : matches) {
       if (match.getType() == MatchType.EQUALS && match.getValue() != null) {
         if (match.getIdentifier() != null) {
-          equealsMatchesWithIdentifier.put(match.getValue(), match.getIdentifier());
+          equalsMatchesWithIdentifier.put(match.getValue(), match.getIdentifier());
         } else {
           equalsMatches.add(match.getValue());
         }
@@ -45,7 +45,7 @@ class Matcher {
       return true;
     }
 
-    if (equealsMatchesWithIdentifier.size() > 0 && equealsMatchesWithIdentifier.containsKey(value)) {
+    if (equalsMatchesWithIdentifier.size() > 0 && equalsMatchesWithIdentifier.containsKey(value)) {
       return true;
     }
 
@@ -69,8 +69,8 @@ class Matcher {
   }
 
   Optional<String> matchIdentifier(String value) {
-    if (equealsMatchesWithIdentifier.size() > 0 && equealsMatchesWithIdentifier.containsKey(value)) {
-      return Optional.of(equealsMatchesWithIdentifier.get(value));
+    if (equalsMatchesWithIdentifier.size() > 0 && equalsMatchesWithIdentifier.containsKey(value)) {
+      return Optional.of(equalsMatchesWithIdentifier.get(value));
     }
 
     if (regexMatchesWithIdentifier.size() > 0) {
