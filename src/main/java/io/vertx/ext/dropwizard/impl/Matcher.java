@@ -11,77 +11,50 @@ import java.util.regex.Pattern;
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 class Matcher {
-
   private final Set<String> equalsMatches;
-  private final Pattern[] regexMatches;
-  private final Map<String, String> equalsMatchesWithIdentifier;
-  private final Map<Pattern, String> regexMatchesWithIdentifier;
+  private final Map<Pattern, String> regexMatches;
+  private final Map<String, String> identifiers;
 
   Matcher(List<Match> matches) {
     equalsMatches = new HashSet<>();
-    equalsMatchesWithIdentifier = new HashMap<>();
-    regexMatchesWithIdentifier = new HashMap<>();
+    regexMatches = new HashMap<>();
+    identifiers = new HashMap<>();
 
     for (Match match : matches) {
       if (match.getType() == MatchType.EQUALS && match.getValue() != null) {
-        if (match.getIdentifier() != null) {
-          equalsMatchesWithIdentifier.put(match.getValue(), match.getIdentifier());
-        } else {
-          equalsMatches.add(match.getValue());
-        }
-      } else if (match.getType() == MatchType.REGEX && match.getValue() != null && match.getIdentifier() != null) {
-        regexMatchesWithIdentifier.put(Pattern.compile(match.getValue()), match.getIdentifier());
+        equalsMatches.add(match.getValue());
+      } else if (match.getType() == MatchType.REGEX && match.getValue() != null) {
+        regexMatches.put(Pattern.compile(match.getValue()), match.getValue());
+      }
+
+      if (match.getIdentifier() != null) {
+        identifiers.put(match.getValue(), match.getIdentifier());
       }
     }
-
-    regexMatches = matches.stream().
-        filter(matcher -> matcher.getType() == MatchType.REGEX && matcher.getValue() != null).
-        map(matcher -> Pattern.compile(matcher.getValue())).
-        toArray(Pattern[]::new);
   }
 
-  boolean match(String value) {
+  String match(String value) {
     if (equalsMatches.size() > 0 && equalsMatches.contains(value)) {
-      return true;
+      return value;
     }
 
-    if (equalsMatchesWithIdentifier.size() > 0 && equalsMatchesWithIdentifier.containsKey(value)) {
-      return true;
-    }
-
-    if (regexMatches.length > 0) {
-      for (Pattern pattern : regexMatches) {
-        if (pattern.matcher(value).matches()) {
-          return true;
-        }
-      }
-    }
-
-    if (regexMatchesWithIdentifier.size() > 0) {
-      for (Entry<Pattern, String> entry : regexMatchesWithIdentifier.entrySet()) {
+    if (regexMatches.size() > 0) {
+      for (Entry<Pattern, String> entry : regexMatches.entrySet()) {
         if (entry.getKey().matcher(value).matches()) {
-          return true;
+          return entry.getValue();
         }
       }
     }
 
-    return false;
+    return null;
   }
 
-  Optional<String> matchIdentifier(String value) {
-    if (equalsMatchesWithIdentifier.size() > 0 && equalsMatchesWithIdentifier.containsKey(value)) {
-      return Optional.of(equalsMatchesWithIdentifier.get(value));
+  String matchIdentifier(String value) {
+    if (value == null) {
+      return null;
     }
 
-    if (regexMatchesWithIdentifier.size() > 0) {
-      for (Entry<Pattern, String> entry : regexMatchesWithIdentifier.entrySet()) {
-        if (entry.getKey().matcher(value).matches()) {
-          return Optional.of(entry.getValue());
-        }
-      }
-    }
-
-    return Optional.empty();
+    return identifiers.get(value);
   }
 
 

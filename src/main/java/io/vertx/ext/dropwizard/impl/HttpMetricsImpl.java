@@ -75,13 +75,14 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     if (closed) {
       return 0;
     }
-    boolean monitoredUri = metric.uri != null && matcher.match(metric.uri);
-    Optional<String> maybeUriIdentifier;
+    String match = matcher.match(metric.uri);
+    boolean monitoredUri = metric.uri != null && match != null;
+    String matchUriIdentifier;
 
     if (!monitoredUri) {
-      maybeUriIdentifier = Optional.empty();
+      matchUriIdentifier = null;
     } else {
-      maybeUriIdentifier = matcher.matchIdentifier(metric.uri);
+      matchUriIdentifier = matcher.matchIdentifier(match);
     }
 
     long duration = System.nanoTime() - metric.requestBegin;
@@ -99,11 +100,11 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     if (metric.method != null) {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
       if (metric.uri != null && monitoredUri) {
-        String uriIdentifier = maybeUriIdentifier.isPresent() ? maybeUriIdentifier.get() : metric.uri;
+        String uriIdentifier = matchUriIdentifier != null ? matchUriIdentifier : metric.uri;
         throughputTimer(metric.method.toString().toLowerCase() + "-requests", uriIdentifier).update(duration, TimeUnit.NANOSECONDS);
       }
     } else if (metric.uri != null && monitoredUri) {
-      String uriIdentifier = maybeUriIdentifier.isPresent() ? maybeUriIdentifier.get() : metric.uri;
+      String uriIdentifier = matchUriIdentifier != null ? matchUriIdentifier : metric.uri;
       throughputTimer("requests", uriIdentifier).update(duration, TimeUnit.NANOSECONDS);
     }
 

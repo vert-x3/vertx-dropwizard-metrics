@@ -375,6 +375,15 @@
  * {@link examples.MetricsExamples#setupMonitoredUris()}
  * ----
  *
+ * In case if the uri contains some path parameters like `/users/:userId` it might not make sense to have a separate entry in the registry for each user
+ * id (like `get-requests./users/1`, `get-requests./users/2` and so on) but a summarized one. To achieve that you can set an identifier to the match instance
+ * in this case the identifier will be used as a part of the registry name instead of uri like `<http-method>-requests.<identifier>`
+ *
+ * [source,$lang]
+ * ----
+ * {@link examples.MetricsExamples#setupMonitoredUrisWithIdentifier()}
+ * ----
+ *
  * *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
  *
  * === Http client metrics

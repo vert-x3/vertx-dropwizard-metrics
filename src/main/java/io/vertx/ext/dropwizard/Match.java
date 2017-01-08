@@ -92,7 +92,7 @@ public class Match {
 
   /**
    * Set the identifier the human readable name that will be used as a part of
-   * registry entry name if the value matches
+   * registry entry name if the value matches.
    *
    * @param identifier the matcher identifier
    * @return a reference to this, so the API can be used fluently

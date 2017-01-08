@@ -23,6 +23,7 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,8 +100,12 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   @Override
   public HandlerMetric handlerRegistered(String address, String repliedAddress) {
     handlerCount.inc();
-    if (handlerMatcher.match(address)) {
-      return new HandlerMetric(address);
+    String match = handlerMatcher.match(address);
+    if (match != null) {
+      String matchIdentifier = handlerMatcher.matchIdentifier(match);
+
+      String addressIdentifier = matchIdentifier != null ? matchIdentifier : address;
+      return new HandlerMetric(addressIdentifier);
     }
     return null;
   }

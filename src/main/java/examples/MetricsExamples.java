@@ -75,7 +75,14 @@ public class MetricsExamples {
             addMonitoredHttpServerUri(
                 new Match().setValue("/")).
             addMonitoredHttpServerUri(
-                new Match().setValue("/foo/.*").setType(MatchType.REGEX)).
+                new Match().setValue("/foo/.*").setType(MatchType.REGEX))
+    ));
+  }
+
+  public void setupMonitoredUrisWithIdentifier() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+        new DropwizardMetricsOptions().
+            setEnabled(true).
             addMonitoredHttpServerUri(new Match().setValue("/users/.*").setIdentifier("users").setType(MatchType.REGEX))
     ));
   }
