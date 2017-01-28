@@ -143,7 +143,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public TCPMetrics<?> createMetrics(NetServer server, SocketAddress localAddress, NetServerOptions options) {
+  public TCPMetrics<?> createMetrics(SocketAddress localAddress, NetServerOptions options) {
     String baseName = MetricRegistry.name(nameOf("net.servers"), TCPMetricsImpl.addressName(localAddress));
     return new TCPMetricsImpl(registry, baseName);
   }
