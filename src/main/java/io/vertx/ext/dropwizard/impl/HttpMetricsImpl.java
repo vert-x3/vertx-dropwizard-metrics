@@ -66,10 +66,11 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
   }
 
   /**
-   * Signal end of request
-   *  @param metric the request metric
+   * Signal end of request.
+   *
+   * @param metric the request metric
    * @param statusCode the status code, {@code 0} means a reset
-   * @param matcher the monitored uri
+   * @param matcher the Matcher instance
    */
   protected long end(RequestMetric metric, int statusCode, Matcher matcher) {
     if (closed) {

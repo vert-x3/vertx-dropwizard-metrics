@@ -67,7 +67,7 @@ Set the name used for registering the metrics in the Dropwizard shared registry.
 |[[identifier]]`identifier`|`String`|
 +++
 Set the identifier the human readable name that will be used as a part of
- registry entry name if the value matches
+ registry entry name if the value matches.
 +++
 |[[type]]`type`|`link:enums.html#MatchType[MatchType]`|
 +++
