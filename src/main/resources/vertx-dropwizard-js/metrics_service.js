@@ -21,7 +21,7 @@ var Vertx = require('vertx-js/vertx');
 
 var io = Packages.io;
 var JsonObject = io.vertx.core.json.JsonObject;
-var JMetricsService = io.vertx.ext.dropwizard.MetricsService;
+var JMetricsService = Java.type('io.vertx.ext.dropwizard.MetricsService');
 
 /**
  The metrics service mainly allows to return a snapshot of measured objects.
