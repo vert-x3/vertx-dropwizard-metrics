@@ -22,7 +22,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-dropwizard-metrics</artifactId>
-  <version>3.4.0.Beta1</version>
+  <version>3.4.0-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -30,14 +30,13 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-dropwizard-metrics:3.4.0.Beta1'
+compile 'io.vertx:vertx-dropwizard-metrics:3.4.0-SNAPSHOT'
 ----
 
 Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true
@@ -50,7 +49,6 @@ You can also enable JMX:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     jmxEnabled:true
@@ -142,7 +140,6 @@ represented by a `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObje
 for a particular Vert.x instance:
 [source,groovy]
 ----
-import io.vertx.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def metrics = metricsService.getMetricsSnapshot(vertx)
 println(metrics)
@@ -160,7 +157,6 @@ that are specific for that particular http server.
 
 [source,groovy]
 ----
-import io.vertx.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def server = vertx.createHttpServer()
 // set up server
@@ -172,7 +168,6 @@ Metrics can also be retrieved using a base name:
 
 [source,groovy]
 ----
-import io.vertx.ext.dropwizard.MetricsService
 def metricsService = MetricsService.create(vertx)
 def metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message")
 
@@ -375,8 +370,6 @@ a specific address match or a regex match:
 
 [source,groovy]
 ----
-import io.vertx.ext.dropwizard.MatchType
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -420,8 +413,6 @@ Http URI metrics must be explicitely configured in the options either by exact m
 
 [source,groovy]
 ----
-import io.vertx.ext.dropwizard.MatchType
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -477,8 +468,6 @@ a specific hostname match or a regex match:
 
 [source,groovy]
 ----
-import io.vertx.ext.dropwizard.MatchType
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
@@ -554,7 +543,6 @@ If you want JMX, then you need to enabled that:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     jmxEnabled:true
@@ -574,7 +562,6 @@ You can configure the domain under which the MBeans will be created:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     jmxEnabled:true,
@@ -615,7 +602,6 @@ so you can retrieve this registry and use according to your needs.
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def options = [
   metricsOptions:[
     enabled:true,
@@ -644,7 +630,6 @@ First, you need to configure your vert.x instance with the following options:
 
 [source,groovy]
 ----
-import io.vertx.core.Vertx
 def vertx = Vertx.vertx([
   metricsOptions:[
     enabled:true,
