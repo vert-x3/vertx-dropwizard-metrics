@@ -69,6 +69,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   private List<Match> monitoredHttpClientUris;
   private List<Match> monitoredHttpClientEndpoints;
   private String configPath;
+  private String baseName;
 
   /**
    * Default constructor
@@ -320,4 +321,21 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     return monitoredHttpClientEndpoints;
   }
 
+  /**
+   * Set a custom baseName for metrics.
+   *
+   * @param baseName the new baseName.
+   * @return a reference to this, so the API can be used fluently
+   */
+  public DropwizardMetricsOptions setBaseName(String baseName) {
+    this.baseName = baseName;
+    return this;
+  }
+
+  /**
+   * @return The custom baseName.
+   */
+  public String getBaseName() {
+    return baseName;
+  }
 }

@@ -123,6 +123,15 @@ for (String metricsName : metricsNames) {
 }
 ----
 
+`baseName` defaults to `vertx`, but can be set to a custom value:
+
+[source,java]
+----
+DropwizardMetricsOptions metricsOptions =
+  new DropwizardMetricsOptions().setBaseName("foo");
+----
+
+
 === Retrieving metrics
 
 Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any

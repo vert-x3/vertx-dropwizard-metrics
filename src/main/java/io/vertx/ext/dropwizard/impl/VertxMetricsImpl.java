@@ -53,8 +53,6 @@ import java.util.Map;
  */
 class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
-  static final String BASE_NAME = "vertx";
-
   private final DropwizardMetricsOptions options;
   private final Counter timers;
   private final Counter verticles;
@@ -62,8 +60,8 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final boolean shutdown;
   private final Map<String, HttpClientReporter> clientReporters = new HashMap<>();
 
-  VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions) {
-    super(registry, BASE_NAME);
+  VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
+    super(registry, baseName);
 
     this.timers = counter("timers");
     this.options = metricsOptions;

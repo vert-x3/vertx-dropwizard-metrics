@@ -134,6 +134,17 @@ end
 
 ----
 
+`baseName` defaults to `vertx`, but can be set to a custom value:
+
+[source,ruby]
+----
+metricsOptions = {
+  'baseName' => "foo"
+}
+
+----
+
+
 === Retrieving metrics
 
 Once enabled, the `link:../../yardoc/VertxDropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
