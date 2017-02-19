@@ -35,20 +35,22 @@ compile 'io.vertx:vertx-dropwizard-metrics:3.4.0-SNAPSHOT'
 
 Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().setEnabled(true)
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true)))
+
 ----
 
 You can also enable JMX:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().setJmxEnabled(true)
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    jmxEnabled = true)))
+
 ----
 
 To see details about JMX see the <<jmx>> section at the bottom.
@@ -96,39 +98,43 @@ metrics data snapshots.
 Each measured component listed below (except for Vertx) will have a base name associated with it. Each metric
 can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + `metricName` from Vertx:
 
-[source,java]
+[source,kotlin]
 ----
-JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
-metrics.getJsonObject("vertx.eventbus.handlers");
+var metrics = metricsService.getMetricsSnapshot(vertx)
+metrics.getJsonObject("vertx.eventbus.handlers")
+
 ----
 
 or from the measured component itself using just the metric name:
 
-[source,java]
+[source,kotlin]
 ----
-EventBus eventBus = vertx.eventBus();
-JsonObject metrics = metricsService.getMetricsSnapshot(eventBus);
-metrics.getJsonObject("handlers");
+var eventBus = vertx.eventBus()
+var metrics = metricsService.getMetricsSnapshot(eventBus)
+metrics.getJsonObject("handlers")
+
 ----
 
 See more examples below on how to retrieve/use metrics for a specific component.
 
 Metrics names can also be listed:
 
-[source,java]
+[source,kotlin]
 ----
-Set<String> metricsNames = metricsService.metricsNames();
-for (String metricsName : metricsNames) {
-  System.out.println("Known metrics name " + metricsName);
+var metricsNames = metricsService.metricsNames()
+for (metricsName in metricsNames) {
+  println("Known metrics name ${metricsName}")
 }
+
 ----
 
 `baseName` defaults to `vertx`, but can be set to a custom value:
 
-[source,java]
+[source,kotlin]
 ----
-DropwizardMetricsOptions metricsOptions =
-  new DropwizardMetricsOptions().setBaseName("foo");
+var metricsOptions = DropwizardMetricsOptions(
+  baseName = "foo")
+
 ----
 
 === Retrieving metrics
@@ -137,11 +143,12 @@ Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.htm
 `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
 represented by a `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
-[source,java]
+[source,kotlin]
 ----
-MetricsService metricsService = MetricsService.create(vertx);
-JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
-System.out.println(metrics);
+var metricsService = MetricsService.create(vertx)
+var metrics = metricsService.getMetricsSnapshot(vertx)
+println(metrics)
+
 ----
 
 NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`
@@ -153,20 +160,22 @@ without having to know the details of the naming scheme of every metric (somethi
 Since `link:../../apidocs/io/vertx/core/http/HttpServer.html[HttpServer]` implements `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
 
-[source,java]
+[source,kotlin]
 ----
-MetricsService metricsService = MetricsService.create(vertx);
-HttpServer server = vertx.createHttpServer();
+var metricsService = MetricsService.create(vertx)
+var server = vertx.createHttpServer()
 // set up server
-JsonObject metrics = metricsService.getMetricsSnapshot(server);
+var metrics = metricsService.getMetricsSnapshot(server)
+
 ----
 
 Metrics can also be retrieved using a base name:
 
-[source,java]
+[source,kotlin]
 ----
-MetricsService metricsService = MetricsService.create(vertx);
-JsonObject metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message");
+var metricsService = MetricsService.create(vertx)
+var metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message")
+
 ----
 
 == Data
@@ -188,7 +197,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[counter]]
 === Counter
 
-[source,java]
+[source,kotlin]
 ----
 {
   "type"  : "counter",
@@ -220,7 +229,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[meter]]
 === Meter
 
-[source,java]
+[source,kotlin]
 ----
 {
   "type"              : "meter",
@@ -238,7 +247,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 
 Extends a <<meter>> to provide an instant throughput.
 
-[source,java]
+[source,kotlin]
 ----
 {
   "type"              : "meter",
@@ -257,7 +266,7 @@ Extends a <<meter>> to provide an instant throughput.
 
 A timer is basically a combination of Histogram + Meter.
 
-[source,java]
+[source,kotlin]
 ----
 {
   "type": "timer",
@@ -289,7 +298,7 @@ A timer is basically a combination of Histogram + Meter.
 
 Extends a <<timer>> to provide an instant throughput metric.
 
-[source,java]
+[source,kotlin]
 ----
 {
   "type": "timer",
@@ -364,16 +373,16 @@ setting is to monitor zero handlers.
 The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().
-        setEnabled(true).
-        addMonitoredEventBusHandler(
-            new Match().setValue("some-address")).
-        addMonitoredEventBusHandler(
-            new Match().setValue("business-.*").setType(MatchType.REGEX))
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    monitoredEventBusHandlers = listOf(Match(
+      value = "some-address"), Match(
+      value = "business-.*",
+      type = MatchType.REGEX)))))
+
 ----
 
 WARNING: if you use regex match, a wrong regex can potentially match a lot of handlers.
@@ -400,16 +409,16 @@ Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus
 
 Http URI metrics must be explicitely configured in the options either by exact match or regex match:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().
-        setEnabled(true).
-        addMonitoredHttpServerUri(
-            new Match().setValue("/")).
-        addMonitoredHttpServerUri(
-            new Match().setValue("/foo/.*").setType(MatchType.REGEX))
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    monitoredHttpServerUris = listOf(Match(
+      value = "/"), Match(
+      value = "/foo/.*",
+      type = MatchType.REGEX)))))
+
 ----
 
 *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
@@ -448,16 +457,16 @@ The default for this setting is to monitor no endpoints.
 The monitored endpoints can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific hostname match or a regex match:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().
-        setEnabled(true).
-        addMonitoredHttpClientEndpoint(
-            new Match().setValue("some-host:80")).
-        addMonitoredHttpClientEndpoint(
-            new Match().setValue("another-host:.*").setType(MatchType.REGEX))
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    monitoredHttpClientEndpoints = listOf(Match(
+      value = "some-host:80"), Match(
+      value = "another-host:.*",
+      type = MatchType.REGEX)))))
+
 ----
 
 [[net-server-metrics]]
@@ -516,11 +525,12 @@ JMX is disabled by default.
 
 If you want JMX, then you need to enabled that:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().setJmxEnabled(true)
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    jmxEnabled = true)))
+
 ----
 
 If running Vert.x from the command line you can enable metrics and JMX by uncommented the JMX_OPTS line in the
@@ -532,13 +542,13 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true
 
 You can configure the domain under which the MBeans will be created:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().
-        setJmxEnabled(true).
-        setJmxDomain("mydomain")
-));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    jmxEnabled = true,
+    jmxDomain = "mydomain")))
+
 ----
 
 In the command line, just append the following system properties to your application (works for the `vertx` cli and
@@ -570,14 +580,17 @@ https://dropwizard.github.io/metrics/3.1.0/getting-started/#the-registry[Dropwiz
 the https://dropwizard.github.io/metrics/3.1.0/apidocs/com/codahale/metrics/SharedMetricRegistries.html[Dropwizard Shared Registry]
 so you can retrieve this registry and use according to your needs.
 
-[source,java]
+[source,kotlin]
 ----
-VertxOptions options = new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions().setEnabled(true).setRegistryName("my-registry")
-);
-Vertx vertx = Vertx.vertx(options);
+var options = VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    registryName = "my-registry"))
+var vertx = Vertx.vertx(options)
 // Get the registry
-MetricRegistry registry = SharedMetricRegistries.getOrCreate("my-registry");}
+var registry = com.codahale.metrics.SharedMetricRegistries.getOrCreate("my-registry")
+// Do whatever you need with the registry
+}
 ----
 
 == Using Jolokia and Hawtio
@@ -593,13 +606,14 @@ This section explains how to configure your vert.x application to retrieve the m
 
 First, you need to configure your vert.x instance with the following options:
 
-[source,java]
+[source,kotlin]
 ----
-Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
-    new DropwizardMetricsOptions()
-        .setEnabled(true)
-        .setJmxEnabled(true)
-        .setJmxDomain("vertx-metrics")));
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    jmxEnabled = true,
+    jmxDomain = "vertx-metrics")))
+
 ----
 
 You can change the domain to whatever you want. The same configuration can be used for clustered Vert.x instances.

@@ -144,7 +144,6 @@ metricsOptions = {
 
 ----
 
-
 === Retrieving metrics
 
 Once enabled, the `link:../../yardoc/VertxDropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any

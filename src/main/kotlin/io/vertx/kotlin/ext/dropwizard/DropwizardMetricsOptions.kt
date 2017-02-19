@@ -8,6 +8,7 @@ import io.vertx.ext.dropwizard.Match
  *
  * Vert.x Dropwizard metrics configuration.
  *
+ * @param baseName  Set a custom baseName for metrics.
  * @param configPath  Set the path for a config file that contains options in JSON format, to be used to create a new options object. The file will be looked for on the file system first and then on the classpath if it's not found.
  * @param enabled 
  * @param jmxDomain  Set the JMX domain to use when JMX metrics are enabled.
@@ -22,6 +23,7 @@ import io.vertx.ext.dropwizard.Match
  * NOTE: This function has been automatically generated from the [io.vertx.ext.dropwizard.DropwizardMetricsOptions original] using Vert.x codegen.
  */
 fun DropwizardMetricsOptions(
+  baseName: String? = null,
   configPath: String? = null,
   enabled: Boolean? = null,
   jmxDomain: String? = null,
@@ -32,6 +34,9 @@ fun DropwizardMetricsOptions(
   monitoredHttpServerUris: Iterable<io.vertx.ext.dropwizard.Match>? = null,
   registryName: String? = null): DropwizardMetricsOptions = io.vertx.ext.dropwizard.DropwizardMetricsOptions().apply {
 
+  if (baseName != null) {
+    this.setBaseName(baseName)
+  }
   if (configPath != null) {
     this.setConfigPath(configPath)
   }
