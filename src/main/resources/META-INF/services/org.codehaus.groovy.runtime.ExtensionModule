@@ -1,4 +1,0 @@
-moduleName = io.vertx.ext.dropwizard.MetricsService-module
-moduleVersion = 1.0
-extensionClasses = io.vertx.groovy.ext.dropwizard.MetricsService_GroovyExtension
-staticExtensionClasses = 

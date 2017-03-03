@@ -134,6 +134,16 @@ Array.prototype.forEach.call(metricsNames, function(metricsName) {
 
 ----
 
+`baseName` defaults to `vertx`, but can be set to a custom value:
+
+[source,js]
+----
+var metricsOptions = {
+  "baseName" : "foo"
+};
+
+----
+
 === Retrieving metrics
 
 Once enabled, the `link:../../jsdoc/module-vertx-dropwizard-js_metrics_service-MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any

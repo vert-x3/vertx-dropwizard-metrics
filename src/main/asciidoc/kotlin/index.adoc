@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:../../yardoc/Vertx/Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:../../yardoc/Vertx/HttpServer.html[HttpServer]`,
-`link:../../yardoc/Vertx/NetServer.html[NetServer]`, and even `link:../../yardoc/Vertx/Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]`
+interface which is implemented by various Vert.x components like `link:../../apidocs/io/vertx/core/http/HttpServer.html[HttpServer]`,
+`link:../../apidocs/io/vertx/core/net/NetServer.html[NetServer]`, and even `link:../../apidocs/io/vertx/core/Vertx.html[Vertx]` itself.
 
 Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -33,29 +33,23 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 compile 'io.vertx:vertx-dropwizard-metrics:3.4.0-SNAPSHOT'
 ----
 
-Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
+Then when you create vertx enable metrics using the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]`:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true)))
 
 ----
 
 You can also enable JMX:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'jmxEnabled' => true
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    jmxEnabled = true)))
 
 ----
 
@@ -73,22 +67,22 @@ options must be set to `true`:
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#set_registry_name-instance_method[vertx.metrics.options.registryName]`
+The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setRegistryName-java.lang.String-[vertx.metrics.options.registryName]`
 configures the <<dropwizard-registry,Dropwizard Registry>> to use:
 
 ----
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=my-registry
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#set_jmx_enabled-instance_method[vertx.metrics.options.jmxEnabled]` and
-`link:../dataobjects.html#DropwizardMetricsOptions#set_jmx_domain-instance_method[vertx.metrics.options.jmxDomain]`
+The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setJmxEnabled-boolean-[vertx.metrics.options.jmxEnabled]` and
+`link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setJmxDomain-java.lang.String-[vertx.metrics.options.jmxDomain]`
 configures the <<jmx,JMX>> registration:
 
 ----
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.jmxEnabled=true ...
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#set_config_path-instance_method[vertx.metrics.options.configPath]`
+The `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html#setConfigPath-java.lang.String-[vertx.metrics.options.configPath]`
 option allows to reconfigure the metrics from a property file.
 
 == Metrics service
@@ -96,7 +90,7 @@ option allows to reconfigure the metrics from a property file.
 While Vert.x core defines an SPI for reporting metrics (implemented for instance in this project), it does not define
 an API for retrieving metrics (because some metrics collectors just do reporting and nothing more).
 
-The `link:../../yardoc/VertxDropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
+The `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
 metrics data snapshots.
 
 === Naming
@@ -104,20 +98,20 @@ metrics data snapshots.
 Each measured component listed below (except for Vertx) will have a base name associated with it. Each metric
 can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + `metricName` from Vertx:
 
-[source,ruby]
+[source,kotlin]
 ----
-metrics = metricsService.get_metrics_snapshot(vertx)
-metrics['vertx.eventbus.handlers']
+var metrics = metricsService.getMetricsSnapshot(vertx)
+metrics.getJsonObject("vertx.eventbus.handlers")
 
 ----
 
 or from the measured component itself using just the metric name:
 
-[source,ruby]
+[source,kotlin]
 ----
-eventBus = vertx.event_bus()
-metrics = metricsService.get_metrics_snapshot(eventBus)
-metrics['handlers']
+var eventBus = vertx.eventBus()
+var metrics = metricsService.getMetricsSnapshot(eventBus)
+metrics.getJsonObject("handlers")
 
 ----
 
@@ -125,66 +119,62 @@ See more examples below on how to retrieve/use metrics for a specific component.
 
 Metrics names can also be listed:
 
-[source,ruby]
+[source,kotlin]
 ----
-metricsNames = metricsService.metrics_names()
-metricsNames.each do |metricsName|
-  puts "Known metrics name #{metricsName}"
-end
+var metricsNames = metricsService.metricsNames()
+for (metricsName in metricsNames) {
+  println("Known metrics name ${metricsName}")
+}
 
 ----
 
 `baseName` defaults to `vertx`, but can be set to a custom value:
 
-[source,ruby]
+[source,kotlin]
 ----
-metricsOptions = {
-  'baseName' => "foo"
-}
+var metricsOptions = DropwizardMetricsOptions(
+  baseName = "foo")
 
 ----
 
 === Retrieving metrics
 
-Once enabled, the `link:../../yardoc/VertxDropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:../../yardoc/Vertx/Measured.html[Measured]` object which provides a map of the metric name to the data,
-represented by a `link:unavailable[JsonObject]`. So for example if we were to print out all metrics
+Once enabled, the `link:../../apidocs/io/vertx/ext/dropwizard/MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
+`link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]` object which provides a map of the metric name to the data,
+represented by a `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`. So for example if we were to print out all metrics
 for a particular Vert.x instance:
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx-dropwizard/metrics_service'
-metricsService = VertxDropwizard::MetricsService.create(vertx)
-metrics = metricsService.get_metrics_snapshot(vertx)
-puts metrics
+var metricsService = MetricsService.create(vertx)
+var metrics = metricsService.getMetricsSnapshot(vertx)
+println(metrics)
 
 ----
 
-NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:unavailable[JsonObject]`
+NOTE: For details on the actual contents of the data (the actual metric) represented by the `link:../../apidocs/io/vertx/core/json/JsonObject.html[JsonObject]`
 consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
 
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:../../yardoc/Vertx/HttpServer.html[HttpServer]` implements `link:../../yardoc/Vertx/Measured.html[Measured]`, you can easily grab all metrics
+Since `link:../../apidocs/io/vertx/core/http/HttpServer.html[HttpServer]` implements `link:../../apidocs/io/vertx/core/metrics/Measured.html[Measured]`, you can easily grab all metrics
 that are specific for that particular http server.
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx-dropwizard/metrics_service'
-metricsService = VertxDropwizard::MetricsService.create(vertx)
-server = vertx.create_http_server()
-# set up server
-metrics = metricsService.get_metrics_snapshot(server)
+var metricsService = MetricsService.create(vertx)
+var server = vertx.createHttpServer()
+// set up server
+var metrics = metricsService.getMetricsSnapshot(server)
 
 ----
 
 Metrics can also be retrieved using a base name:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx-dropwizard/metrics_service'
-metricsService = VertxDropwizard::MetricsService.create(vertx)
-metrics = metricsService.get_metrics_snapshot("vertx.eventbus.message")
+var metricsService = MetricsService.create(vertx)
+var metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message")
 
 ----
 
@@ -207,7 +197,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[counter]]
 === Counter
 
-[source,ruby]
+[source,kotlin]
 ----
 {
   "type"  : "counter",
@@ -239,7 +229,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[meter]]
 === Meter
 
-[source,ruby]
+[source,kotlin]
 ----
 {
   "type"              : "meter",
@@ -257,7 +247,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 
 Extends a <<meter>> to provide an instant throughput.
 
-[source,ruby]
+[source,kotlin]
 ----
 {
   "type"              : "meter",
@@ -276,7 +266,7 @@ Extends a <<meter>> to provide an instant throughput.
 
 A timer is basically a combination of Histogram + Meter.
 
-[source,ruby]
+[source,kotlin]
 ----
 {
   "type": "timer",
@@ -308,7 +298,7 @@ A timer is basically a combination of Histogram + Meter.
 
 Extends a <<timer>> to provide an instant throughput metric.
 
-[source,ruby]
+[source,kotlin]
 ----
 {
   "type": "timer",
@@ -380,26 +370,18 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+The monitored handlers can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific address match or a regex match:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'monitoredEventBusHandlers' => [
-      {
-        'value' => "some-address"
-      },
-      {
-        'value' => "business-.*",
-        'type' => "REGEX"
-      }
-    ]
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    monitoredEventBusHandlers = listOf(Match(
+      value = "some-address"), Match(
+      value = "business-.*",
+      type = MatchType.REGEX)))))
 
 ----
 
@@ -427,45 +409,15 @@ Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus
 
 Http URI metrics must be explicitely configured in the options either by exact match or regex match:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'monitoredHttpServerUris' => [
-      {
-        'value' => "/"
-      },
-      {
-        'value' => "/foo/.*",
-        'type' => "REGEX"
-      }
-    ]
-  }
-})
-
-----
-
-In case if the uri contains some path parameters like `/users/:userId` it might not make sense to have a separate entry in the registry for each user
-id (like `get-requests./users/1`, `get-requests./users/2` and so on) but a summarized one. To achieve that you can set an identifier to the match instance
-in this case the identifier will be used as a part of the registry name instead of uri like `<http-method>-requests.<identifier>`
-
-[source,ruby]
-----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'monitoredHttpServerUris' => [
-      {
-        'value' => "/users/.*",
-        'identifier' => "users",
-        'type' => "REGEX"
-      }
-    ]
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    monitoredHttpServerUris = listOf(Match(
+      value = "/"), Match(
+      value = "/foo/.*",
+      type = MatchType.REGEX)))))
 
 ----
 
@@ -474,7 +426,7 @@ vertx = Vertx::Vertx.vertx({
 === Http client metrics
 
 Base name: `vertx.http.clients` (by default) or `vertx.http.clients.<id>` where `<id>` is a non empty string
-configured by `link:../../vertx-core/dataobjects.html#HttpClientOptions#set_metrics_name-instance_method[metricsName]`.
+configured by `link:../../apidocs/io/vertx/core/http/HttpClientOptions.html#setMetricsName-java.lang.String-[setMetricsName]`.
 
 Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
 
@@ -502,26 +454,18 @@ where <host> is the endpoint host name possibly unresolved and <port> the TCP po
 The monitored endpoints are configurable via a match performed on the server `$host:$port`.
 The default for this setting is to monitor no endpoints.
 
-The monitored endpoints can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+The monitored endpoints can be configured in the `link:../../apidocs/io/vertx/ext/dropwizard/DropwizardMetricsOptions.html[DropwizardMetricsOptions]` via
 a specific hostname match or a regex match:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'monitoredHttpClientEndpoints' => [
-      {
-        'value' => "some-host:80"
-      },
-      {
-        'value' => "another-host:.*",
-        'type' => "REGEX"
-      }
-    ]
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    monitoredHttpClientEndpoints = listOf(Match(
+      value = "some-host:80"), Match(
+      value = "another-host:.*",
+      type = MatchType.REGEX)))))
 
 ----
 
@@ -540,7 +484,7 @@ Base name: `vertx.net.servers.<host>:<port>`
 === Net client metrics
 
 Base name: `vertx.net.clients` (by default) or `vertx.net.clients.<id>` where `<id>` is a non empty string
-configured by `link:../../vertx-core/dataobjects.html#NetClientOptions#set_metrics_name-instance_method[metricsName]`.
+configured by `link:../../apidocs/io/vertx/core/net/NetClientOptions.html#setMetricsName-java.lang.String-[setMetricsName]`.
 
 Net client includes all the metrics of a <<net-server-metrics,Net Server>>
 
@@ -560,7 +504,7 @@ Base name: `vertx.pool.<type>.<name>` where `type` is the type of the pool (e.g 
 `name` is the name of the pool (e.g `vert.x-worker-thread`).
 
 Pools of type _worker_ are blocking worker pools. Vert.x exposes its worker as _vert.x-worker-thread_ and
-_vert.x-internal-blocking_. Named worker executor created with `link:../../yardoc/Vertx/WorkerExecutor.html[WorkerExecutor]` are exposed.
+_vert.x-internal-blocking_. Named worker executor created with `link:../../apidocs/io/vertx/core/WorkerExecutor.html[WorkerExecutor]` are exposed.
 
 Datasource created with Vert.x JDBC clients are exposed as _datasource_.
 
@@ -581,14 +525,11 @@ JMX is disabled by default.
 
 If you want JMX, then you need to enabled that:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'jmxEnabled' => true
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    jmxEnabled = true)))
 
 ----
 
@@ -601,15 +542,12 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true
 
 You can configure the domain under which the MBeans will be created:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'jmxEnabled' => true,
-    'jmxDomain' => "mydomain"
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    jmxEnabled = true,
+    jmxDomain = "mydomain")))
 
 ----
 
@@ -642,19 +580,16 @@ https://dropwizard.github.io/metrics/3.1.0/getting-started/#the-registry[Dropwiz
 the https://dropwizard.github.io/metrics/3.1.0/apidocs/com/codahale/metrics/SharedMetricRegistries.html[Dropwizard Shared Registry]
 so you can retrieve this registry and use according to your needs.
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-options = {
-  'metricsOptions' => {
-    'enabled' => true,
-    'registryName' => "my-registry"
-  }
-}
-vertx = Vertx::Vertx.vertx(options)
-# Get the registry
-registry = Java::ComCodahaleMetrics::SharedMetricRegistries.get_or_create("my-registry")
-# Do whatever you need with the registry
+var options = VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    registryName = "my-registry"))
+var vertx = Vertx.vertx(options)
+// Get the registry
+var registry = com.codahale.metrics.SharedMetricRegistries.getOrCreate("my-registry")
+// Do whatever you need with the registry
 }
 ----
 
@@ -671,16 +606,13 @@ This section explains how to configure your vert.x application to retrieve the m
 
 First, you need to configure your vert.x instance with the following options:
 
-[source,ruby]
+[source,kotlin]
 ----
-require 'vertx/vertx'
-vertx = Vertx::Vertx.vertx({
-  'metricsOptions' => {
-    'enabled' => true,
-    'jmxEnabled' => true,
-    'jmxDomain' => "vertx-metrics"
-  }
-})
+var vertx = Vertx.vertx(VertxOptions(
+  metricsOptions = DropwizardMetricsOptions(
+    enabled = true,
+    jmxEnabled = true,
+    jmxDomain = "vertx-metrics")))
 
 ----
 

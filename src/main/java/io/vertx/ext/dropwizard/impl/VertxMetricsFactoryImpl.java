@@ -40,6 +40,7 @@ import java.util.Scanner;
  */
 public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
 
+  static final String BASE_NAME = "vertx";
   private Logger logger = LoggerFactory.getLogger(VertxMetricsFactoryImpl.class);
 
   @Override
@@ -67,7 +68,8 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
         metricsOptions = new DropwizardMetricsOptions(loadedFromFile);
       }
     }
-    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, shutdown, options, metricsOptions);
+    String baseName = metricsOptions.getBaseName() == null ? BASE_NAME : metricsOptions.getBaseName();
+    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, shutdown, options, metricsOptions, baseName);
     // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
     if (metricsOptions.isJmxEnabled()) {
       String jmxDomain = metricsOptions.getJmxDomain();

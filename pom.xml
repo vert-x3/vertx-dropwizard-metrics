@@ -23,7 +23,7 @@
   <parent>
     <groupId>io.vertx</groupId>
     <artifactId>vertx-ext-parent</artifactId>
-    <version>24</version>
+    <version>26</version>
   </parent>
 
   <artifactId>vertx-dropwizard-metrics</artifactId>
@@ -177,6 +177,7 @@
           Import-Package: \
             groovy.lang.*;resolution:=optional,\
             org.codehaus.groovy.*;resolution:=optional,\
+            kotlin.*;resolution:=optional,\
             io.vertx.groovy.*;resolution:=optional,\
             io.vertx.lang.rxjava.*;resolution:=optional,\
             io.vertx.lang.groovy.*;resolution:=optional,\

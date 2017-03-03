@@ -116,6 +116,11 @@ public class MetricsExamples {
     }
   }
 
+  public void baseName() {
+    DropwizardMetricsOptions metricsOptions =
+      new DropwizardMetricsOptions().setBaseName("foo");
+  }
+
   public void example1(Vertx vertx) {
     MetricsService metricsService = MetricsService.create(vertx);
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx);

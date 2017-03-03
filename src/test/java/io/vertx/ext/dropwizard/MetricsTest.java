@@ -74,6 +74,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.vertx.test.core.TestUtils.*;
+import static java.util.concurrent.TimeUnit.*;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -369,9 +370,18 @@ public class MetricsTest extends MetricsTestBase {
 
     await();
 
-    JsonObject metrics = metricsService.getMetricsSnapshot(server);
+    JsonObject metrics;
+    long start = System.currentTimeMillis();
+    // This allows http server metrics to be completely removed from the registry
+    do {
+      metrics = metricsService.getMetricsSnapshot(server);
+      if (metrics != null && metrics.isEmpty()) {
+        break;
+      }
+      MILLISECONDS.sleep(100);
+    } while (System.currentTimeMillis() - start < 5000);
     assertNotNull(metrics);
-    assertTrue(metrics.isEmpty());
+    assertEquals(Collections.emptyMap(), metrics.getMap());
 
     metrics = metricsService.getMetricsSnapshot(client);
     assertNotNull(metrics);
@@ -1081,7 +1091,7 @@ public class MetricsTest extends MetricsTestBase {
     ScheduledMetricsConsumer consumer = new ScheduledMetricsConsumer(vertx).
         filter((name, metric) -> name.startsWith(baseName));
 
-    consumer.start(300, TimeUnit.MILLISECONDS, (name, metric) -> {
+    consumer.start(300, MILLISECONDS, (name, metric) -> {
       assertTrue(name.startsWith(baseName));
       if (count.get() == 0) {
         if (name.equals(baseName + ".messages.sent")) {
@@ -1334,7 +1344,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   private void assertMetricType(String expectedType, Metric metric) {
-    assertMetricType(expectedType, Helper.convertMetric(metric, TimeUnit.MILLISECONDS, TimeUnit.MILLISECONDS));
+    assertMetricType(expectedType, Helper.convertMetric(metric, MILLISECONDS, MILLISECONDS));
   }
 
   private void assertMetricType(String expectedType, JsonObject metric) {
