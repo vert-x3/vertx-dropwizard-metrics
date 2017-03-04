@@ -101,12 +101,12 @@ public class MetricsTest extends MetricsTestBase {
                 setJmxEnabled(true).
                 addMonitoredEventBusHandler(new Match().setValue("foo")).
                 addMonitoredEventBusHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
-                addMonitoredEventBusHandler(new Match().setValue("user:.*").setType(MatchType.REGEX).setIdentifier("user-handlers")).
+                addMonitoredEventBusHandler(new Match().setValue("user:.*").setType(MatchType.REGEX).setAlias("user-handlers")).
                 addMonitoredHttpServerUri(new Match().setValue("/get")).
                 addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX)).
-                addMonitoredHttpServerUri(new Match().setValue("/users/.*").setIdentifier("users").setType(MatchType.REGEX)).
+                addMonitoredHttpServerUri(new Match().setValue("/users/.*").setAlias("users").setType(MatchType.REGEX)).
                 addMonitoredHttpClientEndpoint(new Match().setValue("localhost:8080")).
-                addMonitoredHttpClientUri(new Match().setValue("/books/.*").setIdentifier("books").setType(MatchType.REGEX))
+                addMonitoredHttpClientUri(new Match().setValue("/books/.*").setAlias("books").setType(MatchType.REGEX))
         );
   }
 

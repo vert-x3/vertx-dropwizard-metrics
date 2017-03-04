@@ -18,7 +18,7 @@ public class Match {
 
   private String value;
   private MatchType type;
-  private String identifier;
+  private String alias;
 
   /**
    * Default constructor
@@ -45,6 +45,7 @@ public class Match {
   public Match(JsonObject json) {
     value = json.getString("value");
     type = MatchType.valueOf(json.getString("type", DEFAULT_TYPE.name()));
+    alias = json.getString("alias");
   }
 
   /**
@@ -84,21 +85,21 @@ public class Match {
   }
 
   /**
-   * @return the matcher identifier
+   * @return the matcher alias
    */
-  public String getIdentifier() {
-    return identifier;
+  public String getAlias() {
+    return alias;
   }
 
   /**
-   * Set the identifier the human readable name that will be used as a part of
-   * registry entry name if the value matches.
+   * Set the alias the human readable name that will be used as a part of
+   * registry entry name when the value matches.
    *
-   * @param identifier the matcher identifier
+   * @param alias the matcher alias
    * @return a reference to this, so the API can be used fluently
    */
-  public Match setIdentifier(String identifier) {
-    this.identifier = identifier;
+  public Match setAlias(String alias) {
+    this.alias = alias;
     return this;
   }
 }

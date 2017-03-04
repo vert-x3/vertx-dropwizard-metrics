@@ -51,7 +51,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   @Override
   public EndpointMetric createEndpoint(String host, int port, int maxPoolSize) {
     String name = host + ":" + port;
-    if (endpointMatcher.match(name) != null) {
+    if (endpointMatcher.matches(name) != null) {
       return new EndpointMetric(clientReporter, name);
     } else {
       return null;

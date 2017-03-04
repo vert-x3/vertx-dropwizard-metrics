@@ -7,59 +7,66 @@ import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 class Matcher {
-  private final Set<String> equalsMatches;
+  private final Map<String, String> exactMatches;
   private final Entry<Pattern, String>[] regexMatches;
-  private final Map<String, String> identifiers;
+  private final Map<String, String> aliases;
 
   Matcher(List<Match> matches) {
-    equalsMatches = new HashSet<>();
-    identifiers = new HashMap<>();
+    aliases = new HashMap<>();
 
     for (Match match : matches) {
-      if (match.getType() == MatchType.EQUALS && match.getValue() != null) {
-        equalsMatches.add(match.getValue());
-      }
-
-      if (match.getIdentifier() != null) {
-        identifiers.put(match.getValue(), match.getIdentifier());
+      if (match.getAlias() != null) {
+        aliases.put(match.getValue(), match.getAlias());
       }
     }
 
-    regexMatches = matches.stream()
+    exactMatches = matches.stream()
+      .filter(match -> match.getType() == MatchType.EQUALS && match.getValue() != null)
+      .collect(Collectors.toMap(Match::getValue, match -> match.getAlias() != null ? match.getAlias() : match.getValue()));
+
+    @SuppressWarnings("unchecked")
+    Entry<Pattern, String>[] entries = matches.stream()
       .filter(match -> match.getType() == MatchType.REGEX && match.getValue() != null)
-      .map(match -> new SimpleEntry<>(Pattern.compile(match.getValue()), match.getValue()))
+      .map(match -> new SimpleEntry<>(Pattern.compile(match.getValue()), match.getAlias()))
       .toArray(Entry[]::new);
+    regexMatches = entries;
   }
 
-  String match(String value) {
-    if (equalsMatches.size() > 0 && equalsMatches.contains(value)) {
-      return value;
+  /**
+   * Return a non {@code null} identifier string when the {@code value} matches otherwise returns {@code null}.
+   * <p>
+   * The returned identifier can be used to identify the match, it is either the original
+   * value or an alias.
+   *
+   * @param value the value to match
+   * @return the identifier or null
+   */
+  String matches(String value) {
+    if (exactMatches.size() > 0 && exactMatches.containsKey(value)) {
+      String valueOrAlias = exactMatches.get(value);
+      if (valueOrAlias != null) {
+        return valueOrAlias;
+      }
     }
-
     if (regexMatches.length > 0) {
       for (Entry<Pattern, String> entry : regexMatches) {
         if (entry.getKey().matcher(value).matches()) {
-          return entry.getValue();
+          String alias = entry.getValue();
+          if (alias != null) {
+            return alias;
+          } else {
+            return value;
+          }
         }
       }
     }
-
     return null;
   }
-
-  String matchIdentifier(String value) {
-    if (value == null) {
-      return null;
-    }
-
-    return identifiers.get(value);
-  }
-
-
-
 }

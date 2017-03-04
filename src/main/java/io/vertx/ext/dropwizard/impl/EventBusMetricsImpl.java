@@ -19,11 +19,9 @@ package io.vertx.ext.dropwizard.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
-import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -100,12 +98,9 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   @Override
   public HandlerMetric handlerRegistered(String address, String repliedAddress) {
     handlerCount.inc();
-    String match = handlerMatcher.match(address);
+    String match = handlerMatcher.matches(address);
     if (match != null) {
-      String matchIdentifier = handlerMatcher.matchIdentifier(match);
-
-      String addressIdentifier = matchIdentifier != null ? matchIdentifier : address;
-      return new HandlerMetric(addressIdentifier);
+      return new HandlerMetric(match);
     }
     return null;
   }

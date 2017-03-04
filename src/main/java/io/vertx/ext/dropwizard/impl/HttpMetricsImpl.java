@@ -24,7 +24,6 @@ import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.EnumMap;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -76,14 +75,9 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     if (closed) {
       return 0;
     }
-    String match = matcher.match(metric.uri);
-    boolean monitoredUri = metric.uri != null && match != null;
-    String matchUriIdentifier;
-
-    if (!monitoredUri) {
-      matchUriIdentifier = null;
-    } else {
-      matchUriIdentifier = matcher.matchIdentifier(match);
+    String match = null;
+    if (metric.uri != null) {
+      match = matcher.matches(metric.uri);
     }
 
     long duration = System.nanoTime() - metric.requestBegin;
@@ -100,13 +94,11 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     // Update specific method / uri request metrics
     if (metric.method != null) {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
-      if (metric.uri != null && monitoredUri) {
-        String uriIdentifier = matchUriIdentifier != null ? matchUriIdentifier : metric.uri;
-        throughputTimer(metric.method.toString().toLowerCase() + "-requests", uriIdentifier).update(duration, TimeUnit.NANOSECONDS);
+      if (match != null) {
+        throughputTimer(metric.method.toString().toLowerCase() + "-requests", match).update(duration, TimeUnit.NANOSECONDS);
       }
-    } else if (metric.uri != null && monitoredUri) {
-      String uriIdentifier = matchUriIdentifier != null ? matchUriIdentifier : metric.uri;
-      throughputTimer("requests", uriIdentifier).update(duration, TimeUnit.NANOSECONDS);
+    } else if (match != null) {
+      throughputTimer("requests", match).update(duration, TimeUnit.NANOSECONDS);
     }
 
     return duration;

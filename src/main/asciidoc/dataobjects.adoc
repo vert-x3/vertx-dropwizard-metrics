@@ -68,10 +68,10 @@ Set the name used for registering the metrics in the Dropwizard shared registry.
 [frame="topbot"]
 |===
 ^|Name | Type ^| Description
-|[[identifier]]`identifier`|`String`|
+|[[alias]]`alias`|`String`|
 +++
-Set the identifier the human readable name that will be used as a part of
- registry entry name if the value matches.
+Set the alias the human readable name that will be used as a part of
+ registry entry name when the value matches.
 +++
 |[[type]]`type`|`link:enums.html#MatchType[MatchType]`|
 +++
