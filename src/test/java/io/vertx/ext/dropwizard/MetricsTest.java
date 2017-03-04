@@ -101,9 +101,12 @@ public class MetricsTest extends MetricsTestBase {
                 setJmxEnabled(true).
                 addMonitoredEventBusHandler(new Match().setValue("foo")).
                 addMonitoredEventBusHandler(new Match().setValue("juu.*").setType(MatchType.REGEX)).
+                addMonitoredEventBusHandler(new Match().setValue("user:.*").setType(MatchType.REGEX).setIdentifier("user-handlers")).
                 addMonitoredHttpServerUri(new Match().setValue("/get")).
                 addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX)).
-                addMonitoredHttpClientEndpoint(new Match().setValue("localhost:8080"))
+                addMonitoredHttpServerUri(new Match().setValue("/users/.*").setIdentifier("users").setType(MatchType.REGEX)).
+                addMonitoredHttpClientEndpoint(new Match().setValue("localhost:8080")).
+                addMonitoredHttpClientUri(new Match().setValue("/books/.*").setIdentifier("books").setType(MatchType.REGEX))
         );
   }
 
@@ -245,6 +248,9 @@ public class MetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       client.request(HttpMethod.GET, 8080, "localhost", "/get", resp -> latch.countDown()).end();
+      client.request(HttpMethod.GET, 8080, "localhost", "/users/1", resp -> latch.countDown()).end();
+      client.request(HttpMethod.GET, 8080, "localhost", "/users/2", resp -> latch.countDown()).end();
+      client.request(HttpMethod.GET, 8080, "localhost", "/users/3", resp -> latch.countDown()).end();
       client.request(HttpMethod.POST, 8080, "localhost", "/post", resp -> latch.countDown()).end();
       client.request(HttpMethod.PUT, 8080, "localhost", "/put", resp -> latch.countDown()).end();
       client.request(HttpMethod.DELETE, 8080, "localhost", "/delete", resp -> latch.countDown()).end();
@@ -261,8 +267,12 @@ public class MetricsTest extends MetricsTestBase {
     vertx.setTimer(100, id -> {
       // Gather metrics
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
-      assertCount(metrics.getJsonObject("get-requests"), 1L);
+      assertCount(metrics.getJsonObject("get-requests"), 4L);
       assertCount(metrics.getJsonObject("get-requests./get"), 1L);
+      assertCount(metrics.getJsonObject("get-requests.users"), 3L);
+      assertNull(metrics.getJsonObject("get-requests./users/1"));
+      assertNull(metrics.getJsonObject("get-requests./users/2"));
+      assertNull(metrics.getJsonObject("get-requests./users/3"));
       assertCount(metrics.getJsonObject("post-requests"), 1L);
       assertCount(metrics.getJsonObject("post-requests./post"), 1L);
       assertCount(metrics.getJsonObject("put-requests"), 1L);
@@ -507,6 +517,37 @@ public class MetricsTest extends MetricsTestBase {
     String baseName = "vertx.http.clients." + name;
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
     assertCount(metrics.getJsonObject(baseName + ".bytes-read"), 1L);
+
+    cleanup(client);
+    cleanup(server);
+  }
+
+  @Test
+  public void testHttpClientMetricsWithMatchIdentifier() throws Exception {
+    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
+      req.response().end();
+    }).listen(ar -> {
+      assertTrue(ar.succeeded());
+      client.request(HttpMethod.GET, 8080, "localhost", "/books/1", resp -> {
+        resp.bodyHandler(buff -> {
+
+          client.request(HttpMethod.GET, 8080, "localhost", "/books/2", resp2 -> {
+            resp2.bodyHandler(buff2 -> {
+              testComplete();
+            });
+          }).end();
+        });
+      }).end();
+    });
+
+    await();
+
+    String baseName = "vertx.http.clients";
+    JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
+    assertCount(metrics.getJsonObject(baseName + ".get-requests.books"), 2L);
+    assertNull(metrics.getJsonObject(baseName + ".get-requests./books/1"));
+    assertNull(metrics.getJsonObject(baseName + ".get-requests./books/2"));
 
     cleanup(client);
     cleanup(server);
@@ -836,6 +877,31 @@ public class MetricsTest extends MetricsTestBase {
     });
     vertx.eventBus().send("juu1234", "whatever");
     await();
+  }
+
+  @Test
+  public void testEventBusMetricsHandlerRegexMatchWithIdentifier() throws Exception {
+
+    CountDownLatch allHandlersLatch = new CountDownLatch(3);
+
+    vertx.eventBus().consumer("user:1", msg -> {
+      allHandlersLatch.countDown();
+    });
+
+    vertx.eventBus().consumer("user:2", msg -> {
+      allHandlersLatch.countDown();
+    });
+    vertx.eventBus().send("user:1", "whatever");
+    vertx.eventBus().send("user:1", "whatever one more time");
+    vertx.eventBus().send("user:2", "whatever");
+
+    awaitLatch(allHandlersLatch);
+
+    // Check global metrics
+    JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+    assertCount(metrics.getJsonObject("handlers.user-handlers"), 3L);
+    assertNull(metrics.getJsonObject("handlers.user:1"));
+    assertNull(metrics.getJsonObject("handlers.user:2"));
   }
 
   @Test

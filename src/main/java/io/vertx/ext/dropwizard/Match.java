@@ -18,6 +18,7 @@ public class Match {
 
   private String value;
   private MatchType type;
+  private String identifier;
 
   /**
    * Default constructor
@@ -79,6 +80,25 @@ public class Match {
    */
   public Match setType(MatchType type) {
     this.type = type;
+    return this;
+  }
+
+  /**
+   * @return the matcher identifier
+   */
+  public String getIdentifier() {
+    return identifier;
+  }
+
+  /**
+   * Set the identifier the human readable name that will be used as a part of
+   * registry entry name if the value matches.
+   *
+   * @param identifier the matcher identifier
+   * @return a reference to this, so the API can be used fluently
+   */
+  public Match setIdentifier(String identifier) {
+    this.identifier = identifier;
     return this;
   }
 }

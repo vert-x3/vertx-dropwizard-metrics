@@ -52,7 +52,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public void responseEnd(RequestMetric requestMetric, HttpServerResponse response) {
-    end(requestMetric, response.getStatusCode(), requestMetric.uri != null && uriMatcher.match(requestMetric.uri));
+    end(requestMetric, response.getStatusCode(), uriMatcher);
   }
 
   @Override

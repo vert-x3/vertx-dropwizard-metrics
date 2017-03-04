@@ -24,6 +24,7 @@ import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.EnumMap;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -65,15 +66,24 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
   }
 
   /**
-   * Signal end of request
+   * Signal end of request.
    *
    * @param metric the request metric
    * @param statusCode the status code, {@code 0} means a reset
-   * @param monitorUri the monitored uri
+   * @param matcher the Matcher instance
    */
-  protected long end(RequestMetric metric, int statusCode, boolean monitorUri) {
+  protected long end(RequestMetric metric, int statusCode, Matcher matcher) {
     if (closed) {
       return 0;
+    }
+    String match = matcher.match(metric.uri);
+    boolean monitoredUri = metric.uri != null && match != null;
+    String matchUriIdentifier;
+
+    if (!monitoredUri) {
+      matchUriIdentifier = null;
+    } else {
+      matchUriIdentifier = matcher.matchIdentifier(match);
     }
 
     long duration = System.nanoTime() - metric.requestBegin;
@@ -90,11 +100,13 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     // Update specific method / uri request metrics
     if (metric.method != null) {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
-      if (metric.uri != null && monitorUri) {
-        throughputTimer(metric.method.toString().toLowerCase() + "-requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
+      if (metric.uri != null && monitoredUri) {
+        String uriIdentifier = matchUriIdentifier != null ? matchUriIdentifier : metric.uri;
+        throughputTimer(metric.method.toString().toLowerCase() + "-requests", uriIdentifier).update(duration, TimeUnit.NANOSECONDS);
       }
-    } else if (metric.uri != null && monitorUri) {
-      throughputTimer("requests", metric.uri).update(duration, TimeUnit.NANOSECONDS);
+    } else if (metric.uri != null && monitoredUri) {
+      String uriIdentifier = matchUriIdentifier != null ? matchUriIdentifier : metric.uri;
+      throughputTimer("requests", uriIdentifier).update(duration, TimeUnit.NANOSECONDS);
     }
 
     return duration;
