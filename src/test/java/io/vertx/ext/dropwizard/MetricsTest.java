@@ -770,7 +770,7 @@ public class MetricsTest extends MetricsTestBase {
     });
 
     // Wait until we have piled the (n-1) messages on the event loop
-    waitUntil(() -> {
+    assertWaitUntil(() -> {
       JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
       JsonObject pending = metrics.getJsonObject("messages.pending-local");
       int count = pending.getInteger("count");
@@ -1064,7 +1064,7 @@ public class MetricsTest extends MetricsTestBase {
       latch.countDown();
     });
     awaitLatch(latch);
-    waitUntil(() -> getCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers")) == 0);
+    assertWaitUntil(() -> getCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers")) == 0);
     assertCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers"), 0L);
 
     // Periodic
@@ -1181,7 +1181,7 @@ public class MetricsTest extends MetricsTestBase {
         }
       }).end();
     }
-    waitUntil(() -> bs.cardinality() == 3);
+    assertWaitUntil(() -> bs.cardinality() == 3);
     for (HttpServer server : servers) {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
       assertEquals(3, (int)metrics.getJsonObject("requests").getInteger("count"));
@@ -1209,14 +1209,14 @@ public class MetricsTest extends MetricsTestBase {
       client.getNow(8080, "localhost", "/somepath", resp -> {
       });
     }
-    waitUntil(() -> requests.size() == 5);
+    assertWaitUntil(() -> requests.size() == 5);
     JsonObject metrics = metricsService.getMetricsSnapshot(client);
     assertEquals(2, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-size").getInteger("count"));
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-delay").getInteger("count"));
     List<Runnable> todo = new ArrayList<>(requests);
     requests.clear();
     todo.forEach(Runnable::run);
-    waitUntil(() -> requests.size() == 2);
+    assertWaitUntil(() -> requests.size() == 2);
     metrics = metricsService.getMetricsSnapshot(client);
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-size").getInteger("count"));
     assertEquals(2, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-delay").getInteger("count"));
@@ -1267,7 +1267,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.ttfb").getInteger("count"));
     assertEquals(15, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
     clients[2].close();
-    waitUntil(() -> closedLatch.getCount() == 2);
+    assertWaitUntil(() -> closedLatch.getCount() == 2);
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
@@ -1275,7 +1275,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.ttfb").getInteger("count"));
     assertEquals(10, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
     clients[1].close();
-    waitUntil(() -> closedLatch.getCount() == 1);
+    assertWaitUntil(() -> closedLatch.getCount() == 1);
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
@@ -1283,7 +1283,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.ttfb").getInteger("count"));
     assertEquals(5, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
     clients[0].close();
-    waitUntil(() -> closedLatch.getCount() == 0);
+    assertWaitUntil(() -> closedLatch.getCount() == 0);
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertNull(metrics.getJsonObject("endpoint.localhost:8080.usage\""));
     assertNull(metrics.getJsonObject("endpoint.localhost:8080.in-use"));
