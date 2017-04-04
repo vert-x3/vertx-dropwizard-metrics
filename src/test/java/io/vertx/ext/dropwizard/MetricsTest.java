@@ -885,11 +885,11 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch allHandlersLatch = new CountDownLatch(3);
 
     vertx.eventBus().consumer("user:1", msg -> {
-      allHandlersLatch.countDown();
+      vertx.runOnContext(v -> allHandlersLatch.countDown());
     });
 
     vertx.eventBus().consumer("user:2", msg -> {
-      allHandlersLatch.countDown();
+      vertx.runOnContext(v -> allHandlersLatch.countDown());
     });
     vertx.eventBus().send("user:1", "whatever");
     vertx.eventBus().send("user:1", "whatever one more time");
