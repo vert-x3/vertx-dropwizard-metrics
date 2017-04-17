@@ -18,6 +18,7 @@ public class MetricsCommandPack implements CommandResolverFactory {
 
   @Override
   public void resolver(Vertx vertx, Handler<AsyncResult<CommandResolver>> handler) {
-    handler.handle(Future.succeededFuture(() -> Stream.of(MetricsInfo.class, MetricsLs.class).map(cmd -> Command.create(vertx, cmd)).collect(Collectors.toList())));
+    handler.handle(Future.succeededFuture(() -> Stream.of(MetricsInfo.class, MetricsLs.class, MetricsHistogram.class)
+      .map(cmd -> Command.create(vertx, cmd)).collect(Collectors.toList())));
   }
 }
