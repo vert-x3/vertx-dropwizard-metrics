@@ -101,9 +101,8 @@ public class MetricsHistogram extends AnnotatedCommand {
       process.write(output.toString());
     });
     process.interruptHandler(i -> {
-      process.write("\n");
-      process.end();
       vertx.cancelTimer(timer);
+      process.end();
     });
   }
 }
