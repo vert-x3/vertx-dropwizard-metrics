@@ -30,13 +30,13 @@ public class MetricsHistogram extends AnnotatedCommand {
   private List<String> availableColumns = Arrays.asList("MIN", "MAX", "75%", "95%", "99%", "99.9%");
 
   @Argument(index = 0, argName = "name")
-  @Description("the histogram metrics name, can be a prefix or a precise name")
+  @Description("The histogram metrics name, can be a prefix or a precise name")
   public void setName(String name) {
     this.name = name;
   }
 
   @Argument(index = 1, argName = "columns", required = false)
-  @Description("the configurable histogram metrics columns to view [min max 75% 95% 98% 99% 99.9%]")
+  @Description("The configurable histogram metrics columns to show [min max 75% 95% 98% 99% 99.9%]")
   public void setColumns(List<String> columns) {
     this.columns = columns;
   }
@@ -71,14 +71,12 @@ public class MetricsHistogram extends AnnotatedCommand {
 
     long timer = vertx.setPeriodic(1000, id -> {
 
-      JsonObject metricsSnapshot = metrics.getMetricsSnapshot(name);
-
-      Map<String, Object> metricsHistogram = metricsSnapshot
+      Map<String, Object> histogramMetrics = metrics.getMetricsSnapshot(name)
         .stream()
         .filter(e -> ((JsonObject) e.getValue()).getString("type").equals("histogram"))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-      List<String> histogramKeys = new ArrayList<>(metricsHistogram.keySet());
+      List<String> histogramKeys = new ArrayList<>(histogramMetrics.keySet());
 
       for (int i = 1; i <= process.height(); i++) {
         output.append("\033[").append(i).append(";1H\033[K");
@@ -88,7 +86,7 @@ public class MetricsHistogram extends AnnotatedCommand {
           int index = i - 2;
           if (index < histogramKeys.size()) {
             String key = histogramKeys.get(index);
-            JsonObject data = (JsonObject) metricsHistogram.get(key);
+            JsonObject data = (JsonObject) histogramMetrics.get(key);
             List<Object> dataColumns = new ArrayList<>();
             dataColumns.add(key);
             for (String header : headerColumns) {
