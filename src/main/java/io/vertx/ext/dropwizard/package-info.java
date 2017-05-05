@@ -641,6 +641,15 @@
  *
  * Check http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[check_jmx4perl documentation] to get more
  * details about check configuration.
+ *
+ * == Metrics commands via Telnet or SSH in Vert.x Shell service
+ *
+ * To find out the available metrics commands you can use the _help_ builtin command:
+ *
+ * * Available commands
+ * .. metrics-ls: List the known metrics for the current Vert.x instance
+ * .. metrics-info: Show metrics info for the current Vert.x instance in JSON format
+ * .. metrics-histogram: Show histogram metrics table for the current Vert.x instance in real time
  */
 @ModuleGen(name = "vertx-dropwizard", groupPackage = "io.vertx")
 @Document(fileName = "index.adoc")
