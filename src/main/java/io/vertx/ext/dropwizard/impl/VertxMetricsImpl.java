@@ -147,7 +147,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public TCPMetrics<?> createMetrics(NetClient client, NetClientOptions options) {
+  public TCPMetrics<?> createMetrics(NetClientOptions options) {
     String baseName;
     if (options.getMetricsName() != null) {
       baseName = nameOf("net.clients", options.getMetricsName());
