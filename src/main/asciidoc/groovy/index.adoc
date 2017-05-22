@@ -547,7 +547,7 @@ Base name: `vertx.datagram`
 
 === Pool metrics
 
-Base name: `vertx.pool.<type>.<name>` where `type` is the type of the pool (e.g _worker_, _datasource_) and
+Base name: `vertx.pools.<type>.<name>` where `type` is the type of the pool (e.g _worker_, _datasource_) and
 `name` is the name of the pool (e.g `vert.x-worker-thread`).
 
 Pools of type _worker_ are blocking worker pools. Vert.x exposes its worker as _vert.x-worker-thread_ and
