@@ -330,7 +330,7 @@
  * * `messages.received` - A <<throughput_meter>> representing the rate of which messages are being received
  * * `messages.received-local` - A <<throughput_meter>> representing the rate of which local messages are being received
  * * `messages.received-remote` - A <<throughput_meter>> representing the rate of which remote messages are being received
- * * `messages.delivered` - A <<throughpu_metert>> representing the rate of which messages are being delivered to an handler
+ * * `messages.delivered` - A <<throughput_meter>> representing the rate of which messages are being delivered to an handler
  * * `messages.delivered-local` - A <<throughput_meter>> representing the rate of which local messages are being delivered to an handler
  * * `messages.delivered-remote` - A <<throughput_meter>> representing the rate of which remote messages are being delivered to an handler
  * * `messages.sent` - A <<throughput_metert>> representing the rate of which messages are being sent
