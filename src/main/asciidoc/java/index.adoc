@@ -346,7 +346,7 @@ Base name: `vertx.eventbus`
 * `messages.received` - A <<throughput_meter>> representing the rate of which messages are being received
 * `messages.received-local` - A <<throughput_meter>> representing the rate of which local messages are being received
 * `messages.received-remote` - A <<throughput_meter>> representing the rate of which remote messages are being received
-* `messages.delivered` - A <<throughpu_metert>> representing the rate of which messages are being delivered to an handler
+* `messages.delivered` - A <<throughput_meter>> representing the rate of which messages are being delivered to an handler
 * `messages.delivered-local` - A <<throughput_meter>> representing the rate of which local messages are being delivered to an handler
 * `messages.delivered-remote` - A <<throughput_meter>> representing the rate of which remote messages are being delivered to an handler
 * `messages.sent` - A <<throughput_metert>> representing the rate of which messages are being sent
@@ -697,3 +697,12 @@ check_jmx4perl --url http://10.0.2.2:8778/jolokia --name eventloops --mbean vert
 
 Check http://search.cpan.org/~roland/jmx4perl/scripts/check_jmx4perl[check_jmx4perl documentation] to get more
 details about check configuration.
+
+== Metrics commands via Telnet or SSH in Vert.x Shell service
+
+To find out the available metrics commands you can use the _help_ builtin command:
+
+* Available commands
+.. metrics-ls: List the known metrics for the current Vert.x instance
+.. metrics-info: Show metrics info for the current Vert.x instance in JSON format
+.. metrics-histogram: Show histogram metrics table for the current Vert.x instance in real time
