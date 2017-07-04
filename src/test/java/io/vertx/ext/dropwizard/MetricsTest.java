@@ -705,12 +705,10 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch latch = new CountDownLatch(1);
     datagramSocket.close(ar -> {
       assertTrue(ar.succeeded());
-      JsonObject dMetrics = metricsService.getMetricsSnapshot(datagramSocket);
-      assertTrue(dMetrics.isEmpty());
       latch.countDown();
     });
-
     awaitLatch(latch);
+    assertWaitUntil(() -> metricsService.getMetricsSnapshot(datagramSocket).isEmpty());
   }
 
   @Test
