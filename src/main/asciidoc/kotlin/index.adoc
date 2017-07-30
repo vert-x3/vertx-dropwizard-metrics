@@ -346,7 +346,7 @@ The following metrics are provided:
 Base name: `vertx.eventbus`
 
 * `handlers` - A <<counter>> of the number of event bus handlers
-* `handlers.myaddress` - A <<timer>> representing the rate of which messages are being received for the _myaddress_ handler
+* `handlers.myaddress` - A <<timer>> representing the rate of which messages are being processed for the _myaddress_ handler
 * `messages.bytes-read` - A <<meter>> of the number of bytes read when receiving remote messages
 * `messages.bytes-written` - A <<meter>> of the number of bytes written when sending remote messages
 * `messages.pending` - A <<counter>> of the number of messages received but not yet processed by an handler
