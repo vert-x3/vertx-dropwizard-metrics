@@ -17,6 +17,7 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Handler;
@@ -48,6 +49,7 @@ import java.util.Map;
  */
 class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private static final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+  private static int eventLoopThreads;
 
   private final DropwizardMetricsOptions options;
   private final Counter timers;
@@ -65,7 +67,8 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     this.shutdown = shutdown;
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
-    gauge(VertxMetricsImpl::getNumberOfEventLoopThreads, "event-loop-threads");
+    updateEventLoopThreads();
+    gauge(() -> eventLoopThreads, "event-loop-threads");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
     if (options.isClustered()) {
       gauge(options::getClusterHost, "cluster-host");
@@ -87,12 +90,14 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   public void verticleDeployed(Verticle verticle) {
     verticles.inc();
     counter("verticles", verticleName(verticle)).inc();
+    updateEventLoopThreads();
   }
 
   @Override
   public void verticleUndeployed(Verticle verticle) {
     verticles.dec();
     counter("verticles", verticleName(verticle)).dec();
+    updateEventLoopThreads();
   }
 
   @Override
@@ -198,13 +203,12 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     return verticle.getClass().getName();
   }
 
-  private static int getNumberOfEventLoopThreads() {
-    int eventLoopThreads = 0;
+  private static void updateEventLoopThreads() {
+    eventLoopThreads = 0;
     for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds())) {
       if (threadInfo.getThreadName().startsWith("vert.x-eventloop-thread-")) {
         ++eventLoopThreads;
       }
     }
-    return eventLoopThreads;
   }
 }
