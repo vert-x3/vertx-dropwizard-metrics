@@ -29,20 +29,15 @@ import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
-import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.core.spi.metrics.DatagramSocketMetrics;
-import io.vertx.core.spi.metrics.EventBusMetrics;
-import io.vertx.core.spi.metrics.HttpClientMetrics;
-import io.vertx.core.spi.metrics.HttpServerMetrics;
-import io.vertx.core.spi.metrics.PoolMetrics;
-import io.vertx.core.spi.metrics.TCPMetrics;
-import io.vertx.core.spi.metrics.VertxMetrics;
+import io.vertx.core.spi.metrics.*;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +47,7 @@ import java.util.Map;
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
 class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
+  private static final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
 
   private final DropwizardMetricsOptions options;
   private final Counter timers;
@@ -69,6 +65,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     this.shutdown = shutdown;
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
+    gauge(VertxMetricsImpl::getNumberOfEventLoopThreads, "event-loop-threads");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
     if (options.isClustered()) {
       gauge(options::getClusterHost, "cluster-host");
@@ -201,4 +198,13 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     return verticle.getClass().getName();
   }
 
+  private static int getNumberOfEventLoopThreads() {
+    int eventLoopThreads = 0;
+    for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds())) {
+      if (threadInfo.getThreadName().startsWith("vert.x-eventloop-thread-")) {
+        ++eventLoopThreads;
+      }
+    }
+    return eventLoopThreads;
+  }
 }
