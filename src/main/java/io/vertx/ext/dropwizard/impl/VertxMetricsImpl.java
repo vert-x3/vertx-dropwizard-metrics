@@ -17,7 +17,6 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Handler;
@@ -49,7 +48,7 @@ import java.util.Map;
  */
 class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private static final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-  private static int eventLoopThreads;
+  private static int eventLoopThreadCount;
 
   private final DropwizardMetricsOptions options;
   private final Counter timers;
@@ -68,7 +67,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
     updateEventLoopThreads();
-    gauge(() -> eventLoopThreads, "event-loop-threads");
+    gauge(() -> eventLoopThreadCount, "event-loop-threads");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
     if (options.isClustered()) {
       gauge(options::getClusterHost, "cluster-host");
@@ -204,11 +203,12 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   private static void updateEventLoopThreads() {
-    eventLoopThreads = 0;
+    int eventLoopThreads = 0;
     for (ThreadInfo threadInfo : threadMXBean.getThreadInfo(threadMXBean.getAllThreadIds())) {
       if (threadInfo.getThreadName().startsWith("vert.x-eventloop-thread-")) {
         ++eventLoopThreads;
       }
     }
+    eventLoopThreadCount = eventLoopThreads;
   }
 }
