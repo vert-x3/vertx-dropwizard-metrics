@@ -9,7 +9,7 @@ A fairly simple API to retrieve metrics via the `link:../../jsdoc/module-vertx-j
 interface which is implemented by various Vert.x components like `link:../../jsdoc/module-vertx-js_http_server-HttpServer.html[HttpServer]`,
 `link:../../jsdoc/module-vertx-js_net_server-NetServer.html[NetServer]`, and even `link:../../jsdoc/module-vertx-js_vertx-Vertx.html[Vertx]` itself.
 
-Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
+Configurable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
 == Getting started
 
@@ -22,7 +22,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 <dependency>
   <groupId>io.vertx</groupId>
   <artifactId>vertx-dropwizard-metrics</artifactId>
-  <version>3.5.0</version>
+  <version>3.5.1-SNAPSHOT</version>
 </dependency>
 ----
 
@@ -30,7 +30,7 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-dropwizard-metrics:3.5.0'
+compile 'io.vertx:vertx-dropwizard-metrics:3.5.1-SNAPSHOT'
 ----
 
 Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
