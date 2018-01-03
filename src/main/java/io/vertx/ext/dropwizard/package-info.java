@@ -10,7 +10,7 @@
  * interface which is implemented by various Vert.x components like {@link io.vertx.core.http.HttpServer HttpServer},
  * {@link io.vertx.core.net.NetServer}, and even {@link io.vertx.core.Vertx Vertx} itself.
  *
- * Confiugrable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
+ * Configurable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
  *
  * == Getting started
  *
