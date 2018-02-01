@@ -1258,6 +1258,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(15, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
     requests.forEach(Runnable::run);
     awaitLatch(responseLatch);
+    awaitLatch(closedLatch);
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
