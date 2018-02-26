@@ -5,9 +5,9 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] library.
 
 == Features
 
-A fairly simple API to retrieve metrics via the `link:../../jsdoc/module-vertx-js_measured-Measured.html[Measured]`
-interface which is implemented by various Vert.x components like `link:../../jsdoc/module-vertx-js_http_server-HttpServer.html[HttpServer]`,
-`link:../../jsdoc/module-vertx-js_net_server-NetServer.html[NetServer]`, and even `link:../../jsdoc/module-vertx-js_vertx-Vertx.html[Vertx]` itself.
+A fairly simple API to retrieve metrics via the {@link io.vertx.core.metrics.Measured Measured}
+interface which is implemented by various Vert.x components like {@link io.vertx.core.http.HttpServer HttpServer},
+{@link io.vertx.core.net.NetServer}, and even {@link io.vertx.core.Vertx Vertx} itself.
 
 Configurable JMX reporting based on Dropwizard implementation, exposing Vert.x as JMX MBeans.
 
@@ -20,9 +20,9 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 [source,xml,subs="+attributes"]
 ----
 <dependency>
-  <groupId>io.vertx</groupId>
-  <artifactId>vertx-dropwizard-metrics</artifactId>
-  <version>3.5.1</version>
+  <groupId>${maven.groupId}</groupId>
+  <artifactId>${maven.artifactId}</artifactId>
+  <version>${maven.version}</version>
 </dependency>
 ----
 
@@ -30,33 +30,21 @@ To enable metrics, add the following dependency to the _dependencies_ section of
 
 [source,groovy,subs="+attributes"]
 ----
-compile 'io.vertx:vertx-dropwizard-metrics:3.5.1'
+compile '${maven.groupId}:${maven.artifactId}:${maven.version}'
 ----
 
-Then when you create vertx enable metrics using the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]`:
+Then when you create vertx enable metrics using the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions}:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true
-  }
-});
-
+{@link examples.MetricsExamples#setup()}
 ----
 
 You can also enable JMX:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "jmxEnabled" : true
-  }
-});
-
+{@link examples.MetricsExamples#setupJMX()}
 ----
 
 To see details about JMX see the <<jmx>> section at the bottom.
@@ -73,22 +61,22 @@ options must be set to `true`:
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#setRegistryName[vertx.metrics.options.registryName]`
+The {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setRegistryName(java.lang.String) vertx.metrics.options.registryName}
 configures the <<dropwizard-registry,Dropwizard Registry>> to use:
 
 ----
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.registryName=my-registry
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#setJmxEnabled[vertx.metrics.options.jmxEnabled]` and
-`link:../dataobjects.html#DropwizardMetricsOptions#setJmxDomain[vertx.metrics.options.jmxDomain]`
+The {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setJmxEnabled(boolean) vertx.metrics.options.jmxEnabled} and
+{@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setJmxDomain(java.lang.String) vertx.metrics.options.jmxDomain}
 configures the <<jmx,JMX>> registration:
 
 ----
 java -jar your-fat-jar -Dvertx.metrics.options.enabled=true -Dvertx.metrics.options.jmxEnabled=true ...
 ----
 
-The `link:../dataobjects.html#DropwizardMetricsOptions#setConfigPath[vertx.metrics.options.configPath]`
+The {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions#setConfigPath(java.lang.String) vertx.metrics.options.configPath}
 option allows to reconfigure the metrics from a property file.
 
 == Metrics service
@@ -96,7 +84,7 @@ option allows to reconfigure the metrics from a property file.
 While Vert.x core defines an SPI for reporting metrics (implemented for instance in this project), it does not define
 an API for retrieving metrics (because some metrics collectors just do reporting and nothing more).
 
-The `link:../../jsdoc/module-vertx-dropwizard-js_metrics_service-MetricsService.html[MetricsService]` provides an API in front of the Dropwizard Registry to get
+The {@link io.vertx.ext.dropwizard.MetricsService} provides an API in front of the Dropwizard Registry to get
 metrics data snapshots.
 
 === Naming
@@ -104,88 +92,64 @@ metrics data snapshots.
 Each measured component listed below (except for Vertx) will have a base name associated with it. Each metric
 can be retrieved by providing the fully qualified name <fqn> `baseName` + `.` + `metricName` from Vertx:
 
-[source,js]
+[source,$lang]
 ----
-var metrics = metricsService.getMetricsSnapshot(vertx);
-metrics.vertx.eventbus.handlers;
-
+{@link examples.MetricsExamples#naming1}
 ----
 
 or from the measured component itself using just the metric name:
 
-[source,js]
+[source,$lang]
 ----
-var eventBus = vertx.eventBus();
-var metrics = metricsService.getMetricsSnapshot(eventBus);
-metrics.handlers;
-
+{@link examples.MetricsExamples#naming2}
 ----
 
 See more examples below on how to retrieve/use metrics for a specific component.
 
 Metrics names can also be listed:
 
-[source,js]
+[source,$lang]
 ----
-var metricsNames = metricsService.metricsNames();
-Array.prototype.forEach.call(metricsNames, function(metricsName) {
-  console.log("Known metrics name " + metricsName);
-});
-
+{@link examples.MetricsExamples#naming3}
 ----
 
 `baseName` defaults to `vertx`, but can be set to a custom value:
 
-[source,js]
+[source,$lang]
 ----
-var metricsOptions = {
-  "baseName" : "foo"
-};
-
+{@link examples.MetricsExamples#baseName}
 ----
 
 === Retrieving metrics
 
-Once enabled, the `link:../../jsdoc/module-vertx-dropwizard-js_metrics_service-MetricsService.html[MetricsService]` allows to retrieve metrics snapshots from any
-`link:../../jsdoc/module-vertx-js_measured-Measured.html[Measured]` object which provides a map of the metric name to the data,
-represented by a `JsonObject`. So for example if we were to print out all metrics
+Once enabled, the {@link io.vertx.ext.dropwizard.MetricsService} allows to retrieve metrics snapshots from any
+{@link io.vertx.core.metrics.Measured Measured} object which provides a map of the metric name to the data,
+represented by a {@link io.vertx.core.json.JsonObject}. So for example if we were to print out all metrics
 for a particular Vert.x instance:
-[source,js]
+[source,$lang]
 ----
-var MetricsService = require("vertx-dropwizard-js/metrics_service");
-var metricsService = MetricsService.create(vertx);
-var metrics = metricsService.getMetricsSnapshot(vertx);
-console.log(metrics);
-
+{@link examples.MetricsExamples#example1}
 ----
 
-NOTE: For details on the actual contents of the data (the actual metric) represented by the `JsonObject`
+NOTE: For details on the actual contents of the data (the actual metric) represented by the {@link io.vertx.core.json.JsonObject}
 consult the implementation documentation like https://github.com/vert-x3/vertx-metrics[vertx-metrics]
 
 Often it is desired that you only want to capture specific metrics for a particular component, like an http server
 without having to know the details of the naming scheme of every metric (something which is left to the implementers of the SPI).
 
-Since `link:../../jsdoc/module-vertx-js_http_server-HttpServer.html[HttpServer]` implements `link:../../jsdoc/module-vertx-js_measured-Measured.html[Measured]`, you can easily grab all metrics
+Since {@link io.vertx.core.http.HttpServer HttpServer} implements {@link io.vertx.core.metrics.Measured}, you can easily grab all metrics
 that are specific for that particular http server.
 
-[source,js]
+[source,$lang]
 ----
-var MetricsService = require("vertx-dropwizard-js/metrics_service");
-var metricsService = MetricsService.create(vertx);
-var server = vertx.createHttpServer();
-// set up server
-var metrics = metricsService.getMetricsSnapshot(server);
-
+{@link examples.MetricsExamples#example2}
 ----
 
 Metrics can also be retrieved using a base name:
 
-[source,js]
+[source,$lang]
 ----
-var MetricsService = require("vertx-dropwizard-js/metrics_service");
-var metricsService = MetricsService.create(vertx);
-var metrics = metricsService.getMetricsSnapshot("vertx.eventbus.message");
-
+{@link examples.MetricsExamples#example3}
 ----
 
 == Data
@@ -207,7 +171,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[counter]]
 === Counter
 
-[source,js]
+[source,$lang]
 ----
 {
   "type"  : "counter",
@@ -239,7 +203,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 [[meter]]
 === Meter
 
-[source,js]
+[source,$lang]
 ----
 {
   "type"              : "meter",
@@ -257,7 +221,7 @@ https://github.com/dropwizard/metrics[Dropwizard metrics] documentation for deta
 
 Extends a <<meter>> to provide an instant throughput.
 
-[source,js]
+[source,$lang]
 ----
 {
   "type"              : "meter",
@@ -276,7 +240,7 @@ Extends a <<meter>> to provide an instant throughput.
 
 A timer is basically a combination of Histogram + Meter.
 
-[source,js]
+[source,$lang]
 ----
 {
   "type": "timer",
@@ -308,7 +272,7 @@ A timer is basically a combination of Histogram + Meter.
 
 Extends a <<timer>> to provide an instant throughput metric.
 
-[source,js]
+[source,$lang]
 ----
 {
   "type": "timer",
@@ -380,27 +344,12 @@ The monitored event bus handlers is configurable via a match performed on the ha
 Vert.x can have potentially a huge amount of registered event bus, therefore the only good default for this
 setting is to monitor zero handlers.
 
-The monitored handlers can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+The monitored handlers can be configured in the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions} via
 a specific address match or a regex match:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "monitoredEventBusHandlers" : [
-      {
-        "value" : "some-address"
-      },
-      {
-        "value" : "business-.*",
-        "type" : "REGEX"
-      }
-    ]
-  }
-});
-
+{@link examples.MetricsExamples#setupMonitoredHandlers()}
 ----
 
 WARNING: if you use regex match, a wrong regex can potentially match a lot of handlers.
@@ -427,46 +376,18 @@ Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus
 
 Http URI metrics must be explicitely configured in the options either by exact match or regex match:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "monitoredHttpServerUris" : [
-      {
-        "value" : "/"
-      },
-      {
-        "value" : "/foo/.*",
-        "type" : "REGEX"
-      }
-    ]
-  }
-});
-
+{@link examples.MetricsExamples#setupMonitoredUris()}
 ----
 
 In case if the uri contains some path parameters like `/users/:userId` it might not make sense to have a separate entry in the registry for each user
 id (like `get-requests./users/1`, `get-requests./users/2` and so on) but a summarized one. To achieve that you can set an alias to the match instance
 in this case the alias will be used as a part of the registry name instead of uri like `<http-method>-requests.<alias>`
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "monitoredHttpServerUris" : [
-      {
-        "value" : "/users/.*",
-        "alias" : "users",
-        "type" : "REGEX"
-      }
-    ]
-  }
-});
-
+{@link examples.MetricsExamples#setupMonitoredUrisWithAliases()}
 ----
 
 *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
@@ -474,7 +395,7 @@ var vertx = Vertx.vertx({
 === Http client metrics
 
 Base name: `vertx.http.clients` (by default) or `vertx.http.clients.<id>` where `<id>` is a non empty string
-configured by `link:../../vertx-core/dataobjects.html#HttpClientOptions#setMetricsName[metricsName]`.
+configured by {@link io.vertx.core.http.HttpClientOptions#setMetricsName}.
 
 Http client includes all the metrics of a <<http-server-metrics,Http Server>> plus the following:
 
@@ -502,27 +423,12 @@ where <host> is the endpoint host name possibly unresolved and <port> the TCP po
 The monitored endpoints are configurable via a match performed on the server `$host:$port`.
 The default for this setting is to monitor no endpoints.
 
-The monitored endpoints can be configured in the `link:../dataobjects.html#DropwizardMetricsOptions[DropwizardMetricsOptions]` via
+The monitored endpoints can be configured in the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions} via
 a specific hostname match or a regex match:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "monitoredHttpClientEndpoints" : [
-      {
-        "value" : "some-host:80"
-      },
-      {
-        "value" : "another-host:.*",
-        "type" : "REGEX"
-      }
-    ]
-  }
-});
-
+{@link examples.MetricsExamples#setupMonitoredEndpoints()}
 ----
 
 [[net-server-metrics]]
@@ -540,7 +446,7 @@ Base name: `vertx.net.servers.<host>:<port>`
 === Net client metrics
 
 Base name: `vertx.net.clients` (by default) or `vertx.net.clients.<id>` where `<id>` is a non empty string
-configured by `link:../../vertx-core/dataobjects.html#NetClientOptions#setMetricsName[metricsName]`.
+configured by {@link io.vertx.core.net.NetClientOptions#setMetricsName}.
 
 Net client includes all the metrics of a <<net-server-metrics,Net Server>>
 
@@ -560,7 +466,7 @@ Base name: `vertx.pools.<type>.<name>` where `type` is the type of the pool (e.g
 `name` is the name of the pool (e.g `vert.x-worker-thread`).
 
 Pools of type _worker_ are blocking worker pools. Vert.x exposes its worker as _vert.x-worker-thread_ and
-_vert.x-internal-blocking_. Named worker executor created with `link:../../jsdoc/module-vertx-js_worker_executor-WorkerExecutor.html[WorkerExecutor]` are exposed.
+_vert.x-internal-blocking_. Named worker executor created with {@link io.vertx.core.WorkerExecutor} are exposed.
 
 Datasource created with Vert.x JDBC clients are exposed as _datasource_.
 
@@ -581,15 +487,9 @@ JMX is disabled by default.
 
 If you want JMX, then you need to enabled that:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "jmxEnabled" : true
-  }
-});
-
+{@link examples.MetricsExamples#setupJMX()}
 ----
 
 If running Vert.x from the command line you can enable metrics and JMX by uncommented the JMX_OPTS line in the
@@ -601,16 +501,9 @@ JMX_OPTS="-Dcom.sun.management.jmxremote -Dvertx.metrics.options.jmxEnabled=true
 
 You can configure the domain under which the MBeans will be created:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "jmxEnabled" : true,
-    "jmxDomain" : "mydomain"
-  }
-});
-
+{@link examples.MetricsExamples#setupJMXWithDomain()}
 ----
 
 In the command line, just append the following system properties to your application (works for the `vertx` cli and
@@ -642,20 +535,9 @@ https://dropwizard.github.io/metrics/3.1.0/getting-started/#the-registry[Dropwiz
 the https://dropwizard.github.io/metrics/3.1.0/apidocs/com/codahale/metrics/SharedMetricRegistries.html[Dropwizard Shared Registry]
 so you can retrieve this registry and use according to your needs.
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var options = {
-  "metricsOptions" : {
-    "enabled" : true,
-    "registryName" : "my-registry"
-  }
-};
-var vertx = Vertx.vertx(options);
-// Get the registry
-var registry = Java.type("com.codahale.metrics.SharedMetricRegistries").getOrCreate("my-registry");
-// Do whatever you need with the registry
-}
+{@link examples.MetricsExamples#getRegistry()}}
 ----
 
 == Using Jolokia and Hawtio
@@ -671,17 +553,9 @@ This section explains how to configure your vert.x application to retrieve the m
 
 First, you need to configure your vert.x instance with the following options:
 
-[source,js]
+[source,$lang]
 ----
-var Vertx = require("vertx-js/vertx");
-var vertx = Vertx.vertx({
-  "metricsOptions" : {
-    "enabled" : true,
-    "jmxEnabled" : true,
-    "jmxDomain" : "vertx-metrics"
-  }
-});
-
+{@link examples.MetricsExamples#example4()}
 ----
 
 You can change the domain to whatever you want. The same configuration can be used for clustered Vert.x instances.
