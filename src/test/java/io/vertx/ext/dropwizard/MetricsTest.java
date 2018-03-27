@@ -16,19 +16,9 @@
 
 package io.vertx.ext.dropwizard;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.WorkerExecutor;
+import com.codahale.metrics.*;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
@@ -39,11 +29,7 @@ import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
-import io.vertx.core.net.NetClient;
-import io.vertx.core.net.NetClientOptions;
-import io.vertx.core.net.NetServer;
-import io.vertx.core.net.NetServerOptions;
-import io.vertx.core.net.NetSocket;
+import io.vertx.core.net.*;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
@@ -54,12 +40,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,8 +49,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static io.vertx.test.core.TestUtils.*;
-import static java.util.concurrent.TimeUnit.*;
+import static io.vertx.test.core.TestUtils.randomBuffer;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -1063,33 +1044,6 @@ public class MetricsTest extends MetricsTestBase {
     });
 
     await();
-  }
-
-  @Test
-  public void testTimerMetrics() throws Exception {
-    // Timer
-    CountDownLatch latch = new CountDownLatch(1);
-    vertx.setTimer(300, id -> {
-      assertCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers"), 1L);
-      latch.countDown();
-    });
-    awaitLatch(latch);
-    assertWaitUntil(() -> getCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers")) == 0);
-    assertCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers"), 0L);
-
-    // Periodic
-    AtomicInteger count = new AtomicInteger(3);
-    vertx.setPeriodic(100, id -> {
-      assertCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers"), 1L);
-      if (count.decrementAndGet() == 0) {
-        vertx.cancelTimer(id);
-        testComplete();
-      }
-    });
-
-    await();
-
-    assertCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.timers"), 0L);
   }
 
   @Test
