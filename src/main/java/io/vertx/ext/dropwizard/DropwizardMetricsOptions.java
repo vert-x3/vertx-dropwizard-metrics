@@ -107,6 +107,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
     configPath = other.getConfigPath();
+    baseName = other.getBaseName();
     monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
     monitoredHttpServerUris = new ArrayList<>(other.monitoredHttpServerUris);
     monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
@@ -124,6 +125,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = json.getBoolean("jmxEnabled", DEFAULT_JMX_ENABLED);
     jmxDomain = json.getString("jmxDomain");
     configPath = json.getString("configPath");
+    baseName = json.getString("baseName");
     if (json.containsKey("monitoredHandlers") && !json.containsKey("monitoredEventBusHandlers")) {
       log.warn("JSON config: monitoredHandlers field is deprecated, use monitoredEventBusHandlers instead");
       monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
