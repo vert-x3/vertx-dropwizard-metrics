@@ -1,4 +1,5 @@
 {
   "jmxEnabled": false,
-  "jmxDomain": "test-jmx-domain"
+  "jmxDomain": "test-jmx-domain",
+  "baseName": "base-name"
 }

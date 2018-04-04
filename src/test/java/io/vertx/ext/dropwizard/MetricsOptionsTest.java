@@ -65,17 +65,20 @@ public class MetricsOptionsTest extends VertxTestBase {
     String jmxDomain = TestUtils.randomAlphaString(100);
     String name = TestUtils.randomAlphaString(100);
     String configPath = TestUtils.randomAlphaString(100);
+    String baseName = TestUtils.randomAlphaString(100);
     options.setEnabled(metricsEnabled);
     options.setJmxEnabled(jmxEnabled);
     options.setJmxDomain(jmxDomain);
     options.setRegistryName(name);
     options.setConfigPath(configPath);
+    options.setBaseName(baseName);
     options = new DropwizardMetricsOptions(options);
     assertEquals(metricsEnabled || jmxEnabled, options.isEnabled());
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
     assertEquals(name, options.getRegistryName());
     assertEquals(configPath, options.getConfigPath());
+    assertEquals(baseName, options.getBaseName());
   }
 
   @Test

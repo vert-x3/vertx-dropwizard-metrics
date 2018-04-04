@@ -45,6 +45,8 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
     // If our file was loaded correctly, then our jmx domain will exist.
     assertTrue(jmxDomains.contains("test-jmx-domain"));
+
+    assertTrue(((VertxMetricsImpl) metrics).baseName.equals("base-name"));
   }
 
   @Test
@@ -63,6 +65,8 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
     // If our file was loaded correctly, then our jmx domain will exist.
     assertTrue(jmxDomains.contains("test-jmx-domain"));
+
+    assertTrue(((VertxMetricsImpl) metrics).baseName.equals("base-name"));
   }
 
   @Test
@@ -81,6 +85,8 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
     // If our file was loaded correctly, then our jmx domain will exist.
     assertTrue(jmxDomains.contains("test-jmx-domain"));
+
+    assertTrue(((VertxMetricsImpl) metrics).baseName.equals("base-name"));
   }
 
   @Test
@@ -96,6 +102,8 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
     // If our file was loaded correctly, then our jmx domain will exist.
     assertFalse(jmxDomains.contains("test-jmx-domain"));
+
+    assertTrue(((VertxMetricsImpl) metrics).baseName.equals("base-name"));
   }
 
   @Test
