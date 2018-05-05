@@ -18,7 +18,6 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
-import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.file.impl.FileResolver;
 import io.vertx.core.json.DecodeException;
@@ -44,7 +43,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
   private Logger logger = LoggerFactory.getLogger(VertxMetricsFactoryImpl.class);
 
   @Override
-  public VertxMetrics metrics(Vertx vertx, VertxOptions options) {
+  public VertxMetrics metrics(VertxOptions options) {
     MetricsOptions baseOptions = options.getMetricsOptions();
     DropwizardMetricsOptions metricsOptions;
     if (baseOptions instanceof DropwizardMetricsOptions) {
@@ -83,7 +82,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     if (metricsOptions.isJmxEnabled()) {
       String jmxDomain = metricsOptions.getJmxDomain();
       if (jmxDomain == null) {
-        jmxDomain = "vertx" + "@" + Integer.toHexString(vertx.hashCode());
+        jmxDomain = "vertx" + "@" + Integer.toHexString(options.hashCode());
       }
       JmxReporter reporter = JmxReporter.forRegistry(metrics.registry()).inDomain(jmxDomain).build();
       metrics.setDoneHandler(v -> reporter.stop());

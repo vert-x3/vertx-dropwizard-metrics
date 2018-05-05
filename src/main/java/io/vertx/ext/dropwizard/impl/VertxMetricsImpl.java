@@ -22,16 +22,10 @@ import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Handler;
 import io.vertx.core.Verticle;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
-import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
@@ -109,18 +103,18 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public EventBusMetrics createMetrics(EventBus eventBus) {
+  public EventBusMetrics createEventBusMetrics() {
     return new EventBusMetricsImpl(this, nameOf("eventbus"), options);
   }
 
   @Override
-  public HttpServerMetrics<?, ?, ?> createMetrics(HttpServer server, SocketAddress localAddress, HttpServerOptions options) {
+  public HttpServerMetrics<?, ?, ?> createHttpServerMetrics(HttpServerOptions options, SocketAddress localAddress) {
     String baseName = MetricRegistry.name(nameOf("http.servers"), TCPMetricsImpl.addressName(localAddress));
     return new HttpServerMetricsImpl(registry, baseName, this.options.getMonitoredHttpServerUris(), localAddress);
   }
 
   @Override
-  public synchronized HttpClientMetrics<?, ?, ?, ?, ?> createMetrics(HttpClient client, HttpClientOptions options) {
+  public HttpClientMetrics<?, ?, ?, ?, ?> createHttpClientMetrics(HttpClientOptions options) {
     String name = options.getMetricsName();
     String baseName;
     if (name != null && name.length() > 0) {
@@ -141,13 +135,13 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public TCPMetrics<?> createMetrics(SocketAddress localAddress, NetServerOptions options) {
+  public TCPMetrics<?> createNetServerMetrics(NetServerOptions options, SocketAddress localAddress) {
     String baseName = MetricRegistry.name(nameOf("net.servers"), TCPMetricsImpl.addressName(localAddress));
     return new TCPMetricsImpl(registry, baseName);
   }
 
   @Override
-  public TCPMetrics<?> createMetrics(NetClientOptions options) {
+  public TCPMetrics<?> createNetClientMetrics(NetClientOptions options) {
     String baseName;
     if (options.getMetricsName() != null) {
       baseName = nameOf("net.clients", options.getMetricsName());
@@ -158,12 +152,12 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public DatagramSocketMetrics createMetrics(DatagramSocket socket, DatagramSocketOptions options) {
+  public DatagramSocketMetrics createDatagramSocketMetrics(DatagramSocketOptions options) {
     return new DatagramSocketMetricsImpl(this, nameOf("datagram"));
   }
 
   @Override
-  public <P> PoolMetrics<?> createMetrics(P pool, String poolType, String poolName, int maxPoolSize) {
+  public PoolMetrics<?> createPoolMetrics(String poolType, String poolName, int maxPoolSize) {
     String baseName = nameOf("pools", poolType, poolName);
     return new PoolMetricsImpl(registry, baseName, maxPoolSize);
   }

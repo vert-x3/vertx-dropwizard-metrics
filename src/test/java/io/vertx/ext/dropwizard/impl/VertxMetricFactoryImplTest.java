@@ -39,7 +39,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    metrics = vmfi.metrics(vertx, vertxOptions);
+    metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
 
@@ -57,7 +57,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    metrics = vmfi.metrics(vertx, vertxOptions);
+    metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
 
@@ -75,7 +75,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    metrics = vmfi.metrics(vertx, vertxOptions);
+    metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
 
@@ -90,7 +90,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    metrics = vmfi.metrics(vertx, vertxOptions);
+    metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
 
@@ -106,7 +106,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    metrics = vmfi.metrics(vertx, vertxOptions);
+    metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
 
@@ -125,7 +125,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    metrics = vmfi.metrics(vertx, vertxOptions);
+    metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
 
@@ -136,7 +136,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testFromJson() throws Exception {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions(
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(
       new JsonObject().put("metricsOptions", new JsonObject()
         .put("enabled", true)
         .put("monitoredEventBusHandlers", new JsonArray()
@@ -170,7 +170,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testFromDeprecatedJson() throws Exception {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions(
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(
       new JsonObject().put("metricsOptions", new JsonObject()
         .put("enabled", true)
         .put("monitoredHandlers", new JsonArray()
@@ -204,7 +204,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testFromJsonMixed() throws Exception {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions(
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(
       new JsonObject().put("metricsOptions", new JsonObject()
         .put("enabled", true)
         .put("monitoredEventBusHandlers", new JsonArray()
@@ -247,14 +247,14 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   @Test
   public void testDefaultBaseName() {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions()));
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions()));
     assertEquals("vertx", metrics.baseName());
   }
 
   @Test
   public void testOverrideBaseName() {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(vertx, new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions().setBaseName("Foo")));
+    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions().setBaseName("Foo")));
     assertEquals("Foo", metrics.baseName());
   }
 }
