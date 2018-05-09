@@ -51,7 +51,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     } else {
       metricsOptions = new DropwizardMetricsOptions(baseOptions.toJson());
     }
-    MetricRegistry registry = new MetricRegistry();
+    MetricRegistry registry = metricsOptions.getMetricRegistry() != null ? metricsOptions.getMetricRegistry() : new MetricRegistry();
     boolean shutdown = true;
     if (metricsOptions.getRegistryName() != null) {
       MetricRegistry other = SharedMetricRegistries.add(metricsOptions.getRegistryName(), registry);
