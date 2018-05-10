@@ -542,7 +542,7 @@ so you can retrieve this registry and use according to your needs.
 
 == Using already existing Dropwizard Registry
 Optionally, it is possible to utilize already existing https://dropwizard.github.io/metrics/3.1.0/getting-started/#the-registry[Dropwizard Registry].
-In order to do so pass MetricRegistry instance as parameter for setMetricRegistry function in VertxOptions object.
+In order to do so pass `MetricRegistry` instance as parameter for `setMetricRegistry` function in `VertxOptions` object.
 
 [source,java]
 ----
