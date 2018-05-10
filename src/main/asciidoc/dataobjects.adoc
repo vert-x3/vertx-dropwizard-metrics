@@ -54,6 +54,10 @@ Add an monitored http server uri.
 +++
 Set the name used for registering the metrics in the Dropwizard shared registry.
 +++
+|[[metricRegistry]]`metricRegistry`|`MetricRegistry`|
++++
+Set an optional metric registry used instead of the Dropwizard shared registry.
++++
 |===
 
 [[Match]]
