@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
  */
 class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<EventBusMetricsImpl.HandlerMetric> {
 
+  private final HandlerMetric ignoredHandler = new HandlerMetric(null, false, true);
+  private final HandlerMetric noMatchHandler = new HandlerMetric(null, true, false);
   private final ConcurrentMap<String, HandlerTimer> handlerTimers = new ConcurrentHashMap<>();
   private final Matcher handlerMatcher;
   private final Counter handlerCount;
@@ -54,7 +56,6 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final ThroughputMeter deliveredLocalMessages;
   private final ThroughputMeter deliveredRemoteMessages;
   private final Meter replyFailures;
-
 
   EventBusMetricsImpl(AbstractMetrics metrics, String baseName, DropwizardMetricsOptions options) {
     super(metrics.registry(), baseName);
@@ -81,14 +82,22 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     handlerMatcher = new Matcher(options.getMonitoredEventBusHandlers());
   }
 
+  private static boolean isInternal(String address) {
+    return address.startsWith("__vertx.");
+  }
+
   @Override
   public void messageWritten(String address, int size) {
-    bytesWritten.mark(size);
+    if (!isInternal(address)) {
+      bytesWritten.mark(size);
+    }
   }
 
   @Override
   public void messageRead(String address, int size) {
-    bytesRead.mark(size);
+    if (!isInternal(address)) {
+      bytesRead.mark(size);
+    }
   }
 
   @Override
@@ -97,33 +106,42 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   @Override
   public HandlerMetric handlerRegistered(String address, String repliedAddress) {
+    if (isInternal(address)) {
+      return ignoredHandler;
+    }
     handlerCount.inc();
     String match = handlerMatcher.matches(address);
     if (match != null) {
-      return new HandlerMetric(match);
+      return new HandlerMetric(match, false, false);
     }
-    return null;
+    return noMatchHandler;
   }
 
   @Override
   public void handlerUnregistered(HandlerMetric handler) {
+    if (handler.ignored) {
+      return;
+    }
     handlerCount.dec();
-    if (handler != null) {
+    if (!handler.noMatch) {
       handler.remove();
     }
   }
 
   @Override
   public void scheduleMessage(HandlerMetric handler, boolean local) {
+    if (handler.ignored) {
+      return;
+    }
     pending.inc();
     if (local) {
       pendingLocal.inc();
-      if (handler != null) {
+      if (!handler.noMatch) {
         handler.pendingLocalCount++;
       }
     } else {
       pendingRemote.inc();
-      if (handler != null) {
+      if (!handler.noMatch) {
         handler.pendingRemoteCount++;
       }
     }
@@ -131,13 +149,16 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   @Override
   public void beginHandleMessage(HandlerMetric handler, boolean local) {
+    if (handler.ignored) {
+      return;
+    }
     pending.dec();
     if (local) {
       pendingLocal.dec();
     } else {
       pendingRemote.dec();
     }
-    if (handler != null) {
+    if (!handler.noMatch) {
       handler.start = System.nanoTime();
       if (local) {
         handler.pendingLocalCount--;
@@ -149,59 +170,71 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   @Override
   public void endHandleMessage(HandlerMetric handler, Throwable failure) {
-    if (handler != null) {
+    if (!handler.noMatch && !handler.ignored) {
       handler.timer.update(System.nanoTime() - handler.start, TimeUnit.NANOSECONDS);
     }
   }
 
   @Override
   public void messageSent(String address, boolean publish, boolean local, boolean remote) {
-    if (publish) {
-      publishedMessages.mark();
-      if (local) {
-        publishedLocalMessages.mark();
+    if (!isInternal(address)) {
+      if (publish) {
+        publishedMessages.mark();
+        if (local) {
+          publishedLocalMessages.mark();
+        } else {
+          publishedRemoteMessages.mark();
+        }
       } else {
-        publishedRemoteMessages.mark();
-      }
-    } else {
-      sentMessages.mark();
-      if (local) {
-        sentLocalMessages.mark();
-      } else {
-        sentRemoteMessages.mark();
+        sentMessages.mark();
+        if (local) {
+          sentLocalMessages.mark();
+        } else {
+          sentRemoteMessages.mark();
+        }
       }
     }
   }
 
   @Override
   public void messageReceived(String address, boolean publish, boolean local, int handlers) {
-    receivedMessages.mark();
-    if (local) {
-      receivedLocalMessages.mark();
-    } else {
-      receivedRemoteMessages.mark();
-    }
-    if (handlers > 0) {
-      deliveredMessages.mark();
+    if (!isInternal(address)) {
+      receivedMessages.mark();
       if (local) {
-        deliveredLocalMessages.mark();
+        receivedLocalMessages.mark();
       } else {
-        deliveredRemoteMessages.mark();
+        receivedRemoteMessages.mark();
+      }
+      if (handlers > 0) {
+        deliveredMessages.mark();
+        if (local) {
+          deliveredLocalMessages.mark();
+        } else {
+          deliveredRemoteMessages.mark();
+        }
       }
     }
   }
 
   public class HandlerMetric {
-
     final String address;
     final Timer timer;
     final String name;
+    final boolean noMatch;
+    final boolean ignored;
     long start;
     long pendingLocalCount;
     long pendingRemoteCount;
 
-    public HandlerMetric(String address) {
+    public HandlerMetric(String address, boolean noMatch, boolean ignored) {
       this.address = address;
+      this.noMatch = noMatch;
+      this.ignored = ignored;
+      if (noMatch || ignored) {
+        this.timer = null;
+        this.name = null;
+        return;
+      }
       this.name = nameOf("handlers", address);
       while (true) {
         HandlerTimer existing = handlerTimers.get(address);
@@ -223,20 +256,22 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     }
 
     void remove() {
-      while (true) {
-        EventBusMetricsImpl.this.pending.dec(pendingLocalCount + pendingRemoteCount);
-        EventBusMetricsImpl.this.pendingLocal.dec(pendingLocalCount);
-        EventBusMetricsImpl.this.pendingRemote.dec(pendingRemoteCount);
-        HandlerTimer existing = handlerTimers.get(address);
-        HandlerTimer next = existing.dec();
-        if (next.refCount == 0) {
-          if (handlerTimers.remove(address, existing)) {
-            registry.remove(name);
-            break;
-          }
-        } else {
-          if (handlerTimers.replace(address, existing, next)) {
-            break;
+      if (!noMatch && !ignored) {
+        while (true) {
+          EventBusMetricsImpl.this.pending.dec(pendingLocalCount + pendingRemoteCount);
+          EventBusMetricsImpl.this.pendingLocal.dec(pendingLocalCount);
+          EventBusMetricsImpl.this.pendingRemote.dec(pendingRemoteCount);
+          HandlerTimer existing = handlerTimers.get(address);
+          HandlerTimer next = existing.dec();
+          if (next.refCount == 0) {
+            if (handlerTimers.remove(address, existing)) {
+              registry.remove(name);
+              break;
+            }
+          } else {
+            if (handlerTimers.replace(address, existing, next)) {
+              break;
+            }
           }
         }
       }
@@ -252,6 +287,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   static class HandlerTimer {
     final int refCount;
     final Timer timer;
+
     public HandlerTimer(int refCount, Timer timer) {
       this.refCount = refCount;
       this.timer = timer;
