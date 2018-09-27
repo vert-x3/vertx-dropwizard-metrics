@@ -141,17 +141,7 @@
           <!-- To use this bundle in OSGi check https://github.com/vert-x3/issues/issues/178#issuecomment-241643262 -->
           <bnd><![CDATA[
           Import-Package: \
-            groovy.lang.*;resolution:=optional,\
-            org.codehaus.groovy.*;resolution:=optional,\
-            kotlin.*;resolution:=optional,\
-            io.vertx.groovy.*;resolution:=optional,\
-            io.vertx.lang.rxjava.*;resolution:=optional,\
-            io.vertx.lang.groovy.*;resolution:=optional,\
             io.vertx.codegen.annotations;resolution:=optional,\
-            io.vertx.rx.java;resolution:=optional,\
-            io.vertx.rxjava.core.*;resolution:=optional,\
-            io.vertx.rxjava.ext.auth.*;resolution:=optional,\
-            rx.*;resolution:=optional,\
             io.vertx.ext.shell.*;resolution:=optional,\
             *
           Require-Capability: osgi.extender; filter:="(osgi.extender=osgi.serviceloader.registrar)"; resolution:="optional"
