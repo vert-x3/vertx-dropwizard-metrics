@@ -46,7 +46,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public WebSocketMetric upgrade(RequestMetric requestMetric, ServerWebSocket serverWebSocket) {
+  public WebSocketMetric connected(Long socketMetric, RequestMetric requestMetric, ServerWebSocket serverWebSocket) {
     return createWebSocketMetric();
   }
 
@@ -62,11 +62,6 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   @Override
   public RequestMetric responsePushed(Long socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
     return new RequestMetric(method, uri);
-  }
-
-  @Override
-  public WebSocketMetric connected(Long socketMetric, ServerWebSocket serverWebSocket) {
-    return createWebSocketMetric();
   }
 
   @Override

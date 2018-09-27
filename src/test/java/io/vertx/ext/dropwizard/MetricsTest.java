@@ -437,8 +437,8 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject(name), 2L);
     assertMinMax(metrics.getJsonObject(name), (long) serverMin.length(), (long) serverMax.length());
     name = "bytes-read";
-    assertCount(metrics.getJsonObject(name), 2L);
-    assertMinMax(metrics.getJsonObject(name), (long) clientMin.length(), (long) clientMax.length());
+    assertCount(metrics.getJsonObject(name), 3L);
+    assertMinMax(metrics.getJsonObject(name), 0L, (long) clientMax.length());
 
     metrics = metricsService.getMetricsSnapshot(client);
     assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
