@@ -110,6 +110,11 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
 
   @Override
   public MetricsOptions newOptions() {
-    return new DropwizardMetricsOptions();
+    return newOptions(null);
+  }
+
+  @Override
+  public MetricsOptions newOptions(JsonObject jsonObject) {
+    return jsonObject == null ? new DropwizardMetricsOptions() : new DropwizardMetricsOptions(jsonObject);
   }
 }
