@@ -96,9 +96,11 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
       if (match != null) {
         throughputTimer(metric.method.toString().toLowerCase() + "-requests", match).update(duration, TimeUnit.NANOSECONDS);
+        throughputMeter("responses" + "-" + responseStatus + "xx", match).mark();
       }
     } else if (match != null) {
       throughputTimer("requests", match).update(duration, TimeUnit.NANOSECONDS);
+      throughputMeter("responses" + "-" + responseStatus + "xx", match).mark();
     }
 
     return duration;
