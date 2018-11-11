@@ -58,7 +58,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final Meter replyFailures;
 
   EventBusMetricsImpl(AbstractMetrics metrics, String baseName, DropwizardMetricsOptions options) {
-    super(metrics.registry(), baseName);
+    super(metrics.registry(), baseName, options.getReservoirFactory());
 
     handlerCount = counter("handlers");
     pending = counter("messages", "pending");

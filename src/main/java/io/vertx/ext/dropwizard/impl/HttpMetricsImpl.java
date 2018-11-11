@@ -20,6 +20,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.net.SocketAddress;
+import io.vertx.ext.dropwizard.ReservoirFactory;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
@@ -37,8 +38,8 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
 
   private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
 
-  public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
-    super(registry, baseName);
+  public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress, ReservoirFactory reservoirFactory) {
+    super(registry, baseName, reservoirFactory);
     openWebSockets = counter("open-websockets");
     requests = throughputTimer("requests");
     responses = new ThroughputMeter[]{

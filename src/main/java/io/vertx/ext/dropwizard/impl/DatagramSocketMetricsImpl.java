@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Reservoir;
 import io.vertx.core.spi.metrics.DatagramSocketMetrics;
 import io.vertx.core.net.SocketAddress;
 
@@ -32,7 +33,7 @@ class DatagramSocketMetricsImpl extends AbstractMetrics implements DatagramSocke
   private Counter exceptions;
 
   DatagramSocketMetricsImpl(AbstractMetrics metrics, String baseName) {
-    super(metrics.registry(), baseName);
+    super(metrics.registry(), baseName, metrics.reservoirFactory);
     socketsCounter = counter("sockets");
     exceptions = counter("exceptions");
     bytesWritten = histogram("bytes-written");

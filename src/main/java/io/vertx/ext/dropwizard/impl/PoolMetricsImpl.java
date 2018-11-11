@@ -5,6 +5,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 import io.vertx.core.spi.metrics.PoolMetrics;
+import io.vertx.ext.dropwizard.ReservoirFactory;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -16,8 +17,8 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
   private final Timer usage;
   private Counter inUse;
 
-  public PoolMetricsImpl(MetricRegistry registry, String baseName, int maxSize) {
-    super(registry, baseName);
+  public PoolMetricsImpl(MetricRegistry registry, String baseName, int maxSize, ReservoirFactory reservoirFactory) {
+    super(registry, baseName, reservoirFactory);
     this.queueSize = counter("queue-size");
     this.queueDelay = timer("queue-delay");
     this.usage = timer("usage");

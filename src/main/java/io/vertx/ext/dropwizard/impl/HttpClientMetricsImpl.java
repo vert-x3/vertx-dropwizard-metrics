@@ -40,7 +40,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   final int maxPoolSize;
 
   HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris, List<Match> monitoredEndpoints) {
-    super(clientReporter.registry, clientReporter.baseName);
+    super(clientReporter.registry, clientReporter.baseName, clientReporter.reservoirFactory);
     this.owner = owner;
     this.clientReporter = clientReporter;
     this.uriMatcher = new Matcher(monitoredUris);

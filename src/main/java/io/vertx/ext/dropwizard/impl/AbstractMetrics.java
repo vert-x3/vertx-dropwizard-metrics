@@ -16,19 +16,12 @@
 
 package io.vertx.ext.dropwizard.impl;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.DerivativeGauge;
-import com.codahale.metrics.ExponentiallyDecayingReservoir;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.spi.metrics.Metrics;
 import io.vertx.core.spi.metrics.MetricsProvider;
+import io.vertx.ext.dropwizard.ReservoirFactory;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
@@ -55,9 +48,12 @@ public abstract class AbstractMetrics implements Metrics {
   protected final MetricRegistry registry;
   protected final String baseName;
 
-  AbstractMetrics(MetricRegistry registry, String baseName) {
+  protected final ReservoirFactory reservoirFactory;
+
+  AbstractMetrics(MetricRegistry registry, String baseName, ReservoirFactory reservoirFactory) {
     this.registry = registry;
     this.baseName = baseName;
+    this.reservoirFactory = reservoirFactory;
   }
 
   /**
@@ -126,9 +122,9 @@ public abstract class AbstractMetrics implements Metrics {
 
   protected Histogram histogram(String... names) {
     try {
-      return registry.histogram(nameOf(names));
+      return registry.histogram(nameOf(names), () -> new Histogram(reservoirFactory.reservoir()));
     } catch (Exception e) {
-      return new Histogram(new ExponentiallyDecayingReservoir());
+      return new Histogram(reservoirFactory.reservoir());
     }
   }
 
@@ -142,9 +138,9 @@ public abstract class AbstractMetrics implements Metrics {
 
   protected Timer timer(String... names) {
     try {
-      return registry.timer(nameOf(names));
+      return registry.timer(nameOf(names), () -> new Timer(reservoirFactory.reservoir()));
     } catch (Exception e) {
-      return new Timer();
+      return new Timer(reservoirFactory.reservoir());
     }
   }
 
@@ -158,9 +154,9 @@ public abstract class AbstractMetrics implements Metrics {
 
   protected ThroughputTimer throughputTimer(String... names) {
     try {
-      return RegistryHelper.throughputTimer(registry, nameOf(names));
+      return RegistryHelper.throughputTimer(registry, nameOf(names), () -> new ThroughputTimer(reservoirFactory.reservoir()));
     } catch (Exception e) {
-      return new ThroughputTimer();
+      return new ThroughputTimer(reservoirFactory.reservoir());
     }
   }
 

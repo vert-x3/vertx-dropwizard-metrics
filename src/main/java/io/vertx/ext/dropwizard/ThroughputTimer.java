@@ -1,6 +1,7 @@
 package io.vertx.ext.dropwizard;
 
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.Reservoir;
 import com.codahale.metrics.Timer;
 import io.vertx.ext.dropwizard.impl.InstantThroughput;
 
@@ -15,6 +16,10 @@ import java.util.concurrent.TimeUnit;
 public class ThroughputTimer extends Timer {
 
   private final InstantThroughput instantThroughput = new InstantThroughput();
+
+  public ThroughputTimer(Reservoir reservoir) {
+    super(reservoir);
+  }
 
   public Long getValue() {
     return instantThroughput.count();

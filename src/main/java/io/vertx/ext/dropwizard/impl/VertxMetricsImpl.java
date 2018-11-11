@@ -55,7 +55,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final Map<String, HttpClientReporter> clientReporters = new HashMap<>();
 
   VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
-    super(registry, baseName);
+    super(registry, baseName, metricsOptions.getReservoirFactory());
 
     this.timers = counter("timers");
     this.options = metricsOptions;
@@ -110,7 +110,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   @Override
   public HttpServerMetrics<?, ?, ?> createHttpServerMetrics(HttpServerOptions options, SocketAddress localAddress) {
     String baseName = MetricRegistry.name(nameOf("http.servers"), TCPMetricsImpl.addressName(localAddress));
-    return new HttpServerMetricsImpl(registry, baseName, this.options.getMonitoredHttpServerUris(), localAddress);
+    return new HttpServerMetricsImpl(registry, baseName, this.options.getMonitoredHttpServerUris(), localAddress, reservoirFactory);
   }
 
   @Override
@@ -122,7 +122,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     } else {
       baseName = nameOf("http.clients");
     }
-    HttpClientReporter reporter = clientReporters.computeIfAbsent(baseName, n -> new HttpClientReporter(registry, baseName, null));
+    HttpClientReporter reporter = clientReporters.computeIfAbsent(baseName, n -> new HttpClientReporter(registry, baseName, null, reservoirFactory));
     return new HttpClientMetricsImpl(this, reporter, options, this.options.getMonitoredHttpClientUris(), this.options.getMonitoredHttpClientEndpoint());
   }
 
@@ -137,7 +137,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   @Override
   public TCPMetrics<?> createNetServerMetrics(NetServerOptions options, SocketAddress localAddress) {
     String baseName = MetricRegistry.name(nameOf("net.servers"), TCPMetricsImpl.addressName(localAddress));
-    return new TCPMetricsImpl(registry, baseName);
+    return new TCPMetricsImpl(registry, baseName, reservoirFactory);
   }
 
   @Override
@@ -148,7 +148,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     } else {
      baseName = nameOf("net.clients");
     }
-    return new TCPMetricsImpl(registry, baseName);
+    return new TCPMetricsImpl(registry, baseName, reservoirFactory);
   }
 
   @Override
@@ -159,7 +159,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   @Override
   public PoolMetrics<?> createPoolMetrics(String poolType, String poolName, int maxPoolSize) {
     String baseName = nameOf("pools", poolType, poolName);
-    return new PoolMetricsImpl(registry, baseName, maxPoolSize);
+    return new PoolMetricsImpl(registry, baseName, maxPoolSize, reservoirFactory);
   }
 
   @Override

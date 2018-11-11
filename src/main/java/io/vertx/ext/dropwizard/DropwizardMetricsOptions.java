@@ -23,6 +23,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.metrics.MetricsOptions;
+import io.vertx.ext.dropwizard.impl.ExponentiallyDecayingReservoirFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -72,6 +73,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   private String configPath;
   private String baseName;
   private MetricRegistry metricRegistry;
+  private ReservoirFactory reservoirFactory;
 
   /**
    * Default constructor
@@ -82,6 +84,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
     monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
     monitoredHttpClientEndpoints = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS);
+    reservoirFactory = new ExponentiallyDecayingReservoirFactory();
   }
 
   /**
@@ -96,6 +99,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
     monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
     monitoredHttpClientEndpoints = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS);
+    reservoirFactory = new ExponentiallyDecayingReservoirFactory();
   }
 
   /**
@@ -114,6 +118,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
     monitoredHttpClientEndpoints = new ArrayList<>(other.monitoredHttpClientEndpoints);
     metricRegistry = other.getMetricRegistry();
+    reservoirFactory = other.reservoirFactory;
   }
 
   /**
@@ -151,6 +156,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     } else {
       monitoredHttpClientEndpoints = loadMonitored("monitoredHttpClientEndpoints", json);
     }
+    reservoirFactory = new ExponentiallyDecayingReservoirFactory();
   }
 
   private List<Match> loadMonitored(String arrayField, JsonObject json) {
@@ -162,6 +168,23 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     });
 
     return list;
+  }
+
+  private <T> Class<? extends T> loadClass(String textClass, Class<T> classRef, Class<? extends T> defaultValue) {
+    if (textClass == null) {
+      return defaultValue;
+    }
+    try {
+      Class requestedClass = Class.forName(textClass);
+      if (!classRef.isAssignableFrom(requestedClass)) {
+        log.warn("Class must be a subclass of " + classRef + ". Using default " + defaultValue);
+        return defaultValue;
+      }
+      return requestedClass;
+    } catch (ClassNotFoundException e) {
+      log.warn("Fail to load class: " + textClass + ". Using default " + defaultValue, e);
+      return defaultValue;
+    }
   }
 
   /**
@@ -359,6 +382,24 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
+    return this;
+  }
+
+  /**
+   * An optional factory for reservoir for timers and histograms
+   * @return the reservoir factory
+   */
+  public ReservoirFactory getReservoirFactory() {
+    return reservoirFactory;
+  }
+
+  /**
+   * Sets optional factory for reservoir for timers and histograms
+   * @param reservoirFactory
+   * @return a reference to this, so the API can be used fluently
+   */
+  public DropwizardMetricsOptions setReservoirFactory(ReservoirFactory reservoirFactory) {
+    this.reservoirFactory = reservoirFactory;
     return this;
   }
 }

@@ -22,6 +22,7 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.TCPMetrics;
+import io.vertx.ext.dropwizard.ReservoirFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,8 +38,8 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
   private Counter exceptions;
   protected volatile boolean closed;
 
-  TCPMetricsImpl(MetricRegistry registry, String baseName) {
-    super(registry, baseName);
+  TCPMetricsImpl(MetricRegistry registry, String baseName, ReservoirFactory reservoirFactory) {
+    super(registry, baseName, reservoirFactory);
 
     this.openConnections = counter("open-netsockets");
     this.connections = timer("connections");
