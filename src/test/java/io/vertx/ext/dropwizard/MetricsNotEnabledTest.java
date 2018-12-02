@@ -18,12 +18,7 @@ package io.vertx.ext.dropwizard;
 
 import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
@@ -79,10 +74,13 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     }).listen(ar -> {
       if (ar.succeeded()) {
         for (int i = 0; i < requests; i++) {
-          HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, resp -> {
-            // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
-            // until *after* the response handler has been called
-            resp.endHandler(v -> latch.countDown());
+          HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, ar1 -> {
+            if (ar1.succeeded()) {
+              HttpClientResponse resp = ar1.result();
+              // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
+              // until *after* the response handler has been called
+              resp.endHandler(v -> latch.countDown());
+            }
           });
           if (i % 2 == 0) {
             req.end(clientMax);
