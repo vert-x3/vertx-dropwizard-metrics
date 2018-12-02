@@ -36,13 +36,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyFailure;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.net.NetClient;
@@ -137,10 +131,13 @@ public class MetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       if (ar.succeeded()) {
         for (int i = 0; i < requests; i++) {
-          HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, resp -> {
-            // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
-            // until *after* the response handler has been called
-            resp.endHandler(v -> latch.countDown());
+          HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, ar1 -> {
+            if (ar1.succeeded()) {
+              HttpClientResponse resp = ar1.result();
+              // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
+              // until *after* the response handler has been called
+              resp.endHandler(v -> latch.countDown());
+            }
           });
           if (i % 2 == 0) {
             req.end(clientMax);
@@ -197,10 +194,13 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       if (ar.succeeded()) {
-        HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, resp -> {
-          // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
-          // until *after* the response handler has been called
-          resp.endHandler(v -> testComplete());
+        HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, ar1 -> {
+          if (ar1.succeeded()) {
+            HttpClientResponse resp = ar1.result();
+            // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
+            // until *after* the response handler has been called
+            resp.endHandler(v -> testComplete());
+          }
         });
         req.setChunked(true);
 
@@ -465,10 +465,13 @@ public class MetricsTest extends MetricsTestBase {
       req.response().sendFile(file.getAbsolutePath());
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      client.request(HttpMethod.GET, 8080, "localhost", "/file", resp -> {
-        resp.bodyHandler(buff -> {
-          testComplete();
-        });
+      client.request(HttpMethod.GET, 8080, "localhost", "/file", ar1 -> {
+        if (ar1.succeeded()) {
+          HttpClientResponse resp1 = ar1.result();
+          resp1.bodyHandler(buff -> {
+            testComplete();
+          });
+        }
       }).end();
     });
 
@@ -506,10 +509,13 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      client.request(HttpMethod.GET, 8080, "localhost", "/file", resp -> {
-        resp.bodyHandler(buff -> {
-          testComplete();
-        });
+      client.request(HttpMethod.GET, 8080, "localhost", "/file", ar1 -> {
+        if (ar1.succeeded()) {
+          HttpClientResponse resp = ar1.result();
+          resp.bodyHandler(buff -> {
+            testComplete();
+          });
+        }
       }).end();
     });
 
@@ -530,15 +536,20 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      client.request(HttpMethod.GET, 8080, "localhost", "/books/1", resp -> {
-        resp.bodyHandler(buff -> {
-
-          client.request(HttpMethod.GET, 8080, "localhost", "/books/2", resp2 -> {
-            resp2.bodyHandler(buff2 -> {
-              testComplete();
-            });
-          }).end();
-        });
+      client.request(HttpMethod.GET, 8080, "localhost", "/books/1", ar1 -> {
+        if (ar1.succeeded()) {
+          HttpClientResponse resp = ar1.result();
+          resp.bodyHandler(buff -> {
+            client.request(HttpMethod.GET, 8080, "localhost", "/books/2", ar2 -> {
+              if (ar2.succeeded()) {
+                HttpClientResponse resp2 = ar2.result();
+                resp2.bodyHandler(buff2 -> {
+                  testComplete();
+                });
+              }
+            }).end();
+          });
+        }
       }).end();
     });
 
@@ -1172,11 +1183,14 @@ public class MetricsTest extends MetricsTestBase {
     HttpClient client = vertx.createHttpClient();
     BitSet bs = new BitSet();
     for (int i = 0;i < size;i++) {
-      client.get(8080, "localhost", "/", resp -> {
-        assertEquals(200, resp.statusCode());
-        int id = Integer.parseInt(resp.getHeader("id"));
-        synchronized (bs) {
-          bs.set(id);
+      client.get(8080, "localhost", "/", ar -> {
+        if (ar.succeeded()) {
+          HttpClientResponse resp = ar.result();
+          assertEquals(200, resp.statusCode());
+          int id = Integer.parseInt(resp.getHeader("id"));
+          synchronized (bs) {
+            bs.set(id);
+          }
         }
       }).end();
     }
