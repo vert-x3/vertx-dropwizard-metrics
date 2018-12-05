@@ -126,7 +126,8 @@ public class MetricsOptionsTest extends VertxTestBase {
       .put("monitoredHttpServerUris", monitoredHttpServerUris)
       .put("monitoredHttpClientUris", monitoredHttpClientUris)
       .put("monitoredEventBusHandlers", monitoredEventBusHandlers)
-      .put("configPath", "the_config_file");
+      .put("configPath", "the_config_file")
+      .put("baseName", "the_base_name");
 
     DropwizardMetricsOptions options = new DropwizardMetricsOptions(config);
 
@@ -134,6 +135,7 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertTrue(options.isJmxEnabled());
     assertEquals("testJmxDomain", options.getJmxDomain());
     assertEquals("the_config_file", options.getConfigPath());
+    assertEquals("the_base_name", options.getBaseName());
 
     assertEquals(2, options.getMonitoredHttpServerUris().size());
     assertEquals("/test/server/1", options.getMonitoredHttpServerUris().get(0).getValue());
