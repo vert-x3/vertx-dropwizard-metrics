@@ -1,7 +1,9 @@
 package io.vertx.ext.dropwizard;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.JsonArray;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Converter for {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions}.
@@ -14,34 +16,34 @@ public class DropwizardMetricsOptionsConverter {
       switch (member.getKey()) {
         case "baseName":
           if (member.getValue() instanceof String) {
-            obj.setBaseName((String) member.getValue());
+            obj.setBaseName((String)member.getValue());
           }
           break;
         case "configPath":
           if (member.getValue() instanceof String) {
-            obj.setConfigPath((String) member.getValue());
+            obj.setConfigPath((String)member.getValue());
           }
           break;
         case "enabled":
           if (member.getValue() instanceof Boolean) {
-            obj.setEnabled((Boolean) member.getValue());
+            obj.setEnabled((Boolean)member.getValue());
           }
           break;
         case "jmxDomain":
           if (member.getValue() instanceof String) {
-            obj.setJmxDomain((String) member.getValue());
+            obj.setJmxDomain((String)member.getValue());
           }
           break;
         case "jmxEnabled":
           if (member.getValue() instanceof Boolean) {
-            obj.setJmxEnabled((Boolean) member.getValue());
+            obj.setJmxEnabled((Boolean)member.getValue());
           }
           break;
         case "monitoredEventBusHandlers":
           if (member.getValue() instanceof JsonArray) {
-            ((Iterable<Object>) member.getValue()).forEach(item -> {
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredEventBusHandler(new io.vertx.ext.dropwizard.Match((JsonObject) item));
+                obj.addMonitoredEventBusHandler(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
@@ -51,31 +53,31 @@ public class DropwizardMetricsOptionsConverter {
           break;
         case "monitoredHttpClientEndpoints":
           if (member.getValue() instanceof JsonArray) {
-            ((Iterable<Object>) member.getValue()).forEach(item -> {
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpClientEndpoint(new io.vertx.ext.dropwizard.Match((JsonObject) item));
+                obj.addMonitoredHttpClientEndpoint(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
         case "monitoredHttpClientUris":
           if (member.getValue() instanceof JsonArray) {
-            ((Iterable<Object>) member.getValue()).forEach(item -> {
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpClientUri(new io.vertx.ext.dropwizard.Match((JsonObject) item));
+                obj.addMonitoredHttpClientUri(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
         case "monitoredHttpServerUris":
           if (member.getValue() instanceof JsonArray) {
-            ((Iterable<Object>) member.getValue()).forEach(item -> {
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpServerUri(new io.vertx.ext.dropwizard.Match((JsonObject) item));
+                obj.addMonitoredHttpServerUri(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
         case "registryName":
           if (member.getValue() instanceof String) {
-            obj.setRegistryName((String) member.getValue());
+            obj.setRegistryName((String)member.getValue());
           }
           break;
       }

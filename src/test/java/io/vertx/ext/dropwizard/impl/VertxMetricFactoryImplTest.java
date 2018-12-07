@@ -168,40 +168,6 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
   }
 
   @Test
-  public void testFromDeprecatedJson() throws Exception {
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
-    VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(
-      new JsonObject().put("metricsOptions", new JsonObject()
-        .put("enabled", true)
-        .put("monitoredHandlers", new JsonArray()
-          .add(new JsonObject().put("value", "foo")))
-        .put("monitoredServerUris", new JsonArray()
-          .add(new JsonObject().put("value", "http://www.bar.com")))
-        .put("monitoredClientUris", new JsonArray()
-          .add(new JsonObject().put("value", "http://www.baz.com")))
-        .put("monitoredClientEndpoints", new JsonArray()
-          .add(new JsonObject().put("value", "http://www.foobar.com"))))
-    ));
-    DropwizardMetricsOptions options = metrics.getOptions();
-
-    assertEquals(1, options.getMonitoredEventBusHandlers().size());
-    assertEquals("foo", options.getMonitoredEventBusHandlers().get(0).getValue());
-    assertEquals(MatchType.EQUALS, options.getMonitoredEventBusHandlers().get(0).getType());
-
-    assertEquals(1, options.getMonitoredHttpServerUris().size());
-    assertEquals("http://www.bar.com", options.getMonitoredHttpServerUris().get(0).getValue());
-    assertEquals(MatchType.EQUALS, options.getMonitoredHttpServerUris().get(0).getType());
-
-    assertEquals(1, options.getMonitoredHttpClientUris().size());
-    assertEquals("http://www.baz.com", options.getMonitoredHttpClientUris().get(0).getValue());
-    assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientUris().get(0).getType());
-
-    assertEquals(1, options.getMonitoredHttpClientEndpoint().size());
-    assertEquals("http://www.foobar.com", options.getMonitoredHttpClientEndpoint().get(0).getValue());
-    assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientEndpoint().get(0).getType());
-  }
-
-  @Test
   public void testFromJsonMixed() throws Exception {
     VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
     VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(

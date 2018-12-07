@@ -124,22 +124,6 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   public DropwizardMetricsOptions(JsonObject json) {
     this();
     DropwizardMetricsOptionsConverter.fromJson(json, this);
-    if (json.containsKey("monitoredHandlers") && !json.containsKey("monitoredEventBusHandlers")) {
-      log.warn("JSON config: monitoredHandlers field is deprecated, use monitoredEventBusHandlers instead");
-      monitoredEventBusHandlers = loadMonitored("monitoredHandlers", json);
-    }
-    if (json.containsKey("monitoredServerUris") && !json.containsKey("monitoredHttpServerUris")) {
-      log.warn("JSON config: monitoredServerUris field is deprecated, use monitoredHttpServerUris instead");
-      monitoredHttpServerUris = loadMonitored("monitoredServerUris", json);
-    }
-    if (json.containsKey("monitoredClientUris") && !json.containsKey("monitoredHttpClientUris")) {
-      log.warn("JSON config: monitoredClientUris field is deprecated, use monitoredHttpClientUris instead");
-      monitoredHttpClientUris = loadMonitored("monitoredClientUris", json);
-    }
-    if (json.containsKey("monitoredClientEndpoints") && !json.containsKey("monitoredHttpClientEndpoints")) {
-      log.warn("JSON config: monitoredClientEndpoints field is deprecated, use monitoredHttpClientEndpoints instead");
-      monitoredHttpClientEndpoints = loadMonitored("monitoredClientEndpoints", json);
-    }
   }
 
   private List<Match> loadMonitored(String arrayField, JsonObject json) {
