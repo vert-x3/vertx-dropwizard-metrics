@@ -1,6 +1,6 @@
 # Dropwizard Metrics for Vert.x
 
-[![Build Status](https://travis-ci.org/vert-x3/vertx-dropwizard-metrics.svg?branch=master?branch=master)](https://travis-ci.org/vert-x3/vertx-dropwizard-metrics)
+[![Build Status](https://travis-ci.org/vert-x3/vertx-dropwizard-metrics.svg?branch=master)](https://travis-ci.org/vert-x3/vertx-dropwizard-metrics)
 
 Metrics Service Provider implementations for Vert.x using [Dropwizard metrics](https://github.com/dropwizard/metrics) library.
 
