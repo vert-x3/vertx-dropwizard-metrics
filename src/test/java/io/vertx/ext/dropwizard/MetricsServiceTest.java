@@ -27,15 +27,15 @@ public class MetricsServiceTest extends MetricsTestBase {
 
   @Test
   public void testFindByBaseName() {
-    JsonObject metrics = metricsService.getMetricsSnapshot("vertx.timers");
+    JsonObject metrics = metricsService.getMetricsSnapshot("vertx.event-loop-size");
     assertEquals(1, metrics.size());
-    assertNotNull(metrics.getJsonObject("vertx.timers"));
+    assertNotNull(metrics.getJsonObject("vertx.event-loop-size"));
   }
 
   @Test
   public void testMetricsNames() {
     Set<String> names = metricsService.metricsNames();
-    assertTrue(names.contains("vertx.timers"));
+    assertTrue(names.contains("vertx.event-loop-size"));
     assertTrue(names.stream().filter(name -> name.startsWith("vertx.eventbus")).count() > 0);
   }
 

@@ -28,13 +28,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.core.spi.metrics.DatagramSocketMetrics;
-import io.vertx.core.spi.metrics.EventBusMetrics;
-import io.vertx.core.spi.metrics.HttpClientMetrics;
-import io.vertx.core.spi.metrics.HttpServerMetrics;
-import io.vertx.core.spi.metrics.PoolMetrics;
-import io.vertx.core.spi.metrics.TCPMetrics;
-import io.vertx.core.spi.metrics.VertxMetrics;
+import io.vertx.core.spi.metrics.*;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.ArrayList;
@@ -48,7 +42,6 @@ import java.util.Map;
 class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   private final DropwizardMetricsOptions options;
-  private final Counter timers;
   private final Counter verticles;
   private Handler<Void> doneHandler;
   private final boolean shutdown;
@@ -57,7 +50,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
     super(registry, baseName);
 
-    this.timers = counter("timers");
     this.options = metricsOptions;
     this.verticles = counter("verticles");
     this.shutdown = shutdown;
@@ -90,16 +82,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   public void verticleUndeployed(Verticle verticle) {
     verticles.dec();
     counter("verticles", verticleName(verticle)).dec();
-  }
-
-  @Override
-  public void timerCreated(long id) {
-    timers.inc();
-  }
-
-  @Override
-  public void timerEnded(long id, boolean cancelled) {
-    timers.dec();
   }
 
   @Override
