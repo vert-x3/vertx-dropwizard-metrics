@@ -98,7 +98,7 @@ public class MetricsOptionsTest extends VertxTestBase {
       put("jmxDomain", jmxDomain).
       put("configPath", configPath)
     );
-    assertEquals(metricsEnabled, options.isEnabled());
+    assertEquals(metricsEnabled || jmxEnabled, options.isEnabled());
     assertEquals(registryName, options.getRegistryName());
     assertEquals(jmxEnabled, options.isJmxEnabled());
     assertEquals(jmxDomain, options.getJmxDomain());
