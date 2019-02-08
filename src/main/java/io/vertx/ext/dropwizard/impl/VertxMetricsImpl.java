@@ -32,9 +32,9 @@ import io.vertx.core.spi.metrics.*;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -45,7 +45,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final Counter verticles;
   private Handler<Void> doneHandler;
   private final boolean shutdown;
-  private final Map<String, HttpClientReporter> clientReporters = new HashMap<>();
+  private final Map<String, HttpClientReporter> clientReporters = new ConcurrentHashMap<>();
 
   VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
     super(registry, baseName);
