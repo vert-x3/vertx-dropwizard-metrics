@@ -177,11 +177,6 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public boolean isEnabled() {
-    return clientReporter.isEnabled();
-  }
-
-  @Override
   public void close() {
     owner.closed(this);
   }

@@ -103,11 +103,6 @@ public abstract class AbstractMetrics implements Metrics {
     return MetricRegistry.name(baseName, names);
   }
 
-  @Override
-  public boolean isEnabled() {
-    return true;
-  }
-
   protected <T> Gauge<T> gauge(Gauge<T> gauge, String... names) {
     try {
       return registry.register(nameOf(names), gauge);

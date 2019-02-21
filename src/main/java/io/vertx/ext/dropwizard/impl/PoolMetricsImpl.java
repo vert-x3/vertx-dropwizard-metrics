@@ -61,11 +61,6 @@ public class PoolMetricsImpl extends AbstractMetrics implements PoolMetrics<Time
   }
 
   @Override
-  public boolean isEnabled() {
-    return true;
-  }
-
-  @Override
   public void close() {
     removeAll();
   }
