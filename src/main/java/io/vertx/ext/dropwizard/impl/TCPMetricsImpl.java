@@ -98,12 +98,16 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
 
   @Override
   public void bytesRead(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    bytesRead.update(numberOfBytes);
+    if (numberOfBytes > 0L) {
+      bytesRead.update(numberOfBytes);
+    }
   }
 
   @Override
   public void bytesWritten(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    bytesWritten.update(numberOfBytes);
+    if (numberOfBytes > 0L) {
+      bytesWritten.update(numberOfBytes);
+    }
   }
 
   @Override
