@@ -77,7 +77,7 @@ public class InternalMetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       AtomicBoolean complete = new AtomicBoolean(false);
-      client.websocket(8080, "localhost", "/blah", socket -> {
+      client.webSocket(8080, "localhost", "/blah", onSuccess(socket -> {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         assertNoInternal(metrics);
         socket.write(clientMax);
@@ -91,7 +91,7 @@ public class InternalMetricsTest extends MetricsTestBase {
             socket.close();
           }
         });
-      });
+      }));
     });
 
     await();
