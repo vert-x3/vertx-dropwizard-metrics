@@ -27,6 +27,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.buffer.Buffer;
@@ -1399,7 +1400,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
 
-    exec.executeBlocking(Future::complete, false, ar -> vertx.runOnContext(v -> done.countDown()));
+    exec.executeBlocking(Promise::complete, false, ar -> vertx.runOnContext(v -> done.countDown()));
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 0);
     assertCount(metrics.getJsonObject("queue-delay"), 5);
