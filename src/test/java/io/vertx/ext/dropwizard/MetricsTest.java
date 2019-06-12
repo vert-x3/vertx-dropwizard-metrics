@@ -1367,7 +1367,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
 
-    exec.executeBlocking(Future::complete, false, ar -> vertx.runOnContext(v -> done.countDown()));
+    exec.executeBlocking(Promise::complete, false, ar -> vertx.runOnContext(v -> done.countDown()));
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 0);
     assertCount(metrics.getJsonObject("queue-delay"), 5);
