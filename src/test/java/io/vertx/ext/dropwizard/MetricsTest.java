@@ -922,7 +922,7 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testEventBusMetricsReplyNoHandlers() {
-    vertx.eventBus().send("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
+    vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
       assertTrue(ar.failed());
       testComplete();
     });
@@ -955,7 +955,7 @@ public class MetricsTest extends MetricsTestBase {
   public void testEventBusMetricsReplyTimeout() {
     vertx.eventBus().consumer("foo").handler(msg -> {});
 
-    vertx.eventBus().send("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
+    vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
       assertTrue(ar.failed());
       testComplete();
     });
@@ -971,7 +971,7 @@ public class MetricsTest extends MetricsTestBase {
   public void testEventBusMetricsReplyRecipientFailure() {
     vertx.eventBus().consumer("foo").handler(msg -> msg.fail(1, "blah"));
 
-    vertx.eventBus().send("foo", "bar", new DeliveryOptions(), ar -> {
+    vertx.eventBus().request("foo", "bar", new DeliveryOptions(), ar -> {
       assertTrue(ar.failed());
       testComplete();
     });
@@ -992,7 +992,7 @@ public class MetricsTest extends MetricsTestBase {
       consumer.handler(msg -> {
         fail("should not be called");
       });
-      eb.send("foo", "the_message", new DeliveryOptions().setSendTimeout(30), ar -> {
+      eb.request("foo", "the_message", new DeliveryOptions().setSendTimeout(30), ar -> {
         assertFalse(ar.succeeded());
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         assertCount(metrics.getJsonObject("messages.pending"), 0L);
