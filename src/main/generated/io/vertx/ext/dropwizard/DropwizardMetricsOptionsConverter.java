@@ -52,7 +52,7 @@ public class DropwizardMetricsOptionsConverter implements JsonCodec<DropwizardMe
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredEventBusHandler(io.vertx.ext.dropwizard.MatchConverter.INSTANCE.decode((JsonObject)item));
+                obj.addMonitoredEventBusHandler(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
@@ -64,7 +64,7 @@ public class DropwizardMetricsOptionsConverter implements JsonCodec<DropwizardMe
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpClientEndpoint(io.vertx.ext.dropwizard.MatchConverter.INSTANCE.decode((JsonObject)item));
+                obj.addMonitoredHttpClientEndpoint(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
@@ -72,7 +72,7 @@ public class DropwizardMetricsOptionsConverter implements JsonCodec<DropwizardMe
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpClientUri(io.vertx.ext.dropwizard.MatchConverter.INSTANCE.decode((JsonObject)item));
+                obj.addMonitoredHttpClientUri(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
@@ -80,7 +80,7 @@ public class DropwizardMetricsOptionsConverter implements JsonCodec<DropwizardMe
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpServerUri(io.vertx.ext.dropwizard.MatchConverter.INSTANCE.decode((JsonObject)item));
+                obj.addMonitoredHttpServerUri(new io.vertx.ext.dropwizard.Match((JsonObject)item));
             });
           }
           break;
