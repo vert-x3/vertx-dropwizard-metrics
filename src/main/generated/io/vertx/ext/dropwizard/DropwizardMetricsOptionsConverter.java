@@ -4,21 +4,13 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonArray;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import io.vertx.core.spi.json.JsonCodec;
 
 /**
- * Converter and Codec for {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions}.
+ * Converter and mapper for {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions}.
  * NOTE: This class has been automatically generated from the {@link io.vertx.ext.dropwizard.DropwizardMetricsOptions} original class using Vert.x codegen.
  */
-public class DropwizardMetricsOptionsConverter implements JsonCodec<DropwizardMetricsOptions, JsonObject> {
+public class DropwizardMetricsOptionsConverter {
 
-  public static final DropwizardMetricsOptionsConverter INSTANCE = new DropwizardMetricsOptionsConverter();
-
-  @Override public JsonObject encode(DropwizardMetricsOptions value) { return (value != null) ? value.toJson() : null; }
-
-  @Override public DropwizardMetricsOptions decode(JsonObject value) { return (value != null) ? new DropwizardMetricsOptions(value) : null; }
-
-  @Override public Class<DropwizardMetricsOptions> getTargetClass() { return DropwizardMetricsOptions.class; }
 
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, DropwizardMetricsOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
