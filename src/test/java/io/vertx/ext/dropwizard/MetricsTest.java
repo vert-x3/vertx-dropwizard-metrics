@@ -414,7 +414,7 @@ public class MetricsTest extends MetricsTestBase {
     AtomicBoolean sendMax = new AtomicBoolean(false);
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080));
-    server.websocketHandler(socket -> {
+    server.webSocketHandler(socket -> {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
       assertEquals(1, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
       socket.handler(buff -> {
