@@ -64,7 +64,7 @@ public class InternalMetricsTest extends MetricsTestBase {
     AtomicBoolean sendMax = new AtomicBoolean(false);
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080));
-    server.websocketHandler(socket -> {
+    server.webSocketHandler(socket -> {
       JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
       assertNoInternal(metrics);
       socket.handler(buff -> {
