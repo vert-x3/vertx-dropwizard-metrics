@@ -24,6 +24,8 @@ import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,7 +37,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
   private ThroughputMeter[] responses;
   private final Counter openWebSockets;
 
-  private EnumMap<HttpMethod, ThroughputTimer> methodRequests;
+  private Map<HttpMethod, ThroughputTimer> methodRequests;
 
   public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
     super(registry, baseName);
@@ -48,7 +50,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
         throughputMeter("responses-4xx"),
         throughputMeter("responses-5xx")
     };
-    methodRequests = new EnumMap<>(HttpMethod.class);
+    methodRequests = new HashMap<>();
     for (HttpMethod method : HttpMethod.values()) {
       methodRequests.put(method, throughputTimer(method.toString().toLowerCase() + "-requests"));
     }
