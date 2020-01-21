@@ -112,16 +112,11 @@ public class MetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       if (ar.succeeded()) {
         for (int i = 0; i < requests; i++) {
-          HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, onSuccess(resp -> {
+          client.post(8080, "localhost", uri, i % 2 == 0 ? clientMax : clientMin, onSuccess(resp -> {
             // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
             // until *after* the response handler has been called
             resp.endHandler(v -> latch.countDown());
           }));
-          if (i % 2 == 0) {
-            req.end(clientMax);
-          } else {
-            req.end(clientMin);
-          }
         }
       } else {
         fail(ar.cause().getMessage());
@@ -172,15 +167,16 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       if (ar.succeeded()) {
-        HttpClientRequest req = client.request(HttpMethod.GET, 8080, "localhost", uri, ar1 -> {
-          if (ar1.succeeded()) {
-            HttpClientResponse resp = ar1.result();
-            // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
-            // until *after* the response handler has been called
-            resp.endHandler(v -> testComplete());
-          }
-        });
-        req.setChunked(true);
+        HttpClientRequest req = client
+          .request(HttpMethod.GET, 8080, "localhost", uri)
+          .setHandler(ar1 -> {
+            if (ar1.succeeded()) {
+              HttpClientResponse resp = ar1.result();
+              // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
+              // until *after* the response handler has been called
+              resp.endHandler(v -> testComplete());
+            }
+          }).setChunked(true);
 
         for (int i = 0; i < chunks; i++) {
           int size = random.nextInt(max - min) + min;
@@ -226,18 +222,18 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      client.request(HttpMethod.GET, 8080, "localhost", "/get", resp -> latch.countDown()).end();
-      client.request(HttpMethod.GET, 8080, "localhost", "/users/1", resp -> latch.countDown()).end();
-      client.request(HttpMethod.GET, 8080, "localhost", "/users/2", resp -> latch.countDown()).end();
-      client.request(HttpMethod.GET, 8080, "localhost", "/users/3", resp -> latch.countDown()).end();
-      client.request(HttpMethod.POST, 8080, "localhost", "/post", resp -> latch.countDown()).end();
-      client.request(HttpMethod.PUT, 8080, "localhost", "/put", resp -> latch.countDown()).end();
-      client.request(HttpMethod.DELETE, 8080, "localhost", "/delete", resp -> latch.countDown()).end();
-      client.request(HttpMethod.OPTIONS, 8080, "localhost", "/options", resp -> latch.countDown()).end();
-      client.request(HttpMethod.HEAD, 8080, "localhost", "/head", resp -> latch.countDown()).end();
-      client.request(HttpMethod.TRACE, 8080, "localhost", "/trace", resp -> latch.countDown()).end();
-      client.request(HttpMethod.CONNECT, 8080, "localhost", "/connect", resp -> latch.countDown()).end();
-      client.request(HttpMethod.PATCH, 8080, "localhost", "/patch", resp -> latch.countDown()).end();
+      client.send(HttpMethod.GET, 8080, "localhost", "/get", resp -> latch.countDown());
+      client.send(HttpMethod.GET, 8080, "localhost", "/users/1", resp -> latch.countDown());
+      client.send(HttpMethod.GET, 8080, "localhost", "/users/2", resp -> latch.countDown());
+      client.send(HttpMethod.GET, 8080, "localhost", "/users/3", resp -> latch.countDown());
+      client.send(HttpMethod.POST, 8080, "localhost", "/post", resp -> latch.countDown());
+      client.send(HttpMethod.PUT, 8080, "localhost", "/put", resp -> latch.countDown());
+      client.send(HttpMethod.DELETE, 8080, "localhost", "/delete", resp -> latch.countDown());
+      client.send(HttpMethod.OPTIONS, 8080, "localhost", "/options", resp -> latch.countDown());
+      client.send(HttpMethod.HEAD, 8080, "localhost", "/head", resp -> latch.countDown());
+      client.send(HttpMethod.TRACE, 8080, "localhost", "/trace", resp -> latch.countDown());
+      client.send(HttpMethod.CONNECT, 8080, "localhost", "/connect", resp -> latch.countDown());
+      client.send(HttpMethod.PATCH, 8080, "localhost", "/patch", resp -> latch.countDown());
     });
 
     awaitLatch(latch);
@@ -313,7 +309,7 @@ public class MetricsTest extends MetricsTestBase {
         assertNotNull("Was expecting " + metricName + " to be not null", metrics);
         assertEquals("Was expecting " + metricName + " to have count = 0", 0, (int) metrics.getInteger("count"));
       }
-      client.request(HttpMethod.GET, 8080, "localhost", "/", resp -> {
+      client.get(8080, "localhost", "/", resp -> {
         vertx.runOnContext(v -> {
           for (Measured measured : Arrays.asList(client, server)) {
             JsonObject metric = metricsService.getMetricsSnapshot(measured);
@@ -321,7 +317,7 @@ public class MetricsTest extends MetricsTestBase {
           }
           latch.countDown();
         });
-      }).end();
+      });
     };
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().setStatusCode(code).end();
@@ -348,9 +344,9 @@ public class MetricsTest extends MetricsTestBase {
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       for (int i = 0; i < requests; i++) {
-        client.request(HttpMethod.GET, 8081, "localhost", "/some/uri", resp -> {
+        client.get(8081, "localhost", "/some/uri", resp -> {
           latch.countDown();
-        }).end();
+        });
       }
     });
 
@@ -461,14 +457,14 @@ public class MetricsTest extends MetricsTestBase {
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().sendFile(file.getAbsolutePath());
     }).listen(onSuccess(s -> {
-      client.request(HttpMethod.GET, 8080, "localhost", "/file", ar1 -> {
+      client.get(8080, "localhost", "/file", ar1 -> {
         if (ar1.succeeded()) {
           HttpClientResponse resp1 = ar1.result();
           resp1.bodyHandler(buff -> {
             latch.countDown();
           });
         }
-      }).end();
+      });
     }));
 
     awaitLatch(latch);
@@ -505,14 +501,14 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      client.request(HttpMethod.GET, 8080, "localhost", "/file", ar1 -> {
+      client.get(8080, "localhost", "/file", ar1 -> {
         if (ar1.succeeded()) {
           HttpClientResponse resp = ar1.result();
           resp.bodyHandler(buff -> {
             testComplete();
           });
         }
-      }).end();
+      });
     });
 
     await();
@@ -532,21 +528,21 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      client.request(HttpMethod.GET, 8080, "localhost", "/books/1", ar1 -> {
+      client.get(8080, "localhost", "/books/1", ar1 -> {
         if (ar1.succeeded()) {
           HttpClientResponse resp = ar1.result();
           resp.bodyHandler(buff -> {
-            client.request(HttpMethod.GET, 8080, "localhost", "/books/2", ar2 -> {
+            client.get(8080, "localhost", "/books/2", ar2 -> {
               if (ar2.succeeded()) {
                 HttpClientResponse resp2 = ar2.result();
                 resp2.bodyHandler(buff2 -> {
                   testComplete();
                 });
               }
-            }).end();
+            });
           });
         }
-      }).end();
+      });
     });
 
     await();
@@ -1158,7 +1154,7 @@ public class MetricsTest extends MetricsTestBase {
             bs.set(id);
           }
         }
-      }).end();
+      });
     }
     assertWaitUntil(() -> bs.cardinality() == 3);
     for (HttpServer server : servers) {
@@ -1185,7 +1181,7 @@ public class MetricsTest extends MetricsTestBase {
     awaitLatch(started);
     HttpClient client = vertx.createHttpClient();
     for (int i = 0;i < 7;i++) {
-      client.getNow(8080, "localhost", "/somepath", resp -> {
+      client.get(8080, "localhost", "/somepath", resp -> {
       });
     }
     assertWaitUntil(() -> requests.size() == 5);
@@ -1225,10 +1221,9 @@ public class MetricsTest extends MetricsTestBase {
           vertx.runOnContext(clv -> closedLatch.countDown());
         });
       });
-      HttpClientRequest req = clients[i].get(8080, "localhost", "/", resp -> {
+      clients[i].get(8080, "localhost", "/", resp -> {
         vertx.runOnContext(rlv -> responseLatch.countDown());
       });
-      req.end();
     }
     awaitLatch(requestsLatch);
     JsonObject metrics = metricsService.getMetricsSnapshot(clients[0]);
