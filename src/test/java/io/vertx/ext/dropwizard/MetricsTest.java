@@ -912,8 +912,9 @@ public class MetricsTest extends MetricsTestBase {
         vertx.eventBus().consumer("foo", msg -> {
           JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
           JsonObject metric = metrics.getJsonObject("handlers.foo");
-          assertEquals(count.get(), (int) metric.getInteger("count"));
-          if (count.incrementAndGet() == size) {
+          int counterValue = count.incrementAndGet();
+          assertEquals(counterValue, (int) metric.getInteger("count"));
+          if (counterValue == size) {
             vertx.runOnContext(done -> {
               JsonObject metrics2 = metricsService.getMetricsSnapshot(vertx.eventBus());
               JsonObject metric2 = metrics2.getJsonObject("handlers.foo");

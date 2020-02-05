@@ -18,7 +18,6 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.Timer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
@@ -26,7 +25,6 @@ import io.vertx.ext.dropwizard.ThroughputMeter;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -35,7 +33,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   private final HandlerMetric ignoredHandler = new HandlerMetric(null, false, true);
   private final HandlerMetric noMatchHandler = new HandlerMetric(null, true, false);
-  private final ConcurrentMap<String, HandlerTimer> handlerTimers = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, HandlerCounter> handlerTimers = new ConcurrentHashMap<>();
   private final Matcher handlerMatcher;
   private final Counter handlerCount;
   private final Counter pending;
@@ -148,7 +146,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   }
 
   @Override
-  public void beginHandleMessage(HandlerMetric handler, boolean local) {
+  public void messageDelivered(HandlerMetric handler, boolean local) {
     if (handler.ignored) {
       return;
     }
@@ -159,19 +157,12 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       pendingRemote.dec();
     }
     if (!handler.noMatch) {
-      handler.start = System.nanoTime();
       if (local) {
         handler.pendingLocalCount--;
       } else {
         handler.pendingRemoteCount--;
       }
-    }
-  }
-
-  @Override
-  public void endHandleMessage(HandlerMetric handler, Throwable failure) {
-    if (!handler.noMatch && !handler.ignored) {
-      handler.timer.update(System.nanoTime() - handler.start, TimeUnit.NANOSECONDS);
+      handler.counter.inc();
     }
   }
 
@@ -218,11 +209,10 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
 
   public class HandlerMetric {
     final String address;
-    final Timer timer;
+    final Counter counter;
     final String name;
     final boolean noMatch;
     final boolean ignored;
-    long start;
     long pendingLocalCount;
     long pendingRemoteCount;
 
@@ -231,24 +221,24 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       this.noMatch = noMatch;
       this.ignored = ignored;
       if (noMatch || ignored) {
-        this.timer = null;
+        this.counter = null;
         this.name = null;
         return;
       }
       this.name = nameOf("handlers", address);
       while (true) {
-        HandlerTimer existing = handlerTimers.get(address);
+        HandlerCounter existing = handlerTimers.get(address);
         if (existing != null) {
-          HandlerTimer next = existing.inc();
+          HandlerCounter next = existing.inc();
           if (handlerTimers.replace(address, existing, next)) {
-            timer = next.timer;
+            counter = next.counter;
             break;
           }
         } else {
-          HandlerTimer created = new HandlerTimer();
+          HandlerCounter created = new HandlerCounter();
           if (handlerTimers.putIfAbsent(address, created) == null) {
-            registry.register(name, created.timer);
-            timer = created.timer;
+            registry.register(name, created.counter);
+            counter = created.counter;
             break;
           }
         }
@@ -261,8 +251,8 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
           EventBusMetricsImpl.this.pending.dec(pendingLocalCount + pendingRemoteCount);
           EventBusMetricsImpl.this.pendingLocal.dec(pendingLocalCount);
           EventBusMetricsImpl.this.pendingRemote.dec(pendingRemoteCount);
-          HandlerTimer existing = handlerTimers.get(address);
-          HandlerTimer next = existing.dec();
+          HandlerCounter existing = handlerTimers.get(address);
+          HandlerCounter next = existing.dec();
           if (next.refCount == 0) {
             if (handlerTimers.remove(address, existing)) {
               registry.remove(name);
@@ -284,30 +274,30 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     meter("messages", "reply-failures", failure.name()).mark();
   }
 
-  static class HandlerTimer {
+  static class HandlerCounter {
     final int refCount;
-    final Timer timer;
+    final Counter counter;
 
-    public HandlerTimer(int refCount, Timer timer) {
+    public HandlerCounter(int refCount, Counter counter) {
       this.refCount = refCount;
-      this.timer = timer;
+      this.counter = counter;
     }
 
-    public HandlerTimer() {
-      this(1, new Timer());
+    public HandlerCounter() {
+      this(1, new Counter());
     }
 
-    HandlerTimer inc() {
-      return new HandlerTimer(refCount + 1, timer);
+    HandlerCounter inc() {
+      return new HandlerCounter(refCount + 1, counter);
     }
 
-    HandlerTimer dec() {
-      return new HandlerTimer(refCount - 1, timer);
+    HandlerCounter dec() {
+      return new HandlerCounter(refCount - 1, counter);
     }
 
     @Override
     public boolean equals(Object obj) {
-      HandlerTimer that = (HandlerTimer) obj;
+      HandlerCounter that = (HandlerCounter) obj;
       return refCount == that.refCount;
     }
   }
