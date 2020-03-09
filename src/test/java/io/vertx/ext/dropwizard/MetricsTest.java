@@ -169,7 +169,7 @@ public class MetricsTest extends MetricsTestBase {
       if (ar.succeeded()) {
         HttpClientRequest req = client
           .request(HttpMethod.GET, 8080, "localhost", uri)
-          .setHandler(ar1 -> {
+          .onComplete(ar1 -> {
             if (ar1.succeeded()) {
               HttpClientResponse resp = ar1.result();
               // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
