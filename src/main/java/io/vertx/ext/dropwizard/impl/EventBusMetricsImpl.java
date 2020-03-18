@@ -19,6 +19,7 @@ package io.vertx.ext.dropwizard.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.spi.metrics.EventBusMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
@@ -41,6 +42,9 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   private final Counter pending;
   private final Counter pendingLocal;
   private final Counter pendingRemote;
+  private final Counter discarded;
+  private final Counter discardedLocal;
+  private final Counter discardedRemote;
   private final Meter bytesRead;
   private final Meter bytesWritten;
   private final ThroughputMeter receivedMessages;
@@ -64,6 +68,9 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     pending = counter("messages", "pending");
     pendingLocal = counter("messages", "pending-local");
     pendingRemote = counter("messages", "pending-remote");
+    discarded = counter("messages", "discarded");
+    discardedLocal = counter("messages", "discarded-local");
+    discardedRemote = counter("messages", "discarded-remote");
     receivedMessages = throughputMeter("messages", "received");
     receivedLocalMessages = throughputMeter("messages", "received-local");
     receivedRemoteMessages = throughputMeter("messages", "received-remote");
@@ -143,6 +150,28 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       pendingRemote.inc();
       if (!handler.noMatch) {
         handler.pendingRemoteCount++;
+      }
+    }
+  }
+
+  @Override
+  public void discardMessage(HandlerMetric handler, boolean local, Message<?> msg) {
+    if (handler.ignored) {
+      return;
+    }
+    pending.dec();
+    discarded.inc();
+    if (local) {
+      discardedLocal.inc();
+      pendingLocal.dec();
+      if (!handler.noMatch) {
+        handler.pendingLocalCount--;
+      }
+    } else {
+      discardedRemote.inc();
+      pendingRemote.dec();
+      if (!handler.noMatch) {
+        handler.pendingRemoteCount--;
       }
     }
   }

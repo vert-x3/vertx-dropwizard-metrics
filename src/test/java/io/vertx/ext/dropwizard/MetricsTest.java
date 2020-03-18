@@ -1031,6 +1031,33 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
+  public void testDiscardMessage() {
+    int num = 10;
+    EventBus eb = vertx.eventBus();
+    MessageConsumer<Object> consumer = eb.consumer("foo");
+    consumer.setMaxBufferedMessages(num);
+    consumer.pause();
+    consumer.handler(msg -> {
+      fail("should not be called");
+    });
+    for (int i = 0;i < num;i++) {
+      eb.send("foo", "the_message-" + i);
+    }
+    eb.send("foo", "last");
+    waitUntil(() -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+      return getCount(metrics.getJsonObject("messages.discarded")) == 1L;
+    });
+    assertCount(metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.pending"), 10L);
+    consumer.unregister();
+    waitUntil(() -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+      return getCount(metrics.getJsonObject("messages.discarded")) == 11L;
+    });
+    assertCount(metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.pending"), 0L);
+  }
+
+  @Test
   public void testVertxMetrics() throws Exception {
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
     assertNotNull(metrics.getJsonObject("vertx.event-loop-size"));
