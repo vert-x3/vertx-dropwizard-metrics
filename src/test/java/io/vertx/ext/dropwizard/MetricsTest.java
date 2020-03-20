@@ -25,7 +25,6 @@ import com.codahale.metrics.SlidingTimeWindowReservoir;
 import com.codahale.metrics.Timer;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.VertxOptions;
@@ -753,27 +752,15 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch allLatch = new CountDownLatch((int) messages);
     AtomicReference<String> deploymentID = new AtomicReference<>();
 
+    AtomicReference<MessageConsumer<Object>> consumer = new AtomicReference<>();
+
     vertx.deployVerticle(new AbstractVerticle() {
 
-      MessageConsumer<Object> consumer;
-
       @Override
-      public void start() throws Exception {
-        consumer = vertx.eventBus().consumer("foo").handler(msg -> {
-          try {
-            gate.await();
-          } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Unexpected interrupt", e);
-          } finally {
-            vertx.runOnContext(v -> allLatch.countDown());
-          }
-        });
-      }
-
-      @Override
-      public void stop() throws Exception {
-        consumer.unregister();
+      public void start() {
+        consumer.set(vertx.eventBus().consumer("foo").handler(msg -> {
+          allLatch.countDown();
+        }).pause());
       }
     }, ar -> {
       assertTrue(ar.succeeded());
@@ -788,9 +775,9 @@ public class MetricsTest extends MetricsTestBase {
       JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
       JsonObject pending = metrics.getJsonObject("messages.pending-local");
       int count = pending.getInteger("count");
-      if (count == messages - 1) {
+      if (count == messages) {
         int messagesPending = metrics.getJsonObject("messages.pending").getInteger("count");
-        assertTrue("Was expecting to have at least " + (messages - 1) + " pending messages: " + metrics, messagesPending >= messages - 1);
+        assertEquals("Was expecting to have " + messages + " pending messages: " + metrics, messagesPending, messages);
         assertEquals(0, (int) metrics.getJsonObject("messages.pending-remote").getInteger("count"));
         return true;
       } else {
@@ -799,7 +786,7 @@ public class MetricsTest extends MetricsTestBase {
     });
 
     // Open the gate
-    gate.countDown();
+    consumer.get().resume();
 
     // Wait until all messages have been processed
     awaitLatch(allLatch);
@@ -1008,25 +995,20 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testPendingCount() {
-    Context ctx = vertx.getOrCreateContext();
-    ctx.runOnContext(v -> {
-      EventBus eb = vertx.eventBus();
-      MessageConsumer<Object> consumer = eb.consumer("foo");
-      consumer.handler(msg -> {
-        fail("should not be called");
-      });
-      eb.send("foo", "the_message", new DeliveryOptions().setSendTimeout(30), ar -> {
-        assertFalse(ar.succeeded());
-        JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-        assertCount(metrics.getJsonObject("messages.pending"), 0L);
-        assertCount(metrics.getJsonObject("messages.pending-local"), 0L);
-        testComplete();
-      });
-      JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-      assertCount(metrics.getJsonObject("messages.pending"), 1L);
-      assertCount(metrics.getJsonObject("messages.pending-local"), 1L);
-      consumer.unregister();
+    EventBus eb = vertx.eventBus();
+    MessageConsumer<Object> consumer = eb.consumer("foo");
+    consumer.handler(msg -> {
+      fail("should not be called");
     });
+    consumer.pause();
+    eb.send("foo", "the_message", new DeliveryOptions().setSendTimeout(30));
+    waitUntil(() -> getCount(metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.pending")) == 1L);
+    consumer.unregister(onSuccess(v2 -> {
+      JsonObject metrics2 = metricsService.getMetricsSnapshot(vertx.eventBus());
+      assertCount(metrics2.getJsonObject("messages.pending"), 0L);
+      assertCount(metrics2.getJsonObject("messages.pending-local"), 0L);
+      testComplete();
+    }));
     await();
   }
 

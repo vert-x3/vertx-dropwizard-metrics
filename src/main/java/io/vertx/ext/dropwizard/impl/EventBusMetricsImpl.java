@@ -287,9 +287,6 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     void remove() {
       if (!noMatch && !ignored) {
         while (true) {
-          EventBusMetricsImpl.this.pending.dec(pendingLocalCount + pendingRemoteCount);
-          EventBusMetricsImpl.this.pendingLocal.dec(pendingLocalCount);
-          EventBusMetricsImpl.this.pendingRemote.dec(pendingRemoteCount);
           HandlerTimer existing = handlerTimers.get(address);
           HandlerTimer next = existing.dec();
           if (next.refCount == 0) {
