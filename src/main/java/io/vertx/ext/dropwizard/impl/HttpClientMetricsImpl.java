@@ -81,21 +81,21 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public void endpointConnected(EndpointMetric endpointMetric) {
+  public void endpointConnected(EndpointMetric endpointMetric, Long socketMetric) {
     if (endpointMetric != null) {
       endpointMetric.openConnections.inc();
     }
   }
 
   @Override
-  public void endpointDisconnected(EndpointMetric endpointMetric) {
+  public void endpointDisconnected(EndpointMetric endpointMetric, Long socketMetric) {
     if (endpointMetric != null) {
       endpointMetric.openConnections.dec();
     }
   }
 
   @Override
-  public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+  public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     if (endpointMetric != null) {
       endpointMetric.inUse.inc();
     }
@@ -116,11 +116,11 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
+  public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
     if (endpointMetric != null) {
       endpointMetric.inUse.inc();
     }
-    return requestBegin(endpointMetric, localAddress, remoteAddress, request);
+    return requestBegin(endpointMetric, socketMetric, localAddress, remoteAddress, request);
   }
 
   @Override
@@ -142,7 +142,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public WebSocketMetric connected(EndpointMetric endpointMetric, WebSocket webSocket) {
+  public WebSocketMetric connected(EndpointMetric endpointMetric, Long socketMetric, WebSocket webSocket) {
     return clientReporter.createWebSocketMetric();
   }
 
