@@ -56,10 +56,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
-    if (options.isClustered()) {
-      gauge(options::getClusterHost, "cluster-host");
-      gauge(options::getClusterPort, "cluster-port");
-    }
   }
 
   DropwizardMetricsOptions getOptions() {

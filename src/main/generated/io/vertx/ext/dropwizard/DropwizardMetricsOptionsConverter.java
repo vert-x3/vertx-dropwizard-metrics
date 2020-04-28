@@ -44,7 +44,7 @@ public class DropwizardMetricsOptionsConverter {
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredEventBusHandler(new io.vertx.ext.dropwizard.Match((JsonObject)item));
+                obj.addMonitoredEventBusHandler(new io.vertx.ext.dropwizard.Match((io.vertx.core.json.JsonObject)item));
             });
           }
           break;
@@ -56,7 +56,7 @@ public class DropwizardMetricsOptionsConverter {
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpClientEndpoint(new io.vertx.ext.dropwizard.Match((JsonObject)item));
+                obj.addMonitoredHttpClientEndpoint(new io.vertx.ext.dropwizard.Match((io.vertx.core.json.JsonObject)item));
             });
           }
           break;
@@ -64,7 +64,7 @@ public class DropwizardMetricsOptionsConverter {
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpClientUri(new io.vertx.ext.dropwizard.Match((JsonObject)item));
+                obj.addMonitoredHttpClientUri(new io.vertx.ext.dropwizard.Match((io.vertx.core.json.JsonObject)item));
             });
           }
           break;
@@ -72,7 +72,7 @@ public class DropwizardMetricsOptionsConverter {
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
               if (item instanceof JsonObject)
-                obj.addMonitoredHttpServerUri(new io.vertx.ext.dropwizard.Match((JsonObject)item));
+                obj.addMonitoredHttpServerUri(new io.vertx.ext.dropwizard.Match((io.vertx.core.json.JsonObject)item));
             });
           }
           break;
