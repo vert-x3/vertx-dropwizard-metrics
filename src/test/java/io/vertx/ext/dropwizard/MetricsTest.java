@@ -1053,36 +1053,6 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testVerticleMetrics() throws Exception {
-    int verticles = 5;
-    CountDownLatch latch = new CountDownLatch(verticles);
-    AtomicReference<String> ref = new AtomicReference<>();
-    for (int i = 0; i < 5; i++) {
-      vertx.deployVerticle(new AbstractVerticle() {}, ar -> {
-        assertTrue(ar.succeeded());
-        ref.set(ar.result()); // just use the last deployment id to test undeploy metrics below
-        latch.countDown();
-      });
-    }
-
-    awaitLatch(latch);
-
-    JsonObject metrics = metricsService.getMetricsSnapshot(vertx);
-    assertNotNull(metrics);
-    assertFalse(metrics.isEmpty());
-
-    assertCount(metrics.getJsonObject("vertx.verticles"), (long) verticles);
-
-    vertx.undeploy(ref.get(), ar -> {
-      assertTrue(ar.succeeded());
-      assertCount(metricsService.getMetricsSnapshot(vertx).getJsonObject("vertx.verticles"), (long) verticles - 1);
-      testComplete();
-    });
-
-    await();
-  }
-
-  @Test
   public void testScheduledMetricConsumer() {
     int messages = 18;
     AtomicInteger count = new AtomicInteger(messages);

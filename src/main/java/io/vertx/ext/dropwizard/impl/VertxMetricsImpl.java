@@ -42,7 +42,6 @@ import java.util.concurrent.ConcurrentHashMap;
 class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   private final DropwizardMetricsOptions options;
-  private final Counter verticles;
   private Handler<Void> doneHandler;
   private final boolean shutdown;
   private final Map<String, HttpClientReporter> clientReporters = new ConcurrentHashMap<>();
@@ -51,7 +50,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     super(registry, baseName);
 
     this.options = metricsOptions;
-    this.verticles = counter("verticles");
     this.shutdown = shutdown;
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
@@ -66,18 +64,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   String projectName(String name) {
     // Special case for vertx we keep the name as is
     return name;
-  }
-
-  @Override
-  public void verticleDeployed(Verticle verticle) {
-    verticles.inc();
-    counter("verticles", verticleName(verticle)).inc();
-  }
-
-  @Override
-  public void verticleUndeployed(Verticle verticle) {
-    verticles.dec();
-    counter("verticles", verticleName(verticle)).dec();
   }
 
   @Override
