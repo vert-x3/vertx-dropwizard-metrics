@@ -1255,7 +1255,9 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.ttfb").getInteger("count"));
     assertEquals(5, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
-    clients[0].close();
+    CountDownLatch latch = new CountDownLatch(1);
+    clients[0].close().onComplete(ar -> latch.countDown());
+    awaitLatch(latch);
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertNull(metrics.getJsonObject("endpoint.localhost:8080.usage\""));
     assertNull(metrics.getJsonObject("endpoint.localhost:8080.in-use"));
