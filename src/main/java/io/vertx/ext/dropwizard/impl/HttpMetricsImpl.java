@@ -23,7 +23,6 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +72,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
    * @param statusCode the status code, {@code 0} means a reset
    * @param matcher the Matcher instance
    */
-  protected long end(RequestMetric metric, int statusCode, Matcher matcher) {
+  protected long end(HttpRequestMetric metric, int statusCode, Matcher matcher) {
     if (closed) {
       return 0;
     }

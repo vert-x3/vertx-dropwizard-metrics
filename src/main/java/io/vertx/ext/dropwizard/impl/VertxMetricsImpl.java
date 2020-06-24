@@ -29,6 +29,7 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.*;
+import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.ArrayList;
@@ -78,7 +79,13 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public HttpClientMetrics<?, ?, ?, ?, ?> createHttpClientMetrics(HttpClientOptions options) {
+  public ClientMetrics<?, ?, ?, ?> createClientMetrics(SocketAddress remoteAddress, String type) {
+    String baseName = MetricRegistry.name(nameOf(type, "clients", remoteAddress.toString()));
+    return new DropwizardClientMetrics<>(registry, baseName);
+  }
+
+  @Override
+  public HttpClientMetrics<?, ?, ?, ?> createHttpClientMetrics(HttpClientOptions options) {
     String name = options.getMetricsName();
     String baseName;
     if (name != null && name.length() > 0) {

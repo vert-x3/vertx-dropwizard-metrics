@@ -22,16 +22,16 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
+import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.ext.dropwizard.Match;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long, EndpointMetric, Timer.Context> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long, Timer.Context> {
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
@@ -49,100 +49,31 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public EndpointMetric createEndpoint(String host, int port, int maxPoolSize) {
-    String name = host + ":" + port;
+  public ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpClientRequest, HttpClientResponse> createEndpointMetrics(SocketAddress remoteAddress, int maxPoolSize) {
+    String name = remoteAddress.toString();
     if (endpointMatcher.matches(name) != null) {
-      return new EndpointMetric(clientReporter, name);
+      return new EndpointMetrics(clientReporter, name, uriMatcher);
     } else {
       return null;
     }
   }
 
   @Override
-  public void closeEndpoint(String host, int port, EndpointMetric endpointMetric) {
-  }
-
-  @Override
-  public Timer.Context enqueueRequest(EndpointMetric endpointMetric) {
-    if (endpointMetric != null) {
-      endpointMetric.queueSize.inc();
-      return endpointMetric.queueDelay.time();
-    } else {
-      return null;
+  public void endpointConnected(ClientMetrics<HttpClientRequestMetric, Timer.Context, ?, ?> endpointMetric) {
+    if (endpointMetric instanceof EndpointMetrics) {
+      ((EndpointMetrics)endpointMetric).openConnections.inc();
     }
   }
 
   @Override
-  public void dequeueRequest(EndpointMetric endpointMetric, Timer.Context taskMetric) {
-    if (endpointMetric != null) {
-      endpointMetric.queueSize.dec();
-      taskMetric.stop();
+  public void endpointDisconnected(ClientMetrics<HttpClientRequestMetric, Timer.Context, ?, ?> endpointMetric) {
+    if (endpointMetric instanceof EndpointMetrics) {
+      ((EndpointMetrics)endpointMetric).openConnections.dec();
     }
   }
 
   @Override
-  public void endpointConnected(EndpointMetric endpointMetric, Long socketMetric) {
-    if (endpointMetric != null) {
-      endpointMetric.openConnections.inc();
-    }
-  }
-
-  @Override
-  public void endpointDisconnected(EndpointMetric endpointMetric, Long socketMetric) {
-    if (endpointMetric != null) {
-      endpointMetric.openConnections.dec();
-    }
-  }
-
-  @Override
-  public HttpClientRequestMetric requestBegin(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    if (endpointMetric != null) {
-      endpointMetric.inUse.inc();
-    }
-    return new HttpClientRequestMetric(endpointMetric, request.method(), request.uri());
-  }
-
-  @Override
-  public void requestEnd(HttpClientRequestMetric requestMetric) {
-    requestMetric.requestEnd = System.nanoTime();
-  }
-
-  @Override
-  public void responseBegin(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
-    long waitTime = System.nanoTime() - requestMetric.requestEnd;
-    if (requestMetric.endpointMetric != null) {
-      requestMetric.endpointMetric.ttfb.update(waitTime, TimeUnit.NANOSECONDS);
-    }
-  }
-
-  @Override
-  public HttpClientRequestMetric responsePushed(EndpointMetric endpointMetric, Long socketMetric, SocketAddress localAddress, SocketAddress remoteAddress, HttpClientRequest request) {
-    if (endpointMetric != null) {
-      endpointMetric.inUse.inc();
-    }
-    return requestBegin(endpointMetric, socketMetric, localAddress, remoteAddress, request);
-  }
-
-  @Override
-  public void requestReset(HttpClientRequestMetric requestMetric) {
-    long duration = clientReporter.end(requestMetric, 0, uriMatcher);
-    if (requestMetric.endpointMetric != null) {
-      requestMetric.endpointMetric.inUse.dec();
-      requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
-    }
-  }
-
-  @Override
-  public void responseEnd(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
-    long duration = clientReporter.end(requestMetric, response.statusCode(), uriMatcher);
-    if (requestMetric.endpointMetric != null) {
-      requestMetric.endpointMetric.inUse.dec();
-      requestMetric.endpointMetric.usage.update(duration, TimeUnit.NANOSECONDS);
-    }
-  }
-
-  @Override
-  public WebSocketMetric connected(EndpointMetric endpointMetric, Long socketMetric, WebSocket webSocket) {
+  public WebSocketMetric connected(WebSocket webSocket) {
     return clientReporter.createWebSocketMetric();
   }
 

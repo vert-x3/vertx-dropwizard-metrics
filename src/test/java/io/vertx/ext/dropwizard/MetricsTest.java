@@ -27,9 +27,11 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.ReplyFailure;
 import io.vertx.core.http.*;
+import io.vertx.core.impl.VertxInternal;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.net.*;
+import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
@@ -155,6 +157,7 @@ public class MetricsTest extends MetricsTestBase {
     AtomicLong serverWrittenBytes = new AtomicLong();
     AtomicLong clientWrittenBytes = new AtomicLong();
     Random random = new Random();
+    CountDownLatch latch = new CountDownLatch(1);
 
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
@@ -174,7 +177,7 @@ public class MetricsTest extends MetricsTestBase {
               HttpClientResponse resp = ar1.result();
               // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
               // until *after* the response handler has been called
-              resp.endHandler(v -> testComplete());
+              resp.endHandler(v -> latch.countDown());
             }
           }).setChunked(true);
 
@@ -189,7 +192,7 @@ public class MetricsTest extends MetricsTestBase {
       }
     });
 
-    await();
+    awaitLatch(latch);
 
     // Gather metrics
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
@@ -297,37 +300,38 @@ public class MetricsTest extends MetricsTestBase {
 
   private void test(int code, String metricName) throws Exception {
     CountDownLatch closeLatch = new CountDownLatch(2);
-    CountDownLatch latch = new CountDownLatch(1);
+    CountDownLatch testLatch = new CountDownLatch(1);
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
     client.connectionHandler(connection -> {
       connection.closeHandler(v -> closeLatch.countDown());
     });
-    Handler<HttpServer> doTest = (server) -> {
-      for (Measured measured : Arrays.asList(client, server)) {
-        JsonObject metric = metricsService.getMetricsSnapshot(measured);
-        JsonObject metrics = metric.getJsonObject(metricName);
-        assertNotNull("Was expecting " + metricName + " to be not null", metrics);
-        assertEquals("Was expecting " + metricName + " to have count = 0", 0, (int) metrics.getInteger("count"));
-      }
-      client.get(8080, "localhost", "/", resp -> {
-        vertx.runOnContext(v -> {
-          for (Measured measured : Arrays.asList(client, server)) {
-            JsonObject metric = metricsService.getMetricsSnapshot(measured);
-            assertEquals(1, (int) metric.getJsonObject(metricName).getInteger("count"));
-          }
-          latch.countDown();
-        });
-      });
-    };
+    CountDownLatch listenLatch = new CountDownLatch(1);
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().setStatusCode(code).end();
     }).connectionHandler(connection -> {
       connection.closeHandler(v -> closeLatch.countDown());
     }).listen(ar -> {
       assertTrue(ar.succeeded());
-      doTest.handle(ar.result());
+      listenLatch.countDown();
     });
-    awaitLatch(latch);
+    awaitLatch(listenLatch);
+    for (Measured measured : Arrays.asList(client, server)) {
+      assertWaitUntil(() -> metricsService.getMetricsSnapshot(measured) != null);
+      JsonObject metric = metricsService.getMetricsSnapshot(measured);
+      JsonObject metrics = metric.getJsonObject(metricName);
+      assertNotNull("Was expecting " + metricName + " to be not null", metrics);
+      assertEquals("Was expecting " + metricName + " to have count = 0", 0, (int) metrics.getInteger("count"));
+    }
+    client.get(8080, "localhost", "/", resp -> {
+      vertx.runOnContext(v -> {
+        for (Measured measured : Arrays.asList(client, server)) {
+          JsonObject metric = metricsService.getMetricsSnapshot(measured);
+          assertEquals(1, (int) metric.getJsonObject(metricName).getInteger("count"));
+        }
+        testLatch.countDown();
+      });
+    });
+    awaitLatch(testLatch);
     cleanup(client);
     cleanup(server);
     awaitLatch(closeLatch);
@@ -1407,5 +1411,32 @@ public class MetricsTest extends MetricsTestBase {
     awaitLatch(latch);
     assertEquals(new JsonObject(), metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread"));
     assertEquals(new JsonObject(), metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking"));
+  }
+
+  @Test
+  public void testClientMetrics() {
+    SocketAddress address = SocketAddress.inetSocketAddress(8080, "localhost");
+    ClientMetrics metrics = ((VertxInternal) vertx).metricsSPI().createClientMetrics(address, "backend");
+
+    // Queue
+    Object queueMetric = metrics.enqueueRequest();
+    JsonObject snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
+    assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.queue-size").getInteger("count"));
+    metrics.dequeueRequest(queueMetric);
+    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
+    assertEquals(0, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.queue-size").getInteger("count"));
+    assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.queue-delay").getInteger("count"));
+
+    // Request
+    Object request = new Object();
+    Object response = new Object();
+    Object requestMetric = metrics.requestBegin(request);
+    metrics.requestEnd(requestMetric);
+    metrics.responseBegin(requestMetric, response);
+    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
+    assertEquals(0, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.requests").getInteger("count"));
+    metrics.responseEnd(requestMetric, response);
+    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
+    assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.requests").getInteger("count"));
   }
 }

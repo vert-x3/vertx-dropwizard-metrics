@@ -17,7 +17,6 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -31,7 +30,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<RequestMetric, WebSocketMetric, Long> {
+class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<HttpRequestMetric, WebSocketMetric, Long> {
 
   private final Matcher uriMatcher;
 
@@ -41,27 +40,27 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public RequestMetric requestBegin(Long socketMetric, HttpServerRequest request) {
-    return new RequestMetric(request.method(), request.uri());
+  public HttpRequestMetric requestBegin(Long socketMetric, HttpServerRequest request) {
+    return new HttpRequestMetric(request.method(), request.uri());
   }
 
   @Override
-  public WebSocketMetric connected(Long socketMetric, RequestMetric requestMetric, ServerWebSocket serverWebSocket) {
+  public WebSocketMetric connected(Long socketMetric, HttpRequestMetric requestMetric, ServerWebSocket serverWebSocket) {
     return createWebSocketMetric();
   }
 
   @Override
-  public void responseEnd(RequestMetric requestMetric, HttpServerResponse response) {
+  public void responseEnd(HttpRequestMetric requestMetric, HttpServerResponse response) {
     end(requestMetric, response.getStatusCode(), uriMatcher);
   }
 
   @Override
-  public void requestReset(RequestMetric requestMetric) {
+  public void requestReset(HttpRequestMetric requestMetric) {
   }
 
   @Override
-  public RequestMetric responsePushed(Long socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
-    return new RequestMetric(method, uri);
+  public HttpRequestMetric responsePushed(Long socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
+    return new HttpRequestMetric(method, uri);
   }
 
   @Override
