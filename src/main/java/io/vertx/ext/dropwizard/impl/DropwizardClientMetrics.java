@@ -41,7 +41,7 @@ public class DropwizardClientMetrics<Req, Resp> extends AbstractMetrics implemen
   }
 
   @Override
-  public RequestMetric requestBegin(Req request) {
+  public RequestMetric requestBegin(String uri, Req request) {
     inUse.inc();
     RequestMetric metric = new RequestMetric();
     metric.requestBegin = System.nanoTime();

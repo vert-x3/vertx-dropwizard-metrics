@@ -1430,7 +1430,7 @@ public class MetricsTest extends MetricsTestBase {
     // Request
     Object request = new Object();
     Object response = new Object();
-    Object requestMetric = metrics.requestBegin(request);
+    Object requestMetric = metrics.requestBegin("some-uri", request);
     metrics.requestEnd(requestMetric);
     metrics.responseBegin(requestMetric, response);
     snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");

@@ -45,7 +45,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
   }
 
   @Override
-  public HttpClientRequestMetric requestBegin(HttpClientRequest request) {
+  public HttpClientRequestMetric requestBegin(String uri, HttpClientRequest request) {
     inUse.inc();
     return new HttpClientRequestMetric(this, request.method(), request.uri());
   }
