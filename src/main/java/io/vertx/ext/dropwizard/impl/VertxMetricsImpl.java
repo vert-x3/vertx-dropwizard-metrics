@@ -16,11 +16,9 @@
 
 package io.vertx.ext.dropwizard.impl;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.Handler;
-import io.vertx.core.Verticle;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.datagram.DatagramSocketOptions;
 import io.vertx.core.http.HttpClientOptions;
@@ -33,6 +31,7 @@ import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,6 +45,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private Handler<Void> doneHandler;
   private final boolean shutdown;
   private final Map<String, HttpClientReporter> clientReporters = new ConcurrentHashMap<>();
+  private final Map<String, DropwizardClientMetrics> clientMetrics = new HashMap<>();
 
   VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
     super(registry, baseName);
@@ -79,9 +79,20 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public ClientMetrics<?, ?, ?, ?> createClientMetrics(SocketAddress remoteAddress, String type) {
-    String baseName = MetricRegistry.name(nameOf(type, "clients", remoteAddress.toString()));
-    return new DropwizardClientMetrics<>(registry, baseName);
+  public synchronized ClientMetrics<?, ?, ?, ?> createClientMetrics(SocketAddress remoteAddress, String type, String namespace) {
+    String baseName;
+    if (namespace != null && namespace.length() > 0) {
+      baseName = MetricRegistry.name(nameOf(type, "clients", namespace, remoteAddress.toString()));
+    } else {
+      baseName = MetricRegistry.name(nameOf(type, "clients", remoteAddress.toString()));
+    }
+    return clientMetrics.compute(baseName, (key, prev) -> {
+      if (prev == null) {
+        return new DropwizardClientMetrics<>(this, registry, baseName, 1);
+      } else {
+        return prev.inc();
+      }
+    });
   }
 
   @Override
@@ -103,6 +114,18 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
       clientReporters.remove(reporter.baseName);
       reporter.close();
     }
+  }
+
+  synchronized void closed(DropwizardClientMetrics metrics) {
+    clientMetrics.compute(metrics.baseName, (key, prev) -> {
+      DropwizardClientMetrics instance = prev.dec();
+      if (instance.count == 0) {
+        instance.removeAll();
+        return null;
+      } else {
+        return instance;
+      }
+    });
   }
 
   @Override
@@ -160,10 +183,6 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   void setDoneHandler(Handler<Void> handler) {
     this.doneHandler = handler;
-  }
-
-  private static String verticleName(Verticle verticle) {
-    return verticle.getClass().getName();
   }
 
 }

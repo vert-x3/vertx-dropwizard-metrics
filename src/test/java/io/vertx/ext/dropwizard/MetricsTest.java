@@ -32,6 +32,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.core.net.*;
 import io.vertx.core.spi.metrics.ClientMetrics;
+import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
@@ -519,9 +520,14 @@ public class MetricsTest extends MetricsTestBase {
 
     String baseName = "vertx.http.clients." + name;
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
+    assertTrue(metrics.size() > 0);
     assertCount(metrics.getJsonObject(baseName + ".bytes-read"), 0L);
 
     cleanup(client);
+
+    metrics = metricsService.getMetricsSnapshot(baseName);
+    assertTrue(metrics.size() == 0);
+
     cleanup(server);
   }
 
@@ -1414,9 +1420,9 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testClientMetrics() {
+  public void testClientMetricsReporting() {
     SocketAddress address = SocketAddress.inetSocketAddress(8080, "localhost");
-    ClientMetrics metrics = ((VertxInternal) vertx).metricsSPI().createClientMetrics(address, "backend");
+    ClientMetrics metrics = ((VertxInternal) vertx).metricsSPI().createClientMetrics(address, "backend", null);
 
     // Queue
     Object queueMetric = metrics.enqueueRequest();
@@ -1438,5 +1444,23 @@ public class MetricsTest extends MetricsTestBase {
     metrics.responseEnd(requestMetric, response);
     snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
     assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.requests").getInteger("count"));
+  }
+
+  @Test
+  public void testClientMetricsLifecycle() {
+    VertxMetrics spi = ((VertxInternal) vertx).metricsSPI();
+    SocketAddress address = SocketAddress.inetSocketAddress(8080, "localhost");
+    ClientMetrics[] metrics = new ClientMetrics[2];
+    for (int i = 0;i < metrics.length;i++) {
+      metrics[i] = spi.createClientMetrics(address, "backend", "acme");
+    }
+    JsonObject snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.acme.localhost:8080");
+    assertTrue(snapshot.size() > 0);
+    metrics[0].close();
+    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.acme.localhost:8080");
+    assertTrue(snapshot.size() > 0);
+    metrics[1].close();
+    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.acme.localhost:8080");
+    assertTrue(snapshot.size() == 0);
   }
 }
