@@ -525,8 +525,7 @@ public class MetricsTest extends MetricsTestBase {
 
     cleanup(client);
 
-    metrics = metricsService.getMetricsSnapshot(baseName);
-    assertTrue(metrics.size() == 0);
+    assertWaitUntil(() -> metricsService.getMetricsSnapshot(baseName).size() == 0);
 
     cleanup(server);
   }
