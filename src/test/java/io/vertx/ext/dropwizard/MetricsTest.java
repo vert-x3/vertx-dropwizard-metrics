@@ -1210,6 +1210,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(7, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-delay").getInteger("count"));
   }
 
+  @Repeat(times = 1000)
   @Test
   public void testMultiHttpClients() throws Exception {
     int size = 3;
@@ -1219,10 +1220,9 @@ public class MetricsTest extends MetricsTestBase {
     vertx.createHttpServer().requestHandler(req -> {
       requests.add(() -> req.response().end());
       requestsLatch.countDown();
-    }).listen(8080, "localhost", ar -> {
-      assertTrue(ar.succeeded());
+    }).listen(8080, "localhost", onSuccess(v -> {
       started.countDown();
-    });
+    }));
     awaitLatch(started);
     HttpClient[] clients = new HttpClient[size];
     CountDownLatch closedLatch = new CountDownLatch(size);
@@ -1234,9 +1234,10 @@ public class MetricsTest extends MetricsTestBase {
           vertx.runOnContext(clv -> closedLatch.countDown());
         });
       });
-      clients[i].get(8080, "localhost", "/", resp -> {
+      clients[i].get(8080, "localhost", "/", onSuccess(resp -> {
+        resp.pause();
         vertx.runOnContext(rlv -> responseLatch.countDown());
-      });
+      }));
     }
     awaitLatch(requestsLatch);
     JsonObject metrics = metricsService.getMetricsSnapshot(clients[0]);
