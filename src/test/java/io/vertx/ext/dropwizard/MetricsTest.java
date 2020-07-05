@@ -35,6 +35,7 @@ import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
+import io.vertx.test.core.Repeat;
 import io.vertx.test.core.RepeatRule;
 import io.vertx.test.core.TestUtils;
 import org.junit.Rule;
@@ -301,7 +302,6 @@ public class MetricsTest extends MetricsTestBase {
 
   private void test(int code, String metricName) throws Exception {
     CountDownLatch closeLatch = new CountDownLatch(2);
-    CountDownLatch testLatch = new CountDownLatch(1);
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
     client.connectionHandler(connection -> {
       connection.closeHandler(v -> closeLatch.countDown());
@@ -316,23 +316,29 @@ public class MetricsTest extends MetricsTestBase {
       listenLatch.countDown();
     });
     awaitLatch(listenLatch);
-    for (Measured measured : Arrays.asList(client, server)) {
+    for (Measured measured : Arrays.asList(server)) {
       assertWaitUntil(() -> metricsService.getMetricsSnapshot(measured) != null);
       JsonObject metric = metricsService.getMetricsSnapshot(measured);
       JsonObject metrics = metric.getJsonObject(metricName);
       assertNotNull("Was expecting " + metricName + " to be not null", metrics);
       assertEquals("Was expecting " + metricName + " to have count = 0", 0, (int) metrics.getInteger("count"));
     }
-    client.get(8080, "localhost", "/", resp -> {
-      vertx.runOnContext(v -> {
-        for (Measured measured : Arrays.asList(client, server)) {
-          JsonObject metric = metricsService.getMetricsSnapshot(measured);
-          assertEquals(1, (int) metric.getJsonObject(metricName).getInteger("count"));
+    client.get(8080, "localhost", "/", onSuccess(resp -> {
+    }));
+    for (Measured measured : Arrays.asList(client)) {
+      waitUntil(() -> {
+        JsonObject metrics = metricsService.getMetricsSnapshot(measured);
+        if (metrics == null) {
+          return false;
         }
-        testLatch.countDown();
+        JsonObject metric = metrics.getJsonObject(metricName);
+        if (metric == null) {
+          return false;
+        }
+        Integer count = metric.getInteger("count");
+        return count != null && count == 1;
       });
-    });
-    awaitLatch(testLatch);
+    }
     cleanup(client);
     cleanup(server);
     awaitLatch(closeLatch);
