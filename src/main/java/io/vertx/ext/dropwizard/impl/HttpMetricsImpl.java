@@ -73,7 +73,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
    * @param matcher the Matcher instance
    */
   protected long end(HttpRequestMetric metric, int statusCode, Matcher matcher) {
-    if (closed) {
+    if (closed || metric == null) {
       return 0;
     }
     String match = null;
