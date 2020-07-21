@@ -6,13 +6,16 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.ClientMetrics;
+import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.core.spi.observability.HttpRequest;
+import io.vertx.core.spi.observability.HttpResponse;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpClientRequest, HttpClientResponse> {
+public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpRequest, HttpResponse> {
 
   final HttpClientReporter reporter;
   final Matcher uriMatcher;
@@ -45,7 +48,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
   }
 
   @Override
-  public HttpClientRequestMetric requestBegin(String uri, HttpClientRequest request) {
+  public HttpClientRequestMetric requestBegin(String uri, HttpRequest request) {
     inUse.inc();
     return new HttpClientRequestMetric(this, request.method(), request.uri());
   }
@@ -61,14 +64,15 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
   }
 
   @Override
-  public void responseBegin(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
+  public void responseBegin(HttpClientRequestMetric requestMetric, HttpResponse response) {
     long waitTime = System.nanoTime() - requestMetric.requestEnd;
+    requestMetric.response = response;
     ttfb.update(waitTime, TimeUnit.NANOSECONDS);
   }
 
   @Override
-  public void responseEnd(HttpClientRequestMetric requestMetric, HttpClientResponse response) {
-    long duration = reporter.end(requestMetric, response.statusCode(), uriMatcher);
+  public void responseEnd(HttpClientRequestMetric requestMetric) {
+    long duration = reporter.end(requestMetric, requestMetric.response.statusCode(), uriMatcher);
     inUse.dec();
     usage.update(duration, TimeUnit.NANOSECONDS);
   }

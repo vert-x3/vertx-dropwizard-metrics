@@ -87,7 +87,7 @@ public class DropwizardClientMetrics<Req, Resp> extends AbstractMetrics implemen
   }
 
   @Override
-  public void responseEnd(RequestMetric requestMetric, Resp response) {
+  public void responseEnd(RequestMetric requestMetric) {
     long duration = System.nanoTime() - requestMetric.requestBegin;
     inUse.dec();
     requests.update(duration, TimeUnit.NANOSECONDS);

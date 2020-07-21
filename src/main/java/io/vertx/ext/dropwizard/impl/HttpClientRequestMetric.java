@@ -1,6 +1,7 @@
 package io.vertx.ext.dropwizard.impl;
 
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.spi.observability.HttpResponse;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -8,6 +9,7 @@ import io.vertx.core.http.HttpMethod;
 public class HttpClientRequestMetric extends HttpRequestMetric {
 
   final EndpointMetrics endpointMetric;
+  HttpResponse response;
   long requestEnd;
 
   public HttpClientRequestMetric(EndpointMetrics endpointMetric, HttpMethod method, String uri) {

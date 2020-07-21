@@ -18,12 +18,12 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.core.spi.observability.HttpRequest;
+import io.vertx.core.spi.observability.HttpResponse;
 import io.vertx.ext.dropwizard.Match;
 
 import java.util.List;
@@ -49,7 +49,7 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpClientRequest, HttpClientResponse> createEndpointMetrics(SocketAddress remoteAddress, int maxPoolSize) {
+  public ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpRequest, HttpResponse> createEndpointMetrics(SocketAddress remoteAddress, int maxPoolSize) {
     String name = remoteAddress.toString();
     if (endpointMatcher.matches(name) != null) {
       return new EndpointMetrics(clientReporter, name, uriMatcher);

@@ -35,7 +35,6 @@ import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
-import io.vertx.test.core.Repeat;
 import io.vertx.test.core.RepeatRule;
 import io.vertx.test.core.TestUtils;
 import org.junit.Rule;
@@ -94,7 +93,6 @@ public class MetricsTest extends MetricsTestBase {
   public RepeatRule repeatRule = new RepeatRule();
 
   @Test
-  //@Repeat(times = 10)
   public void testHttpMetrics() throws Exception {
     String uri = "/foo/bar";
     Buffer serverMin = randomBuffer(500);
@@ -171,20 +169,22 @@ public class MetricsTest extends MetricsTestBase {
       }
       req.response().end();
     }).listen(onSuccess(s -> {
-      HttpClientRequest req = client
+      client
         .request(HttpMethod.GET, 8080, "localhost", uri)
-        .onComplete(onSuccess(resp -> {
-          // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
-          // until *after* the response handler has been called
-          resp.endHandler(v1 -> vertx.runOnContext(v2 -> latch.countDown()));
-        })).setChunked(true);
-
-      for (int i = 0; i < chunks; i++) {
-        int size = random.nextInt(max - min) + min;
-        clientWrittenBytes.addAndGet(size);
-        req.write(randomBuffer(size));
-      }
-      req.end();
+        .onComplete(onSuccess(req -> {
+          req.onComplete(onSuccess(resp -> {
+            // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
+            // until *after* the response handler has been called
+            resp.endHandler(v1 -> vertx.runOnContext(v2 -> latch.countDown()));
+          }));
+          req.setChunked(true);
+          for (int i = 0; i < chunks; i++) {
+            int size = random.nextInt(max - min) + min;
+            clientWrittenBytes.addAndGet(size);
+            req.write(randomBuffer(size));
+          }
+          req.end();
+        }));
     }));
 
     awaitLatch(latch);
@@ -1214,7 +1214,6 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(7, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-delay").getInteger("count"));
   }
 
-  @Repeat(times = 1000)
   @Test
   public void testMultiHttpClients() throws Exception {
     int size = 3;
@@ -1450,7 +1449,7 @@ public class MetricsTest extends MetricsTestBase {
     metrics.responseBegin(requestMetric, response);
     snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
     assertEquals(0, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.requests").getInteger("count"));
-    metrics.responseEnd(requestMetric, response);
+    metrics.responseEnd(requestMetric);
     snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
     assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.requests").getInteger("count"));
   }
