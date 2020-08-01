@@ -74,14 +74,12 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     }).listen(ar -> {
       if (ar.succeeded()) {
         for (int i = 0; i < requests; i++) {
-          client.post(8080, "localhost", uri, i % 2 == 0 ? clientMax : clientMin, ar1 -> {
-            if (ar1.succeeded()) {
-              HttpClientResponse resp = ar1.result();
-              // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
-              // until *after* the response handler has been called
-              resp.endHandler(v -> latch.countDown());
-            }
-          });
+          Buffer body = i % 2 == 0 ? clientMax : clientMin;
+          client.request(HttpMethod.POST, 8080, "localhost", uri).compose(req ->
+            req
+              .send(body)
+              .compose(HttpClientResponse::body)
+          ).onSuccess(buff -> latch.countDown());
         }
       } else {
         fail(ar.cause().getMessage());
