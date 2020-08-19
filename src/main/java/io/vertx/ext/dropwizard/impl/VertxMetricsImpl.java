@@ -75,7 +75,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   @Override
   public HttpServerMetrics<?, ?, ?> createHttpServerMetrics(HttpServerOptions options, SocketAddress localAddress) {
     String baseName = MetricRegistry.name(nameOf("http.servers"), TCPMetricsImpl.addressName(localAddress));
-    return new HttpServerMetricsImpl(registry, baseName, this.options.getMonitoredHttpServerUris(), localAddress);
+    return new HttpServerMetricsImpl(registry, baseName, this.options.getMonitoredHttpServerUris(), this.options.getMonitoredHttpServerRoutes(), localAddress);
   }
 
   @Override

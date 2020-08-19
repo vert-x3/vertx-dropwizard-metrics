@@ -87,6 +87,14 @@ public class MetricsExamples {
     ));
   }
 
+  public void setupMonitoredRoutes() {
+    Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
+      new DropwizardMetricsOptions().
+        setEnabled(true).
+        addMonitoredHttpServerRoute(new Match().setValue("/users/.*").setType(MatchType.REGEX))
+    ));
+  }
+
   public void setupMonitoredEndpoints() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(
         new DropwizardMetricsOptions().

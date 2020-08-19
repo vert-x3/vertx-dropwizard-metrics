@@ -70,15 +70,19 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
    *
    * @param metric the request metric
    * @param statusCode the status code, {@code 0} means a reset
-   * @param matcher the Matcher instance
+   * @param uriMatcher the Matcher instance
    */
-  protected long end(HttpRequestMetric metric, int statusCode, Matcher matcher) {
+  protected long end(HttpRequestMetric metric, int statusCode, Matcher uriMatcher, Matcher routeMatcher) {
     if (closed) {
       return 0;
     }
-    String match = null;
+    String uriMatch = null;
+    String routeMatch = null;
     if (metric.uri != null) {
-      match = matcher.matches(metric.uri);
+      uriMatch = uriMatcher.matches(metric.uri);
+    }
+    if (routeMatcher != null && !metric.routes.isEmpty()) {
+      routeMatch = routeMatcher.matches(metric.getRoute());
     }
 
     long duration = System.nanoTime() - metric.requestBegin;
@@ -95,13 +99,23 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     // Update specific method / uri request metrics
     if (metric.method != null) {
       methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
-      if (match != null) {
-        throughputTimer(metric.method.toString().toLowerCase() + "-requests", match).update(duration, TimeUnit.NANOSECONDS);
-        throughputMeter("responses" + "-" + responseStatus + "xx", match).mark();
+      if (uriMatch != null) {
+        throughputTimer(metric.method.toString().toLowerCase() + "-requests", uriMatch).update(duration, TimeUnit.NANOSECONDS);
+        throughputMeter("responses" + "-" + responseStatus + "xx", uriMatch).mark();
       }
-    } else if (match != null) {
-      throughputTimer("requests", match).update(duration, TimeUnit.NANOSECONDS);
-      throughputMeter("responses" + "-" + responseStatus + "xx", match).mark();
+      if (routeMatch != null) {
+        throughputTimer(metric.method.toString().toLowerCase() + "-requests", routeMatch).update(duration, TimeUnit.NANOSECONDS);
+        throughputMeter("responses" + "-" + responseStatus + "xx", routeMatch).mark();
+      }
+    } else {
+      if (uriMatch != null) {
+        throughputTimer("requests", uriMatch).update(duration, TimeUnit.NANOSECONDS);
+        throughputMeter("responses" + "-" + responseStatus + "xx", uriMatch).mark();
+      }
+      if (routeMatch != null) {
+        throughputTimer("requests", routeMatch).update(duration, TimeUnit.NANOSECONDS);
+        throughputMeter("responses" + "-" + responseStatus + "xx", routeMatch).mark();
+      }
     }
 
     return duration;

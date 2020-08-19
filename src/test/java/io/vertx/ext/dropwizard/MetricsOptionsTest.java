@@ -111,6 +111,10 @@ public class MetricsOptionsTest extends VertxTestBase {
       .add(new JsonObject().put("value", "/test/server/1").put("type", "EQUALS"))
       .add(new JsonObject().put("value", "^/server/test/2/.*").put("type", "REGEX"));
 
+    JsonArray monitoredHttpServerRoutes = new JsonArray()
+      .add(new JsonObject().put("value", "/test/server/:serverId").put("type", "EQUALS"))
+      .add(new JsonObject().put("value", "^/server/test/:name/.*").put("type", "REGEX"));
+
     JsonArray monitoredHttpClientUris = new JsonArray()
       .add(new JsonObject().put("value", "/test/client/1").put("type", "EQUALS"))
       .add(new JsonObject().put("value", "^/client/test/2/.*").put("type", "REGEX"));
@@ -124,6 +128,7 @@ public class MetricsOptionsTest extends VertxTestBase {
       .put("jmxEnabled", true)
       .put("jmxDomain", "testJmxDomain")
       .put("monitoredHttpServerUris", monitoredHttpServerUris)
+      .put("monitoredHttpServerRoutes", monitoredHttpServerRoutes)
       .put("monitoredHttpClientUris", monitoredHttpClientUris)
       .put("monitoredEventBusHandlers", monitoredEventBusHandlers)
       .put("configPath", "the_config_file")
@@ -142,6 +147,12 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertEquals(MatchType.EQUALS, options.getMonitoredHttpServerUris().get(0).getType());
     assertEquals("^/server/test/2/.*", options.getMonitoredHttpServerUris().get(1).getValue());
     assertEquals(MatchType.REGEX, options.getMonitoredHttpServerUris().get(1).getType());
+
+    assertEquals(2, options.getMonitoredHttpServerRoutes().size());
+    assertEquals("/test/server/:serverId", options.getMonitoredHttpServerRoutes().get(0).getValue());
+    assertEquals(MatchType.EQUALS, options.getMonitoredHttpServerRoutes().get(0).getType());
+    assertEquals("^/server/test/:name/.*", options.getMonitoredHttpServerRoutes().get(1).getValue());
+    assertEquals(MatchType.REGEX, options.getMonitoredHttpServerRoutes().get(1).getType());
 
     assertEquals(2, options.getMonitoredHttpClientUris().size());
     assertEquals("/test/client/1", options.getMonitoredHttpClientUris().get(0).getValue());

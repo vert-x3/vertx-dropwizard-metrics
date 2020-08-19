@@ -85,6 +85,7 @@ public class MetricsTest extends MetricsTestBase {
                 addMonitoredHttpServerUri(new Match().setValue("/get")).
                 addMonitoredHttpServerUri(new Match().setValue("/p.*").setType(MatchType.REGEX)).
                 addMonitoredHttpServerUri(new Match().setValue("/users/.*").setAlias("users").setType(MatchType.REGEX)).
+                addMonitoredHttpServerRoute(new Match().setValue(".*").setType(MatchType.REGEX)).
                 addMonitoredHttpClientEndpoint(new Match().setValue("localhost:8080")).
                 addMonitoredHttpClientUri(new Match().setValue("/books/.*").setAlias("books").setType(MatchType.REGEX))
         );
@@ -212,13 +213,22 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testHttpMethodAndUriMetrics() throws Exception {
-    int requests = 4;
+  public void testHttpMethodAndUriAndRouteMetrics() throws Exception {
+    int requests = 13;
     CountDownLatch latch = new CountDownLatch(requests);
 
     HttpClient client = vertx.createHttpClient(new HttpClientOptions());
 
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
+      String uri = req.uri();
+      if (uri.startsWith("/users/")) {
+        req.routed("/users/:userId");
+      }
+      if (uri.startsWith("/internal/users/")) {
+        // mimic subrouting behaviour
+        req.routed("/internal");
+        req.routed("/users/:userId");
+      }
       req.response().end();
     }).listen(ar -> {
       assertTrue(ar.succeeded());
@@ -226,6 +236,7 @@ public class MetricsTest extends MetricsTestBase {
       client.request(HttpMethod.GET, 8080, "localhost", "/users/1").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
       client.request(HttpMethod.GET, 8080, "localhost", "/users/2").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
       client.request(HttpMethod.GET, 8080, "localhost", "/users/3").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+      client.request(HttpMethod.GET, 8080, "localhost", "/internal/users/3").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
       client.request(HttpMethod.POST, 8080, "localhost", "/post").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
       client.request(HttpMethod.PUT, 8080, "localhost", "/put").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
       client.request(HttpMethod.DELETE, 8080, "localhost", "/delete").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
@@ -242,11 +253,15 @@ public class MetricsTest extends MetricsTestBase {
     vertx.setTimer(100, id -> {
       // Gather metrics
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
-      assertCount(metrics.getJsonObject("get-requests"), 4L);
+      assertCount(metrics.getJsonObject("get-requests"), 5L);
       assertCount(metrics.getJsonObject("get-requests./get"), 1L);
       assertCount(metrics.getJsonObject("get-requests.users"), 3L);
+      assertCount(metrics.getJsonObject("get-requests./users/:userId"), 3L);
+      assertCount(metrics.getJsonObject("get-requests./internal>/users/:userId"), 1L);
       assertCount(metrics.getJsonObject("responses-2xx./get"), 1L);
       assertCount(metrics.getJsonObject("responses-2xx.users"), 3L);
+      assertCount(metrics.getJsonObject("responses-2xx./users/:userId"), 3L);
+      assertCount(metrics.getJsonObject("responses-2xx./internal>/users/:userId"), 1L);
 
       assertNull(metrics.getJsonObject("get-requests./users/1"));
       assertNull(metrics.getJsonObject("get-requests./users/2"));
