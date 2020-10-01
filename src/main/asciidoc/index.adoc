@@ -442,8 +442,8 @@ Base name: `vertx.net.servers.<host>:<port>`
 * `open-netsockets.<remote-host>` - A <<counter>> of the number of open net socket connections for a particular remote host
 * `connections` - A <<timer>> of a connection and the rate of it's occurrence
 * `exceptions` - A <<counter>> of the number of exceptions
-* `bytes-read` - A <<histogram>> of the number of bytes read.
-* `bytes-written` - A <<histogram>> of the number of bytes written.
+* `bytes-read` - A <<counter>> of the number of bytes read.
+* `bytes-written` - A <<counter>> of the number of bytes written.
 
 === Net client metrics
 
@@ -473,8 +473,8 @@ Base name: `vertx.datagram`
 
 * `sockets` - A <<counter>> of the number of datagram sockets
 * `exceptions` - A <<counter>> of the number of exceptions
-* `bytes-written` - A <<histogram>> of the number of bytes written.
-* `<host>:<port>.bytes-read` - A <<histogram>> of the number of bytes read.
+* `bytes-written` - A <<counter>> of the number of bytes written.
+* `<host>:<port>.bytes-read` - A <<counter>> of the number of bytes read.
 ** This metric will only be available if the datagram socket is listening
 
 === Pool metrics

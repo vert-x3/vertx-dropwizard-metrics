@@ -32,8 +32,8 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
 
   private Counter openConnections;
   private Timer connections;
-  private Histogram bytesRead;
-  private Histogram bytesWritten;
+  private Counter bytesRead;
+  private Counter bytesWritten;
   private Counter exceptions;
   protected volatile boolean closed;
 
@@ -43,8 +43,8 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
     this.openConnections = counter("open-netsockets");
     this.connections = timer("connections");
     this.exceptions = counter("exceptions");
-    this.bytesRead = histogram("bytes-read");
-    this.bytesWritten = histogram("bytes-written");
+    this.bytesRead = counter("bytes-read");
+    this.bytesWritten = counter("bytes-written");
   }
 
   @Override
@@ -99,14 +99,14 @@ class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
   @Override
   public void bytesRead(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     if (numberOfBytes > 0L) {
-      bytesRead.update(numberOfBytes);
+      bytesRead.inc(numberOfBytes);
     }
   }
 
   @Override
   public void bytesWritten(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     if (numberOfBytes > 0L) {
-      bytesWritten.update(numberOfBytes);
+      bytesWritten.inc(numberOfBytes);
     }
   }
 

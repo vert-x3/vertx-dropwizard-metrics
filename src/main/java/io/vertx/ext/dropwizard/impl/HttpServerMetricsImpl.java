@@ -18,11 +18,11 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.MetricRegistry;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.HttpServerRequest;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
+import io.vertx.core.spi.observability.HttpRequest;
+import io.vertx.core.spi.observability.HttpResponse;
 import io.vertx.ext.dropwizard.Match;
 
 import java.util.List;
@@ -40,8 +40,13 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public HttpRequestMetric requestBegin(Long socketMetric, HttpServerRequest request) {
+  public HttpRequestMetric requestBegin(Long socketMetric, HttpRequest request) {
     return new HttpRequestMetric(request.method(), request.uri());
+  }
+
+  @Override
+  public void responseBegin(HttpRequestMetric requestMetric, HttpResponse response) {
+    requestMetric.response = response;
   }
 
   @Override
@@ -50,8 +55,8 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public void responseEnd(HttpRequestMetric requestMetric, HttpServerResponse response) {
-    end(requestMetric, response.getStatusCode(), uriMatcher);
+  public void responseEnd(HttpRequestMetric requestMetric, long bytesWritten) {
+    end(requestMetric, requestMetric.response.statusCode(), uriMatcher);
   }
 
   @Override
@@ -59,7 +64,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public HttpRequestMetric responsePushed(Long socketMetric, HttpMethod method, String uri, HttpServerResponse response) {
+  public HttpRequestMetric responsePushed(Long socketMetric, HttpMethod method, String uri, HttpResponse response) {
     return new HttpRequestMetric(method, uri);
   }
 

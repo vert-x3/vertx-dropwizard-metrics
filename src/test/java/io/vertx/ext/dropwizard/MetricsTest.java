@@ -136,15 +136,15 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("requests"), (long) requests); // requests
     assertNotNull(metrics.getJsonObject("requests").getValue("oneSecondRate"));
 
-    assertMinMax(metrics.getJsonObject("bytes-written"), (long) serverMin.length(), (long) serverMax.length());
-    assertMinMax(metrics.getJsonObject("bytes-read"), (long) clientMin.length(), (long) clientMax.length());
+    assertCount(metrics.getJsonObject("bytes-written"), 7500L);
+    assertCount(metrics.getJsonObject("bytes-read"), 2000L);
     assertCount(metrics.getJsonObject("exceptions"), 0L);
 
     // Verify http client
     metrics = metricsService.getMetricsSnapshot(client);
     assertCount(metrics.getJsonObject("requests"), (long) requests); // requests
-    assertMinMax(metrics.getJsonObject("bytes-written"), (long) clientMin.length(), (long) clientMax.length());
-    assertMinMax(metrics.getJsonObject("bytes-read"), (long) serverMin.length(), (long) serverMax.length());
+    assertCount(metrics.getJsonObject("bytes-written"), 2000L);
+    assertCount(metrics.getJsonObject("bytes-read"), 7500L);
     assertCount(metrics.getJsonObject("exceptions"), 0L);
 
     cleanup(client);
@@ -197,15 +197,15 @@ public class MetricsTest extends MetricsTestBase {
 
     // Verify http server
     assertCount(metrics.getJsonObject("requests"), 1L); // requests
-    assertMinMax(metrics.getJsonObject("bytes-written"), serverWrittenBytes.get(), serverWrittenBytes.get());
-    assertMinMax(metrics.getJsonObject("bytes-read"), clientWrittenBytes.get(), clientWrittenBytes.get());
+    assertCount(metrics.getJsonObject("bytes-written"), serverWrittenBytes.get());
+    assertCount(metrics.getJsonObject("bytes-read"), clientWrittenBytes.get());
     assertCount(metrics.getJsonObject("exceptions"), 0L);
 
     // Verify http client
     metrics = metricsService.getMetricsSnapshot(client);
     assertCount(metrics.getJsonObject("requests"), 1L); // requests
-    assertMinMax(metrics.getJsonObject("bytes-written"), clientWrittenBytes.get(), clientWrittenBytes.get());
-    assertMinMax(metrics.getJsonObject("bytes-read"), serverWrittenBytes.get(), serverWrittenBytes.get());
+    assertCount(metrics.getJsonObject("bytes-written"), clientWrittenBytes.get());
+    assertCount(metrics.getJsonObject("bytes-read"), serverWrittenBytes.get());
     assertCount(metrics.getJsonObject("exceptions"), 0L);
 
     cleanup(client);
@@ -445,21 +445,17 @@ public class MetricsTest extends MetricsTestBase {
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
     assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
     String name = "bytes-written";
-    assertCount(metrics.getJsonObject(name), 2L);
-    assertMinMax(metrics.getJsonObject(name), (long) serverMin.length(), (long) serverMax.length());
+    assertCount(metrics.getJsonObject(name), 1502L);
     name = "bytes-read";
     // 3 frames : 2 data + 1 close frame (2 bytes)
-    assertCount(metrics.getJsonObject(name), 3L);
-    assertMinMax(metrics.getJsonObject(name), 2L, (long) clientMax.length());
+    assertCount(metrics.getJsonObject(name), 402L);
 
     metrics = metricsService.getMetricsSnapshot(client);
     assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
     name = "bytes-written";
-    assertCount(metrics.getJsonObject(name), 2L);
-    assertMinMax(metrics.getJsonObject(name), (long) clientMin.length(), (long) clientMax.length());
+    assertCount(metrics.getJsonObject(name), 402L);
     name = "bytes-read";
-    assertCount(metrics.getJsonObject(name), 3L);
-    assertMinMax(metrics.getJsonObject(name), (long) 2L, (long) serverMax.length());
+    assertCount(metrics.getJsonObject(name), 1502L);
 
     cleanup(client);
     cleanup(server);
@@ -489,12 +485,10 @@ public class MetricsTest extends MetricsTestBase {
     awaitLatch(latch);
 
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
-    assertCount(metrics.getJsonObject("bytes-written"), 1L);
-    assertMinMax(metrics.getJsonObject("bytes-written"), (long) content.length(), (long) content.length());
+    assertCount(metrics.getJsonObject("bytes-written"), content.length());
 
     metrics = metricsService.getMetricsSnapshot(client);
-    assertCount(metrics.getJsonObject("bytes-read"), 1L);
-    assertMinMax(metrics.getJsonObject("bytes-read"), (long) content.length(), (long) content.length());
+    assertCount(metrics.getJsonObject("bytes-read"), content.length());
 
     cleanup(client);
     cleanup(server);
@@ -574,45 +568,48 @@ public class MetricsTest extends MetricsTestBase {
   public void testNetMetrics() throws Exception {
     Buffer serverData = randomBuffer(500);
     Buffer clientData = randomBuffer(300);
-    int requests = 13;
+    int numRequests = 13;
     AtomicLong expected = new AtomicLong();
-    CountDownLatch latch = new CountDownLatch(requests);
+    AtomicInteger num = new AtomicInteger();
+    CountDownLatch latch = new CountDownLatch(2);
     AtomicInteger actualPort = new AtomicInteger();
     AtomicReference<NetClient> clientRef = new AtomicReference<>();
 
     NetServer server = vertx.createNetServer(new NetServerOptions().setHost("localhost")).connectHandler(socket -> {
       socket.handler(buff -> {
-        expected.incrementAndGet();
+        assertEquals(300, buff.length());
         socket.write(serverData);
       });
+      socket.closeHandler(v -> latch.countDown());
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       actualPort.set(ar.result().actualPort());
-      clientRef.set(vertx.createNetClient(new NetClientOptions()).connect(actualPort.get(), "localhost", ar2 -> {
-        assertTrue(ar2.succeeded());
-        NetSocket socket = ar2.result();
+      clientRef.set(vertx.createNetClient(new NetClientOptions()).connect(actualPort.get(), "localhost", onSuccess(socket -> {
+        AtomicInteger count = new AtomicInteger(numRequests);
         socket.handler(buff -> {
-          latch.countDown();
-          if (latch.getCount() != 0) {
+          assertEquals(500, buff.length());
+          if (count.decrementAndGet() == 0) {
+            socket.close();
+          } else {
             socket.write(clientData);
           }
         });
+        socket.closeHandler(v -> latch.countDown());
         socket.write(clientData);
-      }));
+      })));
     });
 
     awaitLatch(latch);
-    assertEquals(requests, expected.get());
 
     // Verify net server
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
-    assertMinMax(metrics.getJsonObject("bytes-written"), (long) serverData.length(), (long) serverData.length());
-    assertMinMax(metrics.getJsonObject("bytes-read"), (long) clientData.length(), (long) clientData.length());
+    assertCount(metrics.getJsonObject("bytes-written"), numRequests * serverData.length());
+    assertCount(metrics.getJsonObject("bytes-read"), numRequests * clientData.length());
 
     // Verify net client
     metrics = metricsService.getMetricsSnapshot(clientRef.get());
-    assertMinMax(metrics.getJsonObject("bytes-written"), (long) clientData.length(), (long) clientData.length());
-    assertMinMax(metrics.getJsonObject("bytes-read"), (long) serverData.length(), (long) serverData.length());
+    assertCount(metrics.getJsonObject("bytes-written"), numRequests * clientData.length());
+    assertCount(metrics.getJsonObject("bytes-read"), numRequests * serverData.length());
 
     cleanup(clientRef.get());
     cleanup(server);
@@ -620,27 +617,30 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testNamedNetClientMetrics() throws Exception {
+    CountDownLatch latch = new CountDownLatch(2);
     String name = TestUtils.randomAlphaString(10);
     NetClient client = vertx.createNetClient(new NetClientOptions().setMetricsName(name));
     NetServer server = vertx.createNetServer(new NetServerOptions().setHost("localhost").setPort(8080)).connectHandler(socket -> {
+      socket.closeHandler(v -> latch.countDown());
       socket.handler(socket::write);
     }).listen(ar -> {
       assertTrue(ar.succeeded());
       client.connect(8080, "localhost", ar2 -> {
         assertTrue(ar2.succeeded());
         NetSocket socket = ar2.result();
+        socket.closeHandler(v -> latch.countDown());
         socket.handler(buff -> {
-          testComplete();
+          socket.close();
         });
         socket.write("whatever");
       });
     });
 
-    await();
+    awaitLatch(latch);
 
     String baseName = "vertx.net.clients." + name;
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
-    assertCount(metrics.getJsonObject(baseName + ".bytes-read"), 1L);
+    assertCount(metrics.getJsonObject(baseName + ".bytes-written"), 8L);
 
     cleanup(client);
     cleanup(server);

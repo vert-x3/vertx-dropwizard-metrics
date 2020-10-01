@@ -54,7 +54,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
   }
 
   @Override
-  public void requestEnd(HttpClientRequestMetric requestMetric) {
+  public void requestEnd(HttpClientRequestMetric requestMetric, long bytesWritten) {
     requestMetric.requestEnd = System.nanoTime();
   }
 
@@ -71,7 +71,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
   }
 
   @Override
-  public void responseEnd(HttpClientRequestMetric requestMetric) {
+  public void responseEnd(HttpClientRequestMetric requestMetric, long bytesRead) {
     long duration = reporter.end(requestMetric, requestMetric.response.statusCode(), uriMatcher);
     inUse.dec();
     usage.update(duration, TimeUnit.NANOSECONDS);
