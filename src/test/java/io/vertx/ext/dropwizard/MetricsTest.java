@@ -175,7 +175,7 @@ public class MetricsTest extends MetricsTestBase {
       client
         .request(HttpMethod.GET, 8080, "localhost", uri)
         .onComplete(onSuccess(req -> {
-          req.onComplete(onSuccess(resp -> {
+          req.response(onSuccess(resp -> {
             // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
             // until *after* the response handler has been called
             resp.endHandler(v1 -> vertx.runOnContext(v2 -> latch.countDown()));
