@@ -51,6 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static io.vertx.test.core.TestUtils.randomBuffer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -442,20 +443,15 @@ public class MetricsTest extends MetricsTestBase {
 
     awaitLatch(done);
 
-    JsonObject metrics = metricsService.getMetricsSnapshot(server);
-    assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
-    String name = "bytes-written";
-    assertCount(metrics.getJsonObject(name), 1502L);
-    name = "bytes-read";
+    JsonObject serverMetrics = metricsService.getMetricsSnapshot(server);
+    assertEquals(0, (int) serverMetrics.getJsonObject("open-websockets").getInteger("count"));
+    assertCount(serverMetrics.getJsonObject("bytes-written"), 1502L);
     // 3 frames : 2 data + 1 close frame (2 bytes)
-    assertCount(metrics.getJsonObject(name), 402L);
+    assertCount(serverMetrics.getJsonObject("bytes-read"), 402L);
 
-    metrics = metricsService.getMetricsSnapshot(client);
-    assertEquals(0, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
-    name = "bytes-written";
-    assertCount(metrics.getJsonObject(name), 402L);
-    name = "bytes-read";
-    assertCount(metrics.getJsonObject(name), 1502L);
+    assertEquals(0, (int) metricsService.getMetricsSnapshot(client).getJsonObject("open-websockets").getInteger("count"));
+    assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("bytes-written"), 402L);
+    assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("bytes-read"), 1502L);
 
     cleanup(client);
     cleanup(server);
@@ -980,14 +976,10 @@ public class MetricsTest extends MetricsTestBase {
 
     vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
       assertTrue(ar.failed());
-      testComplete();
     });
 
-    await();
-
-    JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-    assertCount(metrics.getJsonObject("messages.reply-failures"), 1L);
-    assertCount(metrics.getJsonObject("messages.reply-failures." + ReplyFailure.TIMEOUT), 1L);
+    assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures"), 1L);
+    assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures." + ReplyFailure.TIMEOUT), 1L);
   }
 
   @Test
@@ -996,14 +988,10 @@ public class MetricsTest extends MetricsTestBase {
 
     vertx.eventBus().request("foo", "bar", new DeliveryOptions(), ar -> {
       assertTrue(ar.failed());
-      testComplete();
     });
 
-    await();
-
-    JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-    assertCount(metrics.getJsonObject("messages.reply-failures"), 1L);
-    assertCount(metrics.getJsonObject("messages.reply-failures." + ReplyFailure.RECIPIENT_FAILURE), 1L);
+    assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures"), 1L);
+    assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures." + ReplyFailure.RECIPIENT_FAILURE), 1L);
   }
 
   @Test
@@ -1284,6 +1272,14 @@ public class MetricsTest extends MetricsTestBase {
     assertNotNull(actual);
     String name = metric.getString("name");
     assertEquals(name + " (count)", expected, (long)actual);
+  }
+
+  private void assertCount(Supplier<JsonObject> supplier, long expected) {
+    assertWaitUntil(() -> {
+      JsonObject metric = supplier.get();
+      Long actual = getCount(metric);
+      return actual != null && actual == expected;
+    });
   }
 
   private void assertTroughput(JsonObject metric, double min, double max) {
