@@ -388,7 +388,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testHttpWebsocketMetrics() throws Exception {
+  public void testHttpWebSocketMetrics() throws Exception {
     Buffer serverMin = randomBuffer(500);
     Buffer serverMax = randomBuffer(1000);
     Buffer clientMax = randomBuffer(300);
