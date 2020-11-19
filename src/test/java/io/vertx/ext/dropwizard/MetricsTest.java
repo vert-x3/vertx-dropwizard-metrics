@@ -371,30 +371,20 @@ public class MetricsTest extends MetricsTestBase {
 
     awaitLatch(latch);
 
+    CountDownLatch closeLatch = new CountDownLatch(1);
     client.close();
     server.close(ar -> {
       assertTrue(ar.succeeded());
-      vertx.runOnContext(v -> testComplete());
+      vertx.runOnContext(v -> closeLatch.countDown());
     });
 
-    await();
+    awaitLatch(closeLatch);
 
-    JsonObject metrics;
-    long start = System.currentTimeMillis();
-    // This allows http server metrics to be completely removed from the registry
-    do {
-      metrics = metricsService.getMetricsSnapshot(server);
-      if (metrics != null && metrics.isEmpty()) {
-        break;
-      }
-      MILLISECONDS.sleep(100);
-    } while (System.currentTimeMillis() - start < 5000);
-    assertNotNull(metrics);
-    assertEquals(Collections.emptyMap(), metrics.getMap());
-
-    metrics = metricsService.getMetricsSnapshot(client);
-    assertNotNull(metrics);
-    assertNull(metrics.getJsonObject("connections.max-pool-size"));
+    assertWaitUntil(() -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(server);
+      return metrics != null && metrics.isEmpty();
+    });
+    assertWaitUntil(() -> metricsService.getMetricsSnapshot(client).getJsonObject("connections.max-pool-size") == null);
   }
 
   @Test
