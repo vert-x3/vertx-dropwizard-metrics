@@ -133,20 +133,18 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(requests, expected.get());
 
     // Verify http server
-    JsonObject metrics = metricsService.getMetricsSnapshot(server);
-    assertCount(metrics.getJsonObject("requests"), (long) requests); // requests
-    assertNotNull(metrics.getJsonObject("requests").getValue("oneSecondRate"));
+    assertCount(() -> metricsService.getMetricsSnapshot(server).getJsonObject("requests"), (long) requests); // requests
+    assertNotNull(metricsService.getMetricsSnapshot(server).getJsonObject("requests").getValue("oneSecondRate"));
 
-    assertCount(metrics.getJsonObject("bytes-written"), 7500L);
-    assertCount(metrics.getJsonObject("bytes-read"), 2000L);
-    assertCount(metrics.getJsonObject("exceptions"), 0L);
+    assertCount(() -> metricsService.getMetricsSnapshot(server).getJsonObject("bytes-written"), 7500L);
+    assertCount(() -> metricsService.getMetricsSnapshot(server).getJsonObject("bytes-read"), 2000L);
+    assertCount(() -> metricsService.getMetricsSnapshot(server).getJsonObject("exceptions"), 0L);
 
     // Verify http client
-    metrics = metricsService.getMetricsSnapshot(client);
-    assertCount(metrics.getJsonObject("requests"), (long) requests); // requests
-    assertCount(metrics.getJsonObject("bytes-written"), 2000L);
-    assertCount(metrics.getJsonObject("bytes-read"), 7500L);
-    assertCount(metrics.getJsonObject("exceptions"), 0L);
+    assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("requests"), (long) requests); // requests
+    assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("bytes-written"), 2000L);
+    assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("bytes-read"), 7500L);
+    assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("exceptions"), 0L);
 
     cleanup(client);
     cleanup(server);
