@@ -46,7 +46,6 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public void responseBegin(HttpRequestMetric requestMetric, HttpResponse response) {
-    requestMetric.response = response;
   }
 
   @Override
@@ -55,8 +54,8 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public void responseEnd(HttpRequestMetric requestMetric, long bytesWritten) {
-    end(requestMetric, requestMetric.response.statusCode(), uriMatcher);
+  public void responseEnd(HttpRequestMetric requestMetric, HttpResponse response, long bytesWritten) {
+    end(requestMetric, response.statusCode(), uriMatcher);
   }
 
   @Override
