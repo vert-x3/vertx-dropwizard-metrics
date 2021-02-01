@@ -28,7 +28,7 @@ class HttpRequestMetric {
 
   String getRoute() {
     if (routes == null) {
-      return "";
+      return null;
     }
     if (routes instanceof String) {
       return (String) routes;

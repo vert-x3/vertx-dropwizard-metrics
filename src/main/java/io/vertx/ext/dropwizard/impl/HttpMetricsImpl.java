@@ -81,8 +81,9 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     if (metric.uri != null) {
       uriMatch = uriMatcher.matches(metric.uri);
     }
-    if (routeMatcher != null) {
-      routeMatch = routeMatcher.matches(metric.getRoute());
+    String route = metric.getRoute();
+    if (routeMatcher != null && route != null) {
+      routeMatch = routeMatcher.matches(route);
     }
 
     long duration = System.nanoTime() - metric.requestBegin;
