@@ -81,7 +81,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     if (metric.uri != null) {
       uriMatch = uriMatcher.matches(metric.uri);
     }
-    if (routeMatcher != null && !metric.routes.isEmpty()) {
+    if (routeMatcher != null) {
       routeMatch = routeMatcher.matches(metric.getRoute());
     }
 

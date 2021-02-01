@@ -1,5 +1,6 @@
 package io.vertx.ext.dropwizard.impl;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,7 +14,11 @@ class HttpRequestMetric {
   final HttpMethod method;
   final String uri;
   long requestBegin;
-  final List<String> routes = new LinkedList<>();
+
+  // a string for a single route, a list of string for multiple
+  private Object routes;
+  // tracks length of resulting routes string
+  private int routesLength = 0;
 
   HttpRequestMetric(HttpMethod method, String uri) {
     this.method = method;
@@ -22,6 +27,41 @@ class HttpRequestMetric {
   }
 
   String getRoute() {
-    return String.join(">", routes);
+    if (routes == null) {
+      return "";
+    }
+    if (routes instanceof String) {
+      return (String) routes;
+    }
+    StringBuilder concatenation = new StringBuilder(routesLength);
+    @SuppressWarnings("unchecked") Iterator<String> iterator = ((List<String>) routes).iterator();
+    concatenation.append(iterator.next());
+    while (iterator.hasNext()) {
+      concatenation.append('>').append(iterator.next());
+    }
+    routes = concatenation.toString();
+    return (String) routes;
+  }
+
+  // we try to minimize allocations as far as possible. see https://github.com/vert-x3/vertx-dropwizard-metrics/pull/101
+  void addRoute(String route) {
+    if (route == null) {
+      return;
+    }
+    routesLength += route.length();
+    if (routes == null) {
+      routes = route;
+      return;
+    }
+    ++routesLength;
+    if (routes instanceof LinkedList) {
+      //noinspection unchecked
+      ((LinkedList<String>) routes).add(route);
+      return;
+    }
+    LinkedList<String> multipleRoutes = new LinkedList<>();
+    multipleRoutes.add((String) routes);
+    multipleRoutes.add(route);
+    routes = multipleRoutes;
   }
 }

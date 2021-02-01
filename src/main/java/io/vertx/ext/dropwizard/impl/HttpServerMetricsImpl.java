@@ -77,7 +77,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   @Override
   public void requestRouted(HttpRequestMetric requestMetric, String route) {
     if (route != null) {
-      requestMetric.routes.add(route);
+      requestMetric.addRoute(route);
     }
   }
 }
