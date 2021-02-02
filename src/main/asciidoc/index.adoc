@@ -367,6 +367,8 @@ Http server includes all the metrics of a <<net-server-metrics,Net Server>> plus
 ** Examples: `get-requests`, `post-requests`
 * `<http-method>-requests./<uri>` - A <<throughput_timer>> of a specific http method & URI request and the rate of it's occurrence
 ** Examples: `get-requests./some/uri`, `post-requests./some/uri?foo=bar`
+* `<http-method>-requests./<route>` - A <<throughput_timer>> of a specific http method & request route and the rate of it's occurrence
+** Examples: `get-requests./route1`, `post-requests./resource/:id`
 * `responses-1xx` - A <<throughput_meter>> of the 1xx response code
 * `responses-2xx` - A <<throughput_meter>> of the 2xx response code
 * `responses-3xx` - A <<throughput_meter>> of the 3xx response code
@@ -391,6 +393,18 @@ In addition there will be separate counters for each response group for each def
 ----
 {@link examples.MetricsExamples#setupMonitoredUrisWithAliases()}
 ----
+
+Http request routes can be reported by frameworks like vertx-web per request, i.e. core vert.x doesn't report any route information by itself. Like URI
+metrics, route metrics must be configured explicitly in the options:
+
+[source,$lang]
+----
+{@link examples.MetricsExamples#setupMonitoredRoutes()}
+----
+
+Similar to URI metrics it is possible to provide aliases but usually routes itself provide sufficient and appropriate semantic grouping of URIs. Note
+that a single http request can be routed multiple times (for example because of vertx-web sub routers) and all reported routes per request will be
+joined together with `>` (for example `/internal_api>/resource/:id`)
 
 *For `bytes-read` and `bytes-written` the bytes represent the body of the request/response, so headers, etc are ignored.*
 

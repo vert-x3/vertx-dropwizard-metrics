@@ -72,7 +72,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
 
   @Override
   public void responseEnd(HttpClientRequestMetric requestMetric, long bytesRead) {
-    long duration = reporter.end(requestMetric, requestMetric.response.statusCode(), uriMatcher);
+    long duration = reporter.end(requestMetric, requestMetric.response.statusCode(), uriMatcher, null);
     inUse.dec();
     usage.update(duration, TimeUnit.NANOSECONDS);
   }

@@ -33,10 +33,12 @@ import java.util.List;
 class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<HttpRequestMetric, WebSocketMetric, Long> {
 
   private final Matcher uriMatcher;
+  private final Matcher routeMatcher;
 
-  HttpServerMetricsImpl(MetricRegistry registry, String baseName, List<Match> monitoredUris, SocketAddress localAddress) {
+  HttpServerMetricsImpl(MetricRegistry registry, String baseName, List<Match> monitoredUris, List<Match> monitoredRoutes, SocketAddress localAddress) {
     super(registry, baseName, localAddress);
     uriMatcher = new Matcher(monitoredUris);
+    routeMatcher = new Matcher(monitoredRoutes);
   }
 
   @Override
@@ -55,7 +57,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public void responseEnd(HttpRequestMetric requestMetric, HttpResponse response, long bytesWritten) {
-    end(requestMetric, response.statusCode(), uriMatcher);
+    end(requestMetric, response.statusCode(), uriMatcher, routeMatcher);
   }
 
   @Override
@@ -70,5 +72,12 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   @Override
   public void disconnected(WebSocketMetric serverWebSocketMetric) {
     disconnect(serverWebSocketMetric);
+  }
+
+  @Override
+  public void requestRouted(HttpRequestMetric requestMetric, String route) {
+    if (route != null) {
+      requestMetric.addRoute(route);
+    }
   }
 }
