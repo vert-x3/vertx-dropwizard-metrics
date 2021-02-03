@@ -69,6 +69,14 @@ public class DropwizardMetricsOptionsConverter {
             });
           }
           break;
+        case "monitoredHttpServerRoutes":
+          if (member.getValue() instanceof JsonArray) {
+            ((Iterable<Object>)member.getValue()).forEach( item -> {
+              if (item instanceof JsonObject)
+                obj.addMonitoredHttpServerRoute(new io.vertx.ext.dropwizard.Match((io.vertx.core.json.JsonObject)item));
+            });
+          }
+          break;
         case "monitoredHttpServerUris":
           if (member.getValue() instanceof JsonArray) {
             ((Iterable<Object>)member.getValue()).forEach( item -> {
