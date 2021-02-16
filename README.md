@@ -1,6 +1,7 @@
 # Dropwizard Metrics for Vert.x
 
-[![Build Status](https://travis-ci.org/vert-x3/vertx-dropwizard-metrics.svg?branch=master?branch=master)](https://travis-ci.org/vert-x3/vertx-dropwizard-metrics)
+[![Build Status](https://github.com/vert-x3/vertx-dropwizard-metrics/workflows/CI/badge.svg?branch=3.9)](https://github.com/vert-x3/vertx-dropwizard-metrics/actions?query=workflow%3ACI)
+
 
 Metrics Service Provider implementations for Vert.x using [Dropwizard metrics](https://github.com/dropwizard/metrics) library.
 
