@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
  *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-@DataObject
+@DataObject(generateConverter = true)
 public class Match {
 
   /**
@@ -33,6 +33,7 @@ public class Match {
    * @param other The other {@link Match} to copy when creating this
    */
   public Match(Match other) {
+    alias = other.alias;
     value = other.value;
     type = other.type;
   }
@@ -43,9 +44,8 @@ public class Match {
    * @param json the JsonObject to create it from
    */
   public Match(JsonObject json) {
-    value = json.getString("value");
-    type = MatchType.valueOf(json.getString("type", DEFAULT_TYPE.name()));
-    alias = json.getString("alias");
+    this();
+    MatchConverter.fromJson(json, this);
   }
 
   /**
@@ -101,5 +101,11 @@ public class Match {
   public Match setAlias(String alias) {
     this.alias = alias;
     return this;
+  }
+
+  public JsonObject toJson() {
+    JsonObject json = new JsonObject();
+    MatchConverter.toJson(this, json);
+    return json;
   }
 }

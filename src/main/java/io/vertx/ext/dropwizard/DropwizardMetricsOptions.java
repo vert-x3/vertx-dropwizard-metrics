@@ -20,8 +20,6 @@ import com.codahale.metrics.MetricRegistry;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.metrics.MetricsOptions;
 
 import java.util.ArrayList;
@@ -34,7 +32,6 @@ import java.util.List;
  */
 @DataObject(generateConverter = true, inheritConverter = true)
 public class DropwizardMetricsOptions extends MetricsOptions {
-  private static final Logger log = LoggerFactory.getLogger(DropwizardMetricsOptions.class);
 
   /**
    * The default value of JMX enabled = {@code false}
@@ -112,6 +109,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions(DropwizardMetricsOptions other) {
     super(other);
+    baseName = other.getBaseName();
     registryName = other.getRegistryName();
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();

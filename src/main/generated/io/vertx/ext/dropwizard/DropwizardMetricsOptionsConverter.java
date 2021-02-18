@@ -110,6 +110,31 @@ public class DropwizardMetricsOptionsConverter {
       json.put("jmxDomain", obj.getJmxDomain());
     }
     json.put("jmxEnabled", obj.isJmxEnabled());
+    if (obj.getMonitoredEventBusHandlers() != null) {
+      JsonArray array = new JsonArray();
+      obj.getMonitoredEventBusHandlers().forEach(item -> array.add(item.toJson()));
+      json.put("monitoredEventBusHandlers", array);
+    }
+    if (obj.getMonitoredHttpClientEndpoint() != null) {
+      JsonArray array = new JsonArray();
+      obj.getMonitoredHttpClientEndpoint().forEach(item -> array.add(item.toJson()));
+      json.put("monitoredHttpClientEndpoint", array);
+    }
+    if (obj.getMonitoredHttpClientUris() != null) {
+      JsonArray array = new JsonArray();
+      obj.getMonitoredHttpClientUris().forEach(item -> array.add(item.toJson()));
+      json.put("monitoredHttpClientUris", array);
+    }
+    if (obj.getMonitoredHttpServerRoutes() != null) {
+      JsonArray array = new JsonArray();
+      obj.getMonitoredHttpServerRoutes().forEach(item -> array.add(item.toJson()));
+      json.put("monitoredHttpServerRoutes", array);
+    }
+    if (obj.getMonitoredHttpServerUris() != null) {
+      JsonArray array = new JsonArray();
+      obj.getMonitoredHttpServerUris().forEach(item -> array.add(item.toJson()));
+      json.put("monitoredHttpServerUris", array);
+    }
     if (obj.getRegistryName() != null) {
       json.put("registryName", obj.getRegistryName());
     }
