@@ -193,7 +193,7 @@ public class MetricsOptionsTest extends VertxTestBase {
     assertEquals("/test/client/1", options.getMonitoredHttpClientUris().get(0).getValue());
     assertEquals(MatchType.EQUALS, options.getMonitoredHttpClientUris().get(0).getType());
 
-    assertEquals(0, options.getMonitoredEventBusHandlers().size());
+    assertEquals(null, options.getMonitoredEventBusHandlers());
   }
 
 }

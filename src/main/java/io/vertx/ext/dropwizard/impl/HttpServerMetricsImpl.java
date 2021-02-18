@@ -37,8 +37,8 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   HttpServerMetricsImpl(MetricRegistry registry, String baseName, List<Match> monitoredUris, List<Match> monitoredRoutes, SocketAddress localAddress) {
     super(registry, baseName, localAddress);
-    uriMatcher = new Matcher(monitoredUris);
-    routeMatcher = new Matcher(monitoredRoutes);
+    uriMatcher = monitoredUris == null ? null : new Matcher(monitoredUris);
+    routeMatcher = monitoredRoutes == null ? null : new Matcher(monitoredRoutes);
   }
 
   @Override

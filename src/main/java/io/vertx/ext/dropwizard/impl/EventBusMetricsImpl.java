@@ -84,7 +84,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
     replyFailures = meter("messages", "reply-failures");
     bytesRead = meter("messages", "bytes-read");
     bytesWritten = meter("messages", "bytes-written");
-    handlerMatcher = new Matcher(options.getMonitoredEventBusHandlers());
+    handlerMatcher = options.getMonitoredEventBusHandlers() == null ? null : new Matcher(options.getMonitoredEventBusHandlers());
   }
 
   private static boolean isInternal(String address) {
@@ -115,9 +115,11 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
       return ignoredHandler;
     }
     handlerCount.inc();
-    String match = handlerMatcher.matches(address);
-    if (match != null) {
-      return new HandlerMetric(match, false, false);
+    if (handlerMatcher != null) {
+      String match = handlerMatcher.matches(address);
+      if (match != null) {
+        return new HandlerMetric(match, false, false);
+      }
     }
     return noMatchHandler;
   }

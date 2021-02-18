@@ -25,7 +25,6 @@ import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.metrics.MetricsOptions;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,34 +37,34 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   private static final Logger log = LoggerFactory.getLogger(DropwizardMetricsOptions.class);
 
   /**
-   * The default value of JMX enabled = false
+   * The default value of JMX enabled = {@code false}
    */
   public static final boolean DEFAULT_JMX_ENABLED = false;
 
   /**
-   * The default monitored handlers : empty by default
+   * The default monitored handlers : {@code null}
    */
-  public static final List<Match> DEFAULT_MONITORED_HANDLERS = Collections.emptyList();
+  public static final List<Match> DEFAULT_MONITORED_HANDLERS = null;
 
   /**
-   * The default monitored http server uris : empty by default
+   * The default monitored http server uris : {@code null}
    */
-  public static final List<Match> DEFAULT_MONITORED_HTTP_SERVER_URIS = Collections.emptyList();
+  public static final List<Match> DEFAULT_MONITORED_HTTP_SERVER_URIS = null;
 
   /**
-   * The default monitored http server routes : empty by default
+   * The default monitored http server routes : {@code null}
    */
-  public static final List<Match> DEFAULT_MONITORED_HTTP_SERVER_ROUTES = Collections.emptyList();
+  public static final List<Match> DEFAULT_MONITORED_HTTP_SERVER_ROUTES = null;
 
   /**
-   * The default monitored http client uris : empty by default
+   * The default monitored http client uris : {@code null}
    */
-  public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_URIS = Collections.emptyList();
+  public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_URIS = null;
 
   /**
-   * The default monitored http client endpoints : empty by default
+   * The default monitored http client endpoints : {@code null}
    */
-  public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS = Collections.emptyList();
+  public static final List<Match> DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS = null;
 
   private String registryName;
   private boolean jmxEnabled;
@@ -84,11 +83,11 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions() {
     jmxEnabled = DEFAULT_JMX_ENABLED;
-    monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
-    monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
-    monitoredHttpServerRoutes = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_ROUTES);
-    monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
-    monitoredHttpClientEndpoints = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS);
+    monitoredEventBusHandlers = DEFAULT_MONITORED_HANDLERS;
+    monitoredHttpServerUris = DEFAULT_MONITORED_HTTP_SERVER_URIS;
+    monitoredHttpServerRoutes = DEFAULT_MONITORED_HTTP_SERVER_ROUTES;
+    monitoredHttpClientUris = DEFAULT_MONITORED_HTTP_CLIENT_URIS;
+    monitoredHttpClientEndpoints = DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS;
   }
 
   /**
@@ -99,11 +98,11 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   public DropwizardMetricsOptions(MetricsOptions other) {
     super(other);
     jmxEnabled = DEFAULT_JMX_ENABLED;
-    monitoredEventBusHandlers = new ArrayList<>(DEFAULT_MONITORED_HANDLERS);
-    monitoredHttpServerUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_URIS);
-    monitoredHttpServerRoutes = new ArrayList<>(DEFAULT_MONITORED_HTTP_SERVER_ROUTES);
-    monitoredHttpClientUris = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_URIS);
-    monitoredHttpClientEndpoints = new ArrayList<>(DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS);
+    monitoredEventBusHandlers = DEFAULT_MONITORED_HANDLERS;
+    monitoredHttpServerUris = DEFAULT_MONITORED_HTTP_SERVER_URIS;
+    monitoredHttpServerRoutes = DEFAULT_MONITORED_HTTP_SERVER_ROUTES;
+    monitoredHttpClientUris = DEFAULT_MONITORED_HTTP_CLIENT_URIS;
+    monitoredHttpClientEndpoints = DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS;
   }
 
   /**
@@ -117,11 +116,11 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     jmxEnabled = other.isJmxEnabled();
     jmxDomain = other.getJmxDomain();
     configPath = other.getConfigPath();
-    monitoredEventBusHandlers = new ArrayList<>(other.monitoredEventBusHandlers);
-    monitoredHttpServerUris = new ArrayList<>(other.monitoredHttpServerUris);
-    monitoredHttpServerRoutes = new ArrayList<>(other.monitoredHttpServerRoutes);
-    monitoredHttpClientUris = new ArrayList<>(other.monitoredHttpClientUris);
-    monitoredHttpClientEndpoints = new ArrayList<>(other.monitoredHttpClientEndpoints);
+    monitoredEventBusHandlers = other.monitoredEventBusHandlers == null ? null : new ArrayList<>(other.monitoredEventBusHandlers);
+    monitoredHttpServerUris = other.monitoredHttpServerUris == null ? null : new ArrayList<>(other.monitoredHttpServerUris);
+    monitoredHttpServerRoutes = other.monitoredHttpServerRoutes == null ? null : new ArrayList<>(other.monitoredHttpServerRoutes);
+    monitoredHttpClientUris = other.monitoredHttpClientUris == null ? null : new ArrayList<>(other.monitoredHttpClientUris);
+    monitoredHttpClientEndpoints = other.monitoredHttpClientEndpoints == null ? null : new ArrayList<>(other.monitoredHttpClientEndpoints);
     metricRegistry = other.getMetricRegistry();
   }
 
@@ -224,6 +223,9 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions addMonitoredEventBusHandler(Match match) {
+    if (monitoredEventBusHandlers == null) {
+      monitoredEventBusHandlers = new ArrayList<>();
+    }
     monitoredEventBusHandlers.add(match);
     return this;
   }
@@ -242,6 +244,9 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions addMonitoredHttpServerUri(Match match) {
+    if (monitoredHttpServerUris == null) {
+      monitoredHttpServerUris = new ArrayList<>();
+    }
     monitoredHttpServerUris.add(match);
     return this;
   }
@@ -260,6 +265,9 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions addMonitoredHttpServerRoute(Match match) {
+    if (monitoredHttpServerRoutes == null) {
+      monitoredHttpServerRoutes = new ArrayList<>();
+    }
     monitoredHttpServerRoutes.add(match);
     return this;
   }
@@ -302,6 +310,9 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions addMonitoredHttpClientUri(Match match) {
+    if (monitoredHttpClientUris == null) {
+      monitoredHttpClientUris = new ArrayList<>();
+    }
     monitoredHttpClientUris.add(match);
     return this;
   }
@@ -313,6 +324,9 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * @return a reference to this, so the API can be used fluently
    */
   public DropwizardMetricsOptions addMonitoredHttpClientEndpoint(Match match) {
+    if (monitoredHttpClientEndpoints == null) {
+      monitoredHttpClientEndpoints = new ArrayList<>();
+    }
     monitoredHttpClientEndpoints.add(match);
     return this;
   }

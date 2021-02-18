@@ -43,15 +43,15 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
     super(clientReporter.registry, clientReporter.baseName);
     this.owner = owner;
     this.clientReporter = clientReporter;
-    this.uriMatcher = new Matcher(monitoredUris);
-    this.endpointMatcher = new Matcher(monitoredEndpoints);
+    this.uriMatcher = monitoredUris == null ? null : new Matcher(monitoredUris);
+    this.endpointMatcher = monitoredEndpoints == null ? null : new Matcher(monitoredEndpoints);
     clientReporter.incMaxPoolSize(maxPoolSize = options.getMaxPoolSize());
   }
 
   @Override
   public ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpRequest, HttpResponse> createEndpointMetrics(SocketAddress remoteAddress, int maxPoolSize) {
     String name = remoteAddress.toString();
-    if (endpointMatcher.matches(name) != null) {
+    if (endpointMatcher == null || endpointMatcher.matches(name) != null) {
       return new EndpointMetrics(clientReporter, name, uriMatcher);
     } else {
       return null;
