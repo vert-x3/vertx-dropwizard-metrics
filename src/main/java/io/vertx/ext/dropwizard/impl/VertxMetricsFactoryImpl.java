@@ -109,8 +109,17 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
   }
 
   @Override
+  public MetricsOptions newOptions(MetricsOptions options) {
+    if (options instanceof DropwizardMetricsOptions) {
+      return new DropwizardMetricsOptions((DropwizardMetricsOptions) options);
+    } else {
+      return VertxMetricsFactory.super.newOptions(options);
+    }
+  }
+
+  @Override
   public MetricsOptions newOptions() {
-    return newOptions(null);
+    return newOptions((JsonObject) null);
   }
 
   @Override
