@@ -14,132 +14,238 @@
   ~
   ~  You may elect to redistribute this code under either of these licenses.
   --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-  <modelVersion>4.0.0</modelVersion>
-
-  <parent>
-    <groupId>io.vertx</groupId>
-    <artifactId>vertx-ext-parent</artifactId>
-    <version>38</version>
-  </parent>
-
-  <artifactId>vertx-dropwizard-metrics</artifactId>
-  <version>3.9.9-SNAPSHOT</version>
-
-  <name>Vert.x Dropwizard Metrics</name>
-
-  <properties>
-    <stack.version>3.9.9-SNAPSHOT</stack.version>
-  </properties>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
+      
+    <modelVersion>4.0.0</modelVersion>
+      
+    <parent>
+            
         <groupId>io.vertx</groupId>
-        <artifactId>vertx-dependencies</artifactId>
-        <version>${stack.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
+            
+        <artifactId>vertx-ext-parent</artifactId>
+            
+        <version>38</version>
+          
+    </parent>
+      
+    <artifactId>vertx-dropwizard-metrics</artifactId>
+      
+    <version>3.9.9</version>
+      
+    <name>Vert.x Dropwizard Metrics</name>
+      
+    <properties>
+            
+        <stack.version>3.9.9</stack.version>
+          
+    </properties>
+      
+    <dependencyManagement>
+            
+        <dependencies>
+                  
+            <dependency>
+                        
+                <groupId>io.vertx</groupId>
+                        
+                <artifactId>vertx-dependencies</artifactId>
+                        
+                <version>${stack.version}</version>
+                        
+                <type>pom</type>
+                        
+                <scope>import</scope>
+                      
+            </dependency>
+                
+        </dependencies>
+          
+    </dependencyManagement>
+      
+    <dependencies>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-shell</artifactId>
+                  
+            <optional>true</optional>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.dropwizard.metrics</groupId>
+                  
+            <artifactId>metrics-core</artifactId>
+                  
+            <version>4.0.2</version>
+                  
+            <exclusions>
+                        
+                <!-- do not use slf4j from metrics-core, as the version may differ from the one used by vert.x -->
+                        
+                <exclusion>
+                              
+                    <groupId>org.slf4j</groupId>
+                              
+                    <artifactId>slf4j-api</artifactId>
+                            
+                </exclusion>
+                      
+            </exclusions>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-codegen</artifactId>
+                  
+            <scope>provided</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-docgen</artifactId>
+                  
+            <scope>provided</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-core</artifactId>
+                  
+            <type>test-jar</type>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>junit</groupId>
+                  
+            <artifactId>junit</artifactId>
+                  
+            <scope>test</scope>
+                  
+            <version>4.13.1</version>
+                
+        </dependency>
+            
+        <dependency>
+                  
+            <groupId>io.vertx</groupId>
+                  
+            <artifactId>vertx-service-factory</artifactId>
+                  
+            <scope>test</scope>
+                
+        </dependency>
+          
     </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-shell</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>io.dropwizard.metrics</groupId>
-      <artifactId>metrics-core</artifactId>
-      <version>4.0.2</version>
-      <exclusions>
-        <!-- do not use slf4j from metrics-core, as the version may differ from the one used by vert.x -->
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-api</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-codegen</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-docgen</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-core</artifactId>
-      <type>test-jar</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-      <version>4.13.1</version>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-service-factory</artifactId>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>default-jar</id>
-            <configuration>
-              <archive>
-                <!-- Generate a jar INDEX.LIST -->
-                <index>true</index>
-                <!-- A manifest containing the OSGi metadata has been generated using the maven-bundle-plugin -->
-                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-                <!-- Add the Maven coordinates in the manifest -->
-                <manifestEntries>
-                  <Maven-Group-Id>${project.groupId}</Maven-Group-Id>
-                  <Maven-Artifact-Id>${project.artifactId}</Maven-Artifact-Id>
-                  <Maven-Version>${project.version}</Maven-Version>
-                </manifestEntries>
-              </archive>
-              <!-- Remove examples and docoverride -->
-              <excludes>
-                <exclude>/examples/**</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>biz.aQute.bnd</groupId>
-        <artifactId>bnd-maven-plugin</artifactId>
-        <version>3.2.0</version>
-
-        <executions>
-          <execution>
-            <id>default-bnd-process</id>
-            <goals>
-              <goal>bnd-process</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <!-- To use this bundle in OSGi check https://github.com/vert-x3/issues/issues/178#issuecomment-241643262 -->
-          <bnd><![CDATA[
+      
+    <build>
+            
+        <plugins>
+                  
+            <plugin>
+                        
+                <artifactId>maven-jar-plugin</artifactId>
+                        
+                <executions>
+                              
+                    <execution>
+                                    
+                        <id>default-jar</id>
+                                    
+                        <configuration>
+                                          
+                            <archive>
+                                                
+                                <!-- Generate a jar INDEX.LIST -->
+                                                
+                                <index>true</index>
+                                                
+                                <!-- A manifest containing the OSGi metadata has been generated using the maven-bundle-plugin -->
+                                                
+                                <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                                                
+                                <!-- Add the Maven coordinates in the manifest -->
+                                                
+                                <manifestEntries>
+                                                      
+                                    <Maven-Group-Id>${project.groupId}</Maven-Group-Id>
+                                                      
+                                    <Maven-Artifact-Id>${project.artifactId}</Maven-Artifact-Id>
+                                                      
+                                    <Maven-Version>${project.version}</Maven-Version>
+                                                    
+                                </manifestEntries>
+                                              
+                            </archive>
+                                          
+                            <!-- Remove examples and docoverride -->
+                                          
+                            <excludes>
+                                                
+                                <exclude>/examples/**</exclude>
+                                              
+                            </excludes>
+                                        
+                        </configuration>
+                                  
+                    </execution>
+                            
+                </executions>
+                      
+            </plugin>
+                  
+            <plugin>
+                        
+                <groupId>biz.aQute.bnd</groupId>
+                        
+                <artifactId>bnd-maven-plugin</artifactId>
+                        
+                <version>3.2.0</version>
+                        
+                <executions>
+                              
+                    <execution>
+                                    
+                        <id>default-bnd-process</id>
+                                    
+                        <goals>
+                                          
+                            <goal>bnd-process</goal>
+                                        
+                        </goals>
+                                  
+                    </execution>
+                            
+                </executions>
+                        
+                <configuration>
+                              
+                    <!-- To use this bundle in OSGi check https://github.com/vert-x3/issues/issues/178#issuecomment-241643262 -->
+                              
+                    <bnd><![CDATA[
           Import-Package: \
             io.vertx.codegen.annotations;resolution:=optional,\
             io.vertx.ext.shell.*;resolution:=optional,\
@@ -148,35 +254,63 @@
           Provide-Capability: osgi.serviceloader; osgi.serviceloader=io.vertx.core.spi.VertxMetricsFactory
           -exportcontents: !*impl, !examples, *
           ]]></bnd>
-        </configuration>
-      </plugin>
-    </plugins>
-    <pluginManagement>
-      <plugins>
-        <!-- Execute with mvn java:exec -->
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>1.4.0</version>
-          <configuration>
-            <executable>java</executable>
-            <classpathScope>test</classpathScope>
-            <arguments>
-              <!--<argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</argument>-->
-              <argument>-classpath</argument>
-              <classpath/>
-              <argument>-Dvertx.metrics.options.enabled=true</argument>
-              <argument>io.vertx.core.Launcher</argument>
-              <argument>run</argument>
-              <argument>-conf</argument>
-              <argument>{"telnetOptions":{"port":5000}}</argument>
-              <argument>service:io.vertx.ext.shell</argument>
-            </arguments>
-          </configuration>
-        </plugin>
-
-      </plugins>
-    </pluginManagement>
-  </build>
-
+                            
+                </configuration>
+                      
+            </plugin>
+                
+        </plugins>
+            
+        <pluginManagement>
+                  
+            <plugins>
+                        
+                <!-- Execute with mvn java:exec -->
+                        
+                <plugin>
+                              
+                    <groupId>org.codehaus.mojo</groupId>
+                              
+                    <artifactId>exec-maven-plugin</artifactId>
+                              
+                    <version>1.4.0</version>
+                              
+                    <configuration>
+                                    
+                        <executable>java</executable>
+                                    
+                        <classpathScope>test</classpathScope>
+                                    
+                        <arguments>
+                                          
+                            <!--<argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</argument>-->
+                                          
+                            <argument>-classpath</argument>
+                                          
+                            <classpath/>
+                                          
+                            <argument>-Dvertx.metrics.options.enabled=true</argument>
+                                          
+                            <argument>io.vertx.core.Launcher</argument>
+                                          
+                            <argument>run</argument>
+                                          
+                            <argument>-conf</argument>
+                                          
+                            <argument>{"telnetOptions":{"port":5000}}</argument>
+                                          
+                            <argument>service:io.vertx.ext.shell</argument>
+                                        
+                        </arguments>
+                                  
+                    </configuration>
+                            
+                </plugin>
+                      
+            </plugins>
+                
+        </pluginManagement>
+          
+    </build>
+    
 </project>
