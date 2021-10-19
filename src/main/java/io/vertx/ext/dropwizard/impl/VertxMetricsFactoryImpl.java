@@ -19,13 +19,14 @@ package io.vertx.ext.dropwizard.impl;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.file.impl.FileResolver;
+import io.vertx.core.file.impl.FileResolverImpl;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.VertxMetricsFactory;
+import io.vertx.core.spi.file.FileResolver;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.reporters.JmxReporter;
@@ -62,7 +63,7 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     }
     // Check to see if a config file name has been set, and if it has load it and create new options file from it
     if (metricsOptions.getConfigPath() != null && !metricsOptions.getConfigPath().isEmpty()) {
-      FileResolver resolver = new FileResolver();
+      FileResolver resolver = new FileResolverImpl();
       JsonObject loadedFromFile;
       try {
         loadedFromFile = loadOptionsFile(metricsOptions.getConfigPath(), resolver);
