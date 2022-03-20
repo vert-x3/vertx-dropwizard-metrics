@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: master
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "io.dropwizard.metrics:*"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: 4.x
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "io.dropwizard.metrics:*"
+    ignore:
+      - dependency-name: "io.dropwizard.metrics:*"
+        update-types:
+          - "version-update:semver-major"
+
+  - package-ecosystem: "maven"
+    directory: "/"
+    target-branch: "5.0"
+    schedule:
+      interval: "weekly"
+    allow:
+      - dependency-name: "io.dropwizard.metrics:*"
+    ignore:
+      - dependency-name: "io.dropwizard.metrics:*"
+        update-types:
+          - "version-update:semver-major"
