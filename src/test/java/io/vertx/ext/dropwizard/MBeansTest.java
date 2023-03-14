@@ -44,11 +44,11 @@ public class MBeansTest extends MetricsTestBase {
     int port1 = 8080, port2 = 8888;
     CountDownLatch listenLatch = new CountDownLatch(2);
     HttpServer server1 = vertx.createHttpServer()
-      .requestHandler(req -> req.response().end())
-      .listen(port1, onSuccess(server -> listenLatch.countDown()));
+      .requestHandler(req -> req.response().end());
+    server1.listen(port1).onComplete(onSuccess(server -> listenLatch.countDown()));
     HttpServer server2 = vertx.createHttpServer()
-      .requestHandler(req -> req.response().end())
-      .listen(port2, onSuccess(server -> listenLatch.countDown()));
+      .requestHandler(req -> req.response().end());
+    server2.listen(port2).onComplete(onSuccess(server -> listenLatch.countDown()));
     awaitLatch(listenLatch);
 
     MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();

@@ -51,7 +51,7 @@ public class MetricsTestBase extends VertxTestBase {
     HttpServer server = vertx.createHttpServer(options);
     toClose.add(() -> {
       CountDownLatch latch = new CountDownLatch(1);
-      server.close(ar -> {
+      server.close().onComplete(ar -> {
         latch.countDown();
       });
       awaitLatch(latch);
@@ -81,7 +81,7 @@ public class MetricsTestBase extends VertxTestBase {
     NetServer server = vertx.createNetServer(options);
     toClose.add(() -> {
       CountDownLatch latch = new CountDownLatch(1);
-      server.close(ar -> {
+      server.close().onSuccess(ar -> {
         latch.countDown();
       });
       awaitLatch(latch);
@@ -116,7 +116,7 @@ public class MetricsTestBase extends VertxTestBase {
   protected void cleanup(HttpServer server) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
     if (server != null) {
-      server.close(ar -> {
+      server.close().onComplete(ar -> {
         latch.countDown();
       });
     }
@@ -132,7 +132,7 @@ public class MetricsTestBase extends VertxTestBase {
   protected void cleanup(NetServer server) throws Exception {
     CountDownLatch latch = new CountDownLatch(1);
     if (server != null) {
-      server.close(ar -> {
+      server.close().onComplete(ar -> {
         latch.countDown();
       });
     }

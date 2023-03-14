@@ -71,20 +71,17 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
       } else {
         req.response().end(serverMax);
       }
-    }).listen(ar -> {
-      if (ar.succeeded()) {
-        for (int i = 0; i < requests; i++) {
-          Buffer body = i % 2 == 0 ? clientMax : clientMin;
-          client.request(HttpMethod.POST, 8080, "localhost", uri).compose(req ->
-            req
-              .send(body)
-              .compose(HttpClientResponse::body)
-          ).onSuccess(buff -> latch.countDown());
-        }
-      } else {
-        fail(ar.cause().getMessage());
-      }
     });
+    server.listen().onComplete(onSuccess(ar -> {
+      for (int i = 0; i < requests; i++) {
+        Buffer body = i % 2 == 0 ? clientMax : clientMin;
+        client.request(HttpMethod.POST, 8080, "localhost", uri).compose(req ->
+          req
+            .send(body)
+            .compose(HttpClientResponse::body)
+        ).onSuccess(buff -> latch.countDown());
+      }
+    }));
 
     awaitLatch(latch);
     assertEquals(requests, expected.get());
