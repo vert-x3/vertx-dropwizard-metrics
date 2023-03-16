@@ -969,7 +969,7 @@ public class MetricsTest extends MetricsTestBase {
   public void testEventBusMetricsReplyTimeout() {
     vertx.eventBus().consumer("foo").handler(msg -> {});
 
-    vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300), ar -> {
+    vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300)).onComplete(ar -> {
       assertTrue(ar.failed());
     });
 
