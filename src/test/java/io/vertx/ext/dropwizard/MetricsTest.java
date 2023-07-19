@@ -1352,13 +1352,9 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch gate = new CountDownLatch(1);
     CountDownLatch latch = new CountDownLatch(5);
     for (int i = 0; i < size;i++) {
-      exec.<Boolean>executeBlocking(fut -> {
-        try {
-          latch.countDown();
-          fut.complete(gate.await(10, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
-          fut.fail(e);
-        }
+      exec.<Boolean>executeBlocking(() -> {
+        latch.countDown();
+        return gate.await(10, TimeUnit.SECONDS);
       }, false).onComplete(onSuccess(res -> {
         assertTrue(res);
         vertx.runOnContext(v -> done.countDown());
@@ -1373,7 +1369,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("in-use"), size);
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
 
-    exec.executeBlocking(Promise::complete, false).onComplete(ar -> vertx.runOnContext(v -> done.countDown()));
+    exec.executeBlocking(() -> null, false).onComplete(ar -> vertx.runOnContext(v -> done.countDown()));
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 0);
     assertCount(metrics.getJsonObject("queue-delay"), 5);
