@@ -110,7 +110,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   synchronized void closed(HttpClientMetricsImpl metrics) {
     HttpClientReporter reporter = metrics.clientReporter;
-    if (reporter.decMaxPoolSize(metrics.maxPoolSize)) {
+    if (reporter.decMaxPoolSize(1)) {
       clientReporters.remove(reporter.baseName);
       reporter.close();
     }

@@ -16,10 +16,7 @@
 
 package io.vertx.ext.dropwizard;
 
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.*;
 import io.vertx.core.net.NetClient;
 import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServer;
@@ -124,6 +121,12 @@ public class MetricsTestBase extends VertxTestBase {
   }
 
   protected void cleanup(HttpClient client) throws Exception {
+    if (client != null) {
+      client.close();
+    }
+  }
+
+  protected void cleanup(WebSocketClient client) throws Exception {
     if (client != null) {
       client.close();
     }

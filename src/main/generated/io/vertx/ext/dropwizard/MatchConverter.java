@@ -20,9 +20,9 @@ public class MatchConverter {
   public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, Match obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "alias":
+        case "value":
           if (member.getValue() instanceof String) {
-            obj.setAlias((String)member.getValue());
+            obj.setValue((String)member.getValue());
           }
           break;
         case "type":
@@ -30,9 +30,9 @@ public class MatchConverter {
             obj.setType(io.vertx.ext.dropwizard.MatchType.valueOf((String)member.getValue()));
           }
           break;
-        case "value":
+        case "alias":
           if (member.getValue() instanceof String) {
-            obj.setValue((String)member.getValue());
+            obj.setAlias((String)member.getValue());
           }
           break;
       }
@@ -44,14 +44,14 @@ public class MatchConverter {
   }
 
   public static void toJson(Match obj, java.util.Map<String, Object> json) {
-    if (obj.getAlias() != null) {
-      json.put("alias", obj.getAlias());
+    if (obj.getValue() != null) {
+      json.put("value", obj.getValue());
     }
     if (obj.getType() != null) {
       json.put("type", obj.getType().name());
     }
-    if (obj.getValue() != null) {
-      json.put("value", obj.getValue());
+    if (obj.getAlias() != null) {
+      json.put("alias", obj.getAlias());
     }
   }
 }

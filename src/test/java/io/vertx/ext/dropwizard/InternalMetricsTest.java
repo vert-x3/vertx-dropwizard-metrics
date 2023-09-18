@@ -18,10 +18,7 @@ package io.vertx.ext.dropwizard;
 
 import io.vertx.core.VertxOptions;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpClient;
-import io.vertx.core.http.HttpClientOptions;
-import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.http.*;
 import io.vertx.core.json.JsonObject;
 import org.junit.Test;
 
@@ -62,7 +59,7 @@ public class InternalMetricsTest extends MetricsTestBase {
     Buffer clientMin = randomBuffer(100);
 
     AtomicBoolean sendMax = new AtomicBoolean(false);
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    WebSocketClient client = vertx.createWebSocketClient();
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080));
     server.webSocketHandler(socket -> {
       JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
@@ -77,7 +74,7 @@ public class InternalMetricsTest extends MetricsTestBase {
     }).listen().onComplete(onSuccess(ar -> {
       AtomicBoolean complete = new AtomicBoolean(false);
       client
-        .webSocket(8080, "localhost", "/blah")
+        .connect(8080, "localhost", "/blah")
         .onComplete(onSuccess(socket -> {
           JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
           assertNoInternal(metrics);
