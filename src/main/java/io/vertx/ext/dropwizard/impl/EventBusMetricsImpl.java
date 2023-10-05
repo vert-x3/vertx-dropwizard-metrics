@@ -110,7 +110,7 @@ class EventBusMetricsImpl extends AbstractMetrics implements EventBusMetrics<Eve
   }
 
   @Override
-  public HandlerMetric handlerRegistered(String address, String repliedAddress) {
+  public HandlerMetric handlerRegistered(String address) {
     if (isInternal(address)) {
       return ignoredHandler;
     }
