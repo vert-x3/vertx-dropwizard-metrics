@@ -17,14 +17,9 @@ public class DropwizardMetricsOptionsConverter {
   private static final Base64.Decoder BASE64_DECODER = JsonUtil.BASE64_DECODER;
   private static final Base64.Encoder BASE64_ENCODER = JsonUtil.BASE64_ENCODER;
 
-  public static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, DropwizardMetricsOptions obj) {
+   static void fromJson(Iterable<java.util.Map.Entry<String, Object>> json, DropwizardMetricsOptions obj) {
     for (java.util.Map.Entry<String, Object> member : json) {
       switch (member.getKey()) {
-        case "enabled":
-          if (member.getValue() instanceof Boolean) {
-            obj.setEnabled((Boolean)member.getValue());
-          }
-          break;
         case "registryName":
           if (member.getValue() instanceof String) {
             obj.setRegistryName((String)member.getValue());
@@ -98,12 +93,11 @@ public class DropwizardMetricsOptionsConverter {
     }
   }
 
-  public static void toJson(DropwizardMetricsOptions obj, JsonObject json) {
+   static void toJson(DropwizardMetricsOptions obj, JsonObject json) {
     toJson(obj, json.getMap());
   }
 
-  public static void toJson(DropwizardMetricsOptions obj, java.util.Map<String, Object> json) {
-    json.put("enabled", obj.isEnabled());
+   static void toJson(DropwizardMetricsOptions obj, java.util.Map<String, Object> json) {
     if (obj.getRegistryName() != null) {
       json.put("registryName", obj.getRegistryName());
     }
