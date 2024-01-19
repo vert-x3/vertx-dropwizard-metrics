@@ -81,6 +81,10 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * Default constructor
    */
   public DropwizardMetricsOptions() {
+    init();
+  }
+
+  private void init() {
     jmxEnabled = DEFAULT_JMX_ENABLED;
     monitoredEventBusHandlers = DEFAULT_MONITORED_HANDLERS;
     monitoredHttpServerUris = DEFAULT_MONITORED_HTTP_SERVER_URIS;
@@ -96,12 +100,7 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public DropwizardMetricsOptions(MetricsOptions other) {
     super(other);
-    jmxEnabled = DEFAULT_JMX_ENABLED;
-    monitoredEventBusHandlers = DEFAULT_MONITORED_HANDLERS;
-    monitoredHttpServerUris = DEFAULT_MONITORED_HTTP_SERVER_URIS;
-    monitoredHttpServerRoutes = DEFAULT_MONITORED_HTTP_SERVER_ROUTES;
-    monitoredHttpClientUris = DEFAULT_MONITORED_HTTP_CLIENT_URIS;
-    monitoredHttpClientEndpoints = DEFAULT_MONITORED_HTTP_CLIENT_ENDPOINTS;
+    init();
   }
 
   /**
@@ -130,7 +129,8 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    * @param json the JsonObject to create it from
    */
   public DropwizardMetricsOptions(JsonObject json) {
-    this();
+    super(json);
+    init();
     DropwizardMetricsOptionsConverter.fromJson(json, this);
   }
 

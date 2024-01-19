@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.test.core.Repeat;
 import io.vertx.test.core.TestUtils;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
@@ -79,6 +80,7 @@ public class MetricsOptionsTest extends VertxTestBase {
   }
 
   @Test
+  @Repeat(times = 100)
   public void testJsonOptions() {
     DropwizardMetricsOptions options = new DropwizardMetricsOptions(new JsonObject());
     assertFalse(options.isEnabled());
