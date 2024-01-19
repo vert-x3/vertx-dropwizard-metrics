@@ -36,7 +36,7 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
   private ThroughputMeter[] responses;
   private final Counter openWebSockets;
 
-  private Map<HttpMethod, ThroughputTimer> methodRequests;
+  private final Map<HttpMethod, ThroughputTimer> methodRequests;
 
   public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
     super(registry, baseName);
@@ -98,8 +98,9 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
     requests.update(duration, TimeUnit.NANOSECONDS);
 
     // Update specific method / uri request metrics
-    if (metric.method != null) {
-      methodRequests.get(metric.method).update(duration, TimeUnit.NANOSECONDS);
+    ThroughputTimer throughputTimerForMethod;
+    if (metric.method != null && (throughputTimerForMethod = methodRequests.get(metric.method)) != null) {
+      throughputTimerForMethod.update(duration, TimeUnit.NANOSECONDS);
       if (uriMatch != null) {
         throughputTimer(metric.method.toString().toLowerCase() + "-requests", uriMatch).update(duration, TimeUnit.NANOSECONDS);
         throughputMeter("responses" + "-" + responseStatus + "xx", uriMatch).mark();
