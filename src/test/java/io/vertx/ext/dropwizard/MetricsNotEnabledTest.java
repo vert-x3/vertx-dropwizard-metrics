@@ -63,7 +63,7 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
     int requests = 10;
     AtomicLong expected = new AtomicLong();
     CountDownLatch latch = new CountDownLatch(requests);
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       expected.incrementAndGet();
       if (expected.get() % 2 == 0) {

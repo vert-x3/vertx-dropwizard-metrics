@@ -105,7 +105,7 @@ public class MetricsTest extends MetricsTestBase {
     int requests = 10;
     AtomicLong expected = new AtomicLong();
     CountDownLatch latch = new CountDownLatch(requests);
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       expected.incrementAndGet();
       if (expected.get() % 2 == 0) {
@@ -159,7 +159,7 @@ public class MetricsTest extends MetricsTestBase {
     Random random = new Random();
     CountDownLatch latch = new CountDownLatch(1);
 
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().setChunked(true);
       for (int i = 0; i < chunks; i++) {
@@ -322,7 +322,7 @@ public class MetricsTest extends MetricsTestBase {
 
   private void test(int code, String metricName) throws Exception {
     CountDownLatch closeLatch = new CountDownLatch(2);
-    HttpClient client = vertx
+    HttpClientAgent client = vertx
       .httpClientBuilder()
       .withConnectHandler(connection -> {
         connection.closeHandler(v -> closeLatch.countDown());
@@ -371,7 +371,7 @@ public class MetricsTest extends MetricsTestBase {
     int requests = 6;
     CountDownLatch latch = new CountDownLatch(requests);
 
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8081)).requestHandler(req -> {
       req.response().end();
     });
@@ -469,7 +469,7 @@ public class MetricsTest extends MetricsTestBase {
     Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
     CountDownLatch latch = new CountDownLatch(1);
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().sendFile(file.getAbsolutePath());
     });
@@ -498,11 +498,11 @@ public class MetricsTest extends MetricsTestBase {
   @Test
   public void testHttpClientMetricsName() throws Exception {
     String name = TestUtils.randomAlphaString(10);
-    HttpClient namedClient = vertx.createHttpClient(new HttpClientOptions().setMetricsName(name));
+    HttpClientAgent namedClient = vertx.createHttpClient(new HttpClientOptions().setMetricsName(name));
     assertEquals(AbstractMetrics.unwrap(namedClient).baseName(), "vertx.http.clients." + name);
     cleanup(namedClient);
 
-    HttpClient unnamedClient = vertx.createHttpClient();
+    HttpClientAgent unnamedClient = vertx.createHttpClient();
     assertEquals(AbstractMetrics.unwrap(unnamedClient).baseName(), "vertx.http.clients");
     cleanup(unnamedClient);
   }
@@ -1085,7 +1085,7 @@ public class MetricsTest extends MetricsTestBase {
       latch1.countDown();
     }));
     awaitLatch(latch1);
-    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     CountDownLatch latch2 = new CountDownLatch(1);
     NetServer nServer = vertx.createNetServer(new NetServerOptions().setPort(1234));
     nServer.connectHandler(conn -> {});
@@ -1171,7 +1171,7 @@ public class MetricsTest extends MetricsTestBase {
       started.countDown();
     }));
     awaitLatch(started);
-    HttpClient client = vertx.createHttpClient();
+    HttpClientAgent client = vertx.createHttpClient();
     for (int i = 0;i < 7;i++) {
       client.request(HttpMethod.GET, 8080, "localhost", "/somepath").compose(HttpClientRequest::send);
     }
@@ -1201,7 +1201,7 @@ public class MetricsTest extends MetricsTestBase {
       started.countDown();
     }));
     awaitLatch(started);
-    HttpClient[] clients = new HttpClient[size];
+    HttpClientAgent[] clients = new HttpClientAgent[size];
     CountDownLatch closedLatch = new CountDownLatch(size);
     CountDownLatch responseLatch = new CountDownLatch(size);
     for (int i = 0;i < size;i++) {
