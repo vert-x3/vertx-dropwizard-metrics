@@ -416,6 +416,7 @@ public class MetricsTest extends MetricsTestBase {
     WebSocketClient client = vertx.createWebSocketClient();
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080));
     server.webSocketHandler(socket -> {
+      socket.accept();
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
       assertEquals(1, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
       socket.handler(buff -> {
