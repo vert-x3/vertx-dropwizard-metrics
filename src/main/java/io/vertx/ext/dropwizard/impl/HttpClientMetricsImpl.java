@@ -16,7 +16,6 @@
 
 package io.vertx.ext.dropwizard.impl;
 
-import com.codahale.metrics.Timer;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
@@ -31,26 +30,26 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long, Timer.Context> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long> {
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
-  private final Matcher endpointMatcher;
+  private final Matcher monitoredEndpoints;
   final HttpClientReporter clientReporter;
 
-  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris, List<Match> monitoredEndpoints) {
+  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris, Matcher monitoredEndpoints) {
     super(clientReporter.registry, clientReporter.baseName);
     this.owner = owner;
     this.clientReporter = clientReporter;
     this.uriMatcher = monitoredUris == null ? null : new Matcher(monitoredUris);
-    this.endpointMatcher = monitoredEndpoints == null ? null : new Matcher(monitoredEndpoints);
+    this.monitoredEndpoints = monitoredEndpoints;
     clientReporter.incMaxPoolSize(1);
   }
 
   @Override
-  public ClientMetrics<HttpClientRequestMetric, Timer.Context, HttpRequest, HttpResponse> createEndpointMetrics(SocketAddress remoteAddress, int maxPoolSize) {
+  public ClientMetrics<HttpClientRequestMetric, HttpRequest, HttpResponse> createEndpointMetrics(SocketAddress remoteAddress, int maxPoolSize) {
     String name = remoteAddress.toString();
-    if (endpointMatcher == null || endpointMatcher.matches(name) != null) {
+    if (monitoredEndpoints == null || monitoredEndpoints.matches(name) != null) {
       return new EndpointMetrics(clientReporter, name, uriMatcher);
     } else {
       return null;
@@ -58,14 +57,14 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public void endpointConnected(ClientMetrics<HttpClientRequestMetric, Timer.Context, ?, ?> endpointMetric) {
+  public void endpointConnected(ClientMetrics<HttpClientRequestMetric, ?, ?> endpointMetric) {
     if (endpointMetric instanceof EndpointMetrics) {
       ((EndpointMetrics)endpointMetric).openConnections.inc();
     }
   }
 
   @Override
-  public void endpointDisconnected(ClientMetrics<HttpClientRequestMetric, Timer.Context, ?, ?> endpointMetric) {
+  public void endpointDisconnected(ClientMetrics<HttpClientRequestMetric, ?, ?> endpointMetric) {
     if (endpointMetric instanceof EndpointMetrics) {
       ((EndpointMetrics)endpointMetric).openConnections.dec();
     }
