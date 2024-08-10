@@ -37,6 +37,7 @@ import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;
 import io.vertx.test.core.TestUtils;
+import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -561,6 +562,33 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject(baseName + ".get-requests.books"), 2L);
     assertNull(metrics.getJsonObject(baseName + ".get-requests./books/1"));
     assertNull(metrics.getJsonObject(baseName + ".get-requests./books/2"));
+
+    cleanup(client);
+    cleanup(server);
+  }
+
+  @Test
+  public void testHttpClientMetricsWithMatchEndpoint() throws Exception {
+    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8081)).requestHandler(req -> {
+      req.response().end();
+    });
+    server
+      .listen()
+      .compose(s -> client
+        .request(HttpMethod.GET, 8081, "localhost", "/")
+        .compose(req -> req
+          .send()
+          .compose(HttpClientResponse::body))
+        .onComplete(onSuccess(body2 -> {
+        testComplete();
+      })));
+
+    await();
+
+    String baseName = "vertx.pools.http";
+    JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
+    Assert.assertEquals(0, metrics.size());
 
     cleanup(client);
     cleanup(server);
@@ -1177,16 +1205,16 @@ public class MetricsTest extends MetricsTestBase {
       client.request(HttpMethod.GET, 8080, "localhost", "/somepath").compose(HttpClientRequest::send);
     }
     assertWaitUntil(() -> requests.size() == 5);
-    JsonObject metrics = metricsService.getMetricsSnapshot(client);
-    assertEquals(2, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-size").getInteger("count"));
-    assertEquals(5, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-delay").getInteger("count"));
+    JsonObject metrics = metricsService.getMetricsSnapshot("vertx.pools.http");
+    assertEquals(2, (int)metrics.getJsonObject("vertx.pools.http.localhost:8080.queue-size").getInteger("count"));
+    assertEquals(5, (int)metrics.getJsonObject("vertx.pools.http.localhost:8080.queue-delay").getInteger("count"));
     List<Runnable> todo = new ArrayList<>(requests);
     requests.clear();
     todo.forEach(Runnable::run);
     assertWaitUntil(() -> requests.size() == 2);
-    metrics = metricsService.getMetricsSnapshot(client);
-    assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-size").getInteger("count"));
-    assertEquals(7, (int)metrics.getJsonObject("endpoint.localhost:8080.queue-delay").getInteger("count"));
+    metrics = metricsService.getMetricsSnapshot("vertx.pools.http");
+    assertEquals(0, (int)metrics.getJsonObject("vertx.pools.http.localhost:8080.queue-size").getInteger("count"));
+    assertEquals(7, (int)metrics.getJsonObject("vertx.pools.http.localhost:8080.queue-delay").getInteger("count"));
   }
 
   @Test
@@ -1413,22 +1441,13 @@ public class MetricsTest extends MetricsTestBase {
     SocketAddress address = SocketAddress.inetSocketAddress(8080, "localhost");
     ClientMetrics metrics = ((VertxInternal) vertx).metricsSPI().createClientMetrics(address, "backend", null);
 
-    // Queue
-    Object queueMetric = metrics.enqueueRequest();
-    JsonObject snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
-    assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.queue-size").getInteger("count"));
-    metrics.dequeueRequest(queueMetric);
-    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
-    assertEquals(0, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.queue-size").getInteger("count"));
-    assertEquals(1, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.queue-delay").getInteger("count"));
-
     // Request
     Object request = new Object();
     Object response = new Object();
     Object requestMetric = metrics.requestBegin("some-uri", request);
     metrics.requestEnd(requestMetric);
     metrics.responseBegin(requestMetric, response);
-    snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
+    JsonObject snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");
     assertEquals(0, (int)snapshot.getJsonObject("vertx.backend.clients.localhost:8080.requests").getInteger("count"));
     metrics.responseEnd(requestMetric);
     snapshot = metricsService.getMetricsSnapshot("vertx.backend.clients.localhost:8080");

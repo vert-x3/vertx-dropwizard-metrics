@@ -29,6 +29,7 @@ import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.*;
 import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.Match;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,12 +47,22 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final boolean shutdown;
   private final Map<String, HttpClientReporter> clientReporters = new ConcurrentHashMap<>();
   private final Map<String, DropwizardClientMetrics> clientMetrics = new HashMap<>();
+  private final Matcher httpClientMonitoredEndpoints;
 
   VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
     super(registry, baseName);
 
+    List<Match> monitoredHttpClientEndpoint = metricsOptions.getMonitoredHttpClientEndpoint();
+    Matcher monitoredHttpClientMatcher;
+    if (monitoredHttpClientEndpoint != null) {
+      monitoredHttpClientMatcher = new Matcher(monitoredHttpClientEndpoint);
+    } else {
+      monitoredHttpClientMatcher = null;
+    }
+
     this.options = metricsOptions;
     this.shutdown = shutdown;
+    this.httpClientMonitoredEndpoints = monitoredHttpClientMatcher;
 
     gauge(options::getEventLoopPoolSize, "event-loop-size");
     gauge(options::getWorkerPoolSize, "worker-pool-size");
@@ -79,7 +90,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public synchronized ClientMetrics<?, ?, ?, ?> createClientMetrics(SocketAddress remoteAddress, String type, String namespace) {
+  public synchronized ClientMetrics<?, ?, ?> createClientMetrics(SocketAddress remoteAddress, String type, String namespace) {
     String baseName;
     if (namespace != null && namespace.length() > 0) {
       baseName = MetricRegistry.name(nameOf(type, "clients", namespace, remoteAddress.toString()));
@@ -96,7 +107,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public HttpClientMetrics<?, ?, ?, ?> createHttpClientMetrics(HttpClientOptions options) {
+  public HttpClientMetrics<?, ?, ?> createHttpClientMetrics(HttpClientOptions options) {
     String name = options.getMetricsName();
     String baseName;
     if (name != null && name.length() > 0) {
@@ -105,7 +116,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
       baseName = nameOf("http.clients");
     }
     HttpClientReporter reporter = clientReporters.computeIfAbsent(baseName, n -> new HttpClientReporter(registry, baseName, null));
-    return new HttpClientMetricsImpl(this, reporter, options, this.options.getMonitoredHttpClientUris(), this.options.getMonitoredHttpClientEndpoint());
+    return new HttpClientMetricsImpl(this, reporter, options, this.options.getMonitoredHttpClientUris(), httpClientMonitoredEndpoints);
   }
 
   synchronized void closed(HttpClientMetricsImpl metrics) {
@@ -151,7 +162,10 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public PoolMetrics<?> createPoolMetrics(String poolType, String poolName, int maxPoolSize) {
+  public PoolMetrics<?, ?> createPoolMetrics(String poolType, String poolName, int maxPoolSize) {
+    if ("http".equals(poolType) && httpClientMonitoredEndpoints.matches(poolName) == null) {
+      return null;
+    }
     String baseName = nameOf("pools", poolType, poolName);
     return new PoolMetricsImpl(registry, baseName, maxPoolSize);
   }
