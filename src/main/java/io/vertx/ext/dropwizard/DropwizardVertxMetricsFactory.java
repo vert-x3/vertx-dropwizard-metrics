@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.dropwizard.impl;
+package io.vertx.ext.dropwizard;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
@@ -28,20 +28,36 @@ import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.VertxMetricsFactory;
 import io.vertx.core.spi.file.FileResolver;
 import io.vertx.core.spi.metrics.VertxMetrics;
-import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.impl.VertxMetricsImpl;
 import io.vertx.ext.dropwizard.reporters.JmxReporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Scanner;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
+public class DropwizardVertxMetricsFactory implements VertxMetricsFactory {
 
   static final String BASE_NAME = "vertx";
-  private Logger logger = LoggerFactory.getLogger(VertxMetricsFactoryImpl.class);
+  private Logger logger = LoggerFactory.getLogger(DropwizardVertxMetricsFactory.class);
+
+  private MetricRegistry metricRegistry;
+
+  public DropwizardVertxMetricsFactory() {
+    this(new MetricRegistry());
+  }
+
+  /**
+   * Create a metrics factory passing a metric registry used instead of the Dropwizard shared registry.
+   *
+   * @param metricRegistry the metricRegistry
+   */
+  public DropwizardVertxMetricsFactory(MetricRegistry metricRegistry) {
+    this.metricRegistry = Objects.requireNonNull(metricRegistry);
+  }
 
   @Override
   public VertxMetrics metrics(VertxOptions options) {
@@ -52,12 +68,11 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
     } else {
       metricsOptions = new DropwizardMetricsOptions(baseOptions.toJson());
     }
-    MetricRegistry registry = metricsOptions.getMetricRegistry() != null ? metricsOptions.getMetricRegistry() : new MetricRegistry();
     boolean shutdown = true;
     if (metricsOptions.getRegistryName() != null) {
-      MetricRegistry other = SharedMetricRegistries.add(metricsOptions.getRegistryName(), registry);
+      MetricRegistry other = SharedMetricRegistries.add(metricsOptions.getRegistryName(), metricRegistry);
       if (other != null) {
-        registry = other;
+        metricRegistry = other;
         shutdown = false;
       }
     }
@@ -78,14 +93,14 @@ public class VertxMetricsFactoryImpl implements VertxMetricsFactory {
       }
     }
     String baseName = metricsOptions.getBaseName() == null ? BASE_NAME : metricsOptions.getBaseName();
-    VertxMetricsImpl metrics = new VertxMetricsImpl(registry, shutdown, options, metricsOptions, baseName);
+    VertxMetricsImpl metrics = new VertxMetricsImpl(metricRegistry, shutdown, options, metricsOptions, baseName);
     // TODO: Probably should consume metrics through MetricsProvider API, and expose as JMXBeans
     if (metricsOptions.isJmxEnabled()) {
       String jmxDomain = metricsOptions.getJmxDomain();
       if (jmxDomain == null) {
         jmxDomain = "vertx" + "@" + Integer.toHexString(options.hashCode());
       }
-      JmxReporter reporter = JmxReporter.forRegistry(metrics.registry()).inDomain(jmxDomain).build();
+      JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain(jmxDomain).build();
       metrics.setDoneHandler(v -> reporter.stop());
       reporter.start();
     }
