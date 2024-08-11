@@ -22,6 +22,7 @@ import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
+import io.vertx.core.spi.VertxMetricsFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -356,21 +357,18 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     return baseName;
   }
 
-  /**
-   * An optional metric registry used instead of the Dropwizard shared registry.
-   *
-   * @return the metricRegistry
-   */
+  @Deprecated
   public MetricRegistry getMetricRegistry() {
     return metricRegistry;
   }
 
   /**
-   * Set the optional metric registry used instead of the Dropwizard shared registry.
+   * Deprecated, instead use a {@link io.vertx.core.VertxBuilder#withMetrics(VertxMetricsFactory)} setting
+   * an instance build using {@link DropwizardVertxMetricsFactory(MetricRegistry)}.
    *
-   * @param metricRegistry the metricRegistry
-   * @return a reference to this, so the API can be used fluently
+   * @deprecated instead use {@link DropwizardVertxMetricsFactory(MetricRegistry}
    */
+  @Deprecated
   public DropwizardMetricsOptions setMetricRegistry(MetricRegistry metricRegistry) {
     this.metricRegistry = metricRegistry;
     return this;

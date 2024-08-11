@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.DropwizardVertxMetricsFactory;
 import io.vertx.ext.dropwizard.MatchType;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.After;
@@ -38,7 +39,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     // Verify our jmx domain isn't there already, just in case.
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
 
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
@@ -56,7 +57,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     // Verify our jmx domain isn't there already, just in case.
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
 
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
@@ -74,7 +75,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     // Verify our jmx domain isn't there already, just in case.
     assertFalse(Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains()).contains("test-jmx-domain"));
 
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
@@ -89,7 +90,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
     DropwizardMetricsOptions dmo = new DropwizardMetricsOptions().setConfigPath(filePath);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
@@ -105,7 +106,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
       .setJmxDomain("non-file-jmx");
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
@@ -124,7 +125,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
       .setConfigPath(filePath);
     VertxOptions vertxOptions = new VertxOptions().setMetricsOptions(dmo);
 
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     metrics = vmfi.metrics(vertxOptions);
 
     List<String> jmxDomains = Arrays.asList(ManagementFactory.getPlatformMBeanServer().getDomains());
@@ -135,7 +136,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
   @Test
   public void testFromJson() throws Exception {
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(
       new JsonObject().put("metricsOptions", new JsonObject()
         .put("enabled", true)
@@ -169,7 +170,7 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
   @Test
   public void testFromJsonMixed() throws Exception {
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions(
       new JsonObject().put("metricsOptions", new JsonObject()
         .put("enabled", true)
@@ -212,14 +213,14 @@ public class VertxMetricFactoryImplTest extends VertxTestBase {
 
   @Test
   public void testDefaultBaseName() {
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions()));
     assertEquals("vertx", metrics.baseName());
   }
 
   @Test
   public void testOverrideBaseName() {
-    VertxMetricsFactoryImpl vmfi = new VertxMetricsFactoryImpl();
+    DropwizardVertxMetricsFactory vmfi = new DropwizardVertxMetricsFactory();
     VertxMetricsImpl metrics = (VertxMetricsImpl) vmfi.metrics(new VertxOptions().setMetricsOptions(new DropwizardMetricsOptions().setBaseName("Foo")));
     assertEquals("Foo", metrics.baseName());
   }
