@@ -91,7 +91,7 @@ public abstract class AbstractMetrics implements Metrics {
     return name.substring(baseName.length() + 1);
   }
 
-  protected MetricRegistry registry() {
+  public final MetricRegistry registry() {
     return registry;
   }
 
