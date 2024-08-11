@@ -16,7 +16,6 @@
 
 package io.vertx.ext.dropwizard;
 
-import com.codahale.metrics.MetricRegistry;
 import io.vertx.codegen.annotations.DataObject;
 import io.vertx.codegen.json.annotations.JsonGen;
 import io.vertx.core.json.JsonArray;
@@ -75,7 +74,6 @@ public class DropwizardMetricsOptions extends MetricsOptions {
   private List<Match> monitoredHttpClientEndpoints;
   private String configPath;
   private String baseName;
-  private MetricRegistry metricRegistry;
 
   /**
    * Default constructor
@@ -120,7 +118,6 @@ public class DropwizardMetricsOptions extends MetricsOptions {
     monitoredHttpServerRoutes = other.monitoredHttpServerRoutes == null ? null : new ArrayList<>(other.monitoredHttpServerRoutes);
     monitoredHttpClientUris = other.monitoredHttpClientUris == null ? null : new ArrayList<>(other.monitoredHttpClientUris);
     monitoredHttpClientEndpoints = other.monitoredHttpClientEndpoints == null ? null : new ArrayList<>(other.monitoredHttpClientEndpoints);
-    metricRegistry = other.getMetricRegistry();
   }
 
   /**
@@ -354,26 +351,6 @@ public class DropwizardMetricsOptions extends MetricsOptions {
    */
   public String getBaseName() {
     return baseName;
-  }
-
-  /**
-   * An optional metric registry used instead of the Dropwizard shared registry.
-   *
-   * @return the metricRegistry
-   */
-  public MetricRegistry getMetricRegistry() {
-    return metricRegistry;
-  }
-
-  /**
-   * Set the optional metric registry used instead of the Dropwizard shared registry.
-   *
-   * @param metricRegistry the metricRegistry
-   * @return a reference to this, so the API can be used fluently
-   */
-  public DropwizardMetricsOptions setMetricRegistry(MetricRegistry metricRegistry) {
-    this.metricRegistry = metricRegistry;
-    return this;
   }
 
   /**

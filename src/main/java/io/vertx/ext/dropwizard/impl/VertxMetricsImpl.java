@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
+public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   private final DropwizardMetricsOptions options;
   private Handler<Void> doneHandler;
@@ -49,7 +49,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   private final Map<String, DropwizardClientMetrics> clientMetrics = new HashMap<>();
   private final Matcher httpClientMonitoredEndpoints;
 
-  VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
+  public VertxMetricsImpl(MetricRegistry registry, boolean shutdown, VertxOptions options, DropwizardMetricsOptions metricsOptions, String baseName) {
     super(registry, baseName);
 
     List<Match> monitoredHttpClientEndpoint = metricsOptions.getMonitoredHttpClientEndpoint();
@@ -195,8 +195,7 @@ class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     return true;
   }
 
-  void setDoneHandler(Handler<Void> handler) {
+  public void setDoneHandler(Handler<Void> handler) {
     this.doneHandler = handler;
   }
-
 }
