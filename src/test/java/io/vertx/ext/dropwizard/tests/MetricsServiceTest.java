@@ -1,7 +1,9 @@
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.MetricsService;
 import org.junit.Test;
 
 import java.util.Map;

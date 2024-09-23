@@ -68,7 +68,7 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     gauge(options::getWorkerPoolSize, "worker-pool-size");
   }
 
-  DropwizardMetricsOptions getOptions() {
+  public DropwizardMetricsOptions getOptions() {
     return options;
   }
 

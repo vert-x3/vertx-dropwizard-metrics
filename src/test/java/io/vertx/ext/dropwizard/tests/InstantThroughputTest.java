@@ -1,4 +1,4 @@
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import io.vertx.ext.dropwizard.impl.InstantThroughput;
 import org.junit.Test;

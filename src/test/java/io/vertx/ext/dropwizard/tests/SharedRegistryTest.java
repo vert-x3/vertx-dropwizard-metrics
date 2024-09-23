@@ -13,11 +13,12 @@
  *
  *  You may elect to redistribute this code under either of these licenses.
  */
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.VertxOptions;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,7 +27,7 @@ import java.util.Collections;
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class ReuseSharedRegistryTest extends MetricsTestBase {
+public class SharedRegistryTest extends MetricsTestBase {
 
   @Override
   protected VertxOptions getOptions() {
@@ -38,7 +39,6 @@ public class ReuseSharedRegistryTest extends MetricsTestBase {
   @Override
   public void setUp() throws Exception {
     SharedMetricRegistries.clear();
-    SharedMetricRegistries.getOrCreate("the_name");
     super.setUp();
   }
 
@@ -52,7 +52,6 @@ public class ReuseSharedRegistryTest extends MetricsTestBase {
   @Override
   protected void tearDown() throws Exception {
     super.tearDown();
-    Assert.assertEquals(Collections.singleton("the_name"), SharedMetricRegistries.names());
-    Assert.assertTrue(registry.getNames().size() > 0);
+    Assert.assertEquals(Collections.<String>emptySet(), SharedMetricRegistries.names());
   }
 }

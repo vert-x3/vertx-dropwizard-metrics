@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import io.vertx.core.http.*;
 import io.vertx.core.net.NetClient;
@@ -23,7 +23,6 @@ import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.test.core.VertxTestBase;
 
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
