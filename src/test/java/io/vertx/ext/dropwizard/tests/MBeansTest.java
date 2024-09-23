@@ -25,6 +25,9 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Segismont
@@ -34,7 +37,7 @@ public class MBeansTest extends MetricsTestBase {
   @Override
   protected VertxOptions getOptions() {
     DropwizardMetricsOptions metrics = new DropwizardMetricsOptions()
-      .setJmxDomain(name.getMethodName())
+      .setJmxDomain("testDistinctHttpServerMBeans")
       .setEnabled(true)
       .setJmxEnabled(true);
     return super.getOptions().setMetricsOptions(metrics);
@@ -43,18 +46,16 @@ public class MBeansTest extends MetricsTestBase {
   @Test
   public void testDistinctHttpServerMBeans() throws Exception {
     int port1 = 8080, port2 = 8888;
-    CountDownLatch listenLatch = new CountDownLatch(2);
     HttpServer server1 = vertx.createHttpServer()
       .requestHandler(req -> req.response().end());
-    server1.listen(port1).onComplete(onSuccess(server -> listenLatch.countDown()));
+    server1.listen(port1).await(20, TimeUnit.SECONDS);
     HttpServer server2 = vertx.createHttpServer()
       .requestHandler(req -> req.response().end());
-    server2.listen(port2).onComplete(onSuccess(server -> listenLatch.countDown()));
-    awaitLatch(listenLatch);
+    server2.listen(port2).await(20, TimeUnit.SECONDS);
 
     MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
-    assertTrue(mBeanServer.isRegistered(new ObjectName(name.getMethodName(), "name", "\"vertx.http.servers.0.0.0.0:" + port1 + ".requests\"")));
-    assertTrue(mBeanServer.isRegistered(new ObjectName(name.getMethodName(), "name", "\"vertx.http.servers.0.0.0.0:" + port2 + ".requests\"")));
+    assertTrue(mBeanServer.isRegistered(new ObjectName("testDistinctHttpServerMBeans", "name", "\"vertx.http.servers.0.0.0.0:" + port1 + ".requests\"")));
+    assertTrue(mBeanServer.isRegistered(new ObjectName("testDistinctHttpServerMBeans", "name", "\"vertx.http.servers.0.0.0.0:" + port2 + ".requests\"")));
 
     cleanup(server1);
     cleanup(server2);
