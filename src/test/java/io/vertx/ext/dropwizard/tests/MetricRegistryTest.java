@@ -1,9 +1,12 @@
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import com.codahale.metrics.MetricRegistry;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.internal.VertxInternal;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
+import io.vertx.ext.dropwizard.DropwizardVertxMetricsFactory;
+import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.ext.dropwizard.impl.VertxMetricsImpl;
 import org.junit.Test;
 

@@ -14,7 +14,7 @@
  *  You may elect to redistribute this code under either of these licenses.
  */
 
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
@@ -33,6 +33,7 @@ import io.vertx.core.metrics.Measured;
 import io.vertx.core.net.*;
 import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.VertxMetrics;
+import io.vertx.ext.dropwizard.*;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.test.core.RepeatRule;

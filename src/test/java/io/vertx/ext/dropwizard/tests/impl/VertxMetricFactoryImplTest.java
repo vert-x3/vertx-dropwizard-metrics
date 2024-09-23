@@ -1,4 +1,4 @@
-package io.vertx.ext.dropwizard.impl;
+package io.vertx.ext.dropwizard.tests.impl;
 
 import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonArray;
@@ -7,6 +7,7 @@ import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.DropwizardVertxMetricsFactory;
 import io.vertx.ext.dropwizard.MatchType;
+import io.vertx.ext.dropwizard.impl.VertxMetricsImpl;
 import io.vertx.test.core.VertxTestBase;
 import org.junit.After;
 import org.junit.Test;

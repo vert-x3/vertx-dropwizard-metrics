@@ -14,10 +14,11 @@
  * under the License.
  */
 
-package io.vertx.ext.dropwizard;
+package io.vertx.ext.dropwizard.tests;
 
 import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpServer;
+import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import org.junit.Test;
 
 import javax.management.MBeanServer;
