@@ -4,10 +4,13 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.MetricsService;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -31,7 +34,7 @@ public class MetricsServiceTest extends MetricsTestBase {
   public void testFindByBaseName() {
     JsonObject metrics = metricsService.getMetricsSnapshot("vertx.event-loop-size");
     assertEquals(1, metrics.size());
-    assertNotNull(metrics.getJsonObject("vertx.event-loop-size"));
+    Assert.assertNotNull(metrics.getJsonObject("vertx.event-loop-size"));
   }
 
   @Test

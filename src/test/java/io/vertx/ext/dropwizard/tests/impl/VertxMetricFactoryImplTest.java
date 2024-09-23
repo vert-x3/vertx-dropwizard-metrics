@@ -8,7 +8,6 @@ import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.DropwizardVertxMetricsFactory;
 import io.vertx.ext.dropwizard.MatchType;
 import io.vertx.ext.dropwizard.impl.VertxMetricsImpl;
-import io.vertx.test.core.VertxTestBase;
 import org.junit.After;
 import org.junit.Test;
 
@@ -16,10 +15,12 @@ import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.*;
+
 /**
  * @author <a href="mailto:john.warner@ef.com">John Warner</a>
  */
-public class VertxMetricFactoryImplTest extends VertxTestBase {
+public class VertxMetricFactoryImplTest {
 
   private VertxMetrics metrics;
 

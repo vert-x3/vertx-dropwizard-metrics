@@ -25,9 +25,10 @@ import org.junit.Test;
 
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static io.vertx.test.core.TestUtils.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -72,18 +73,17 @@ public class MetricsNotEnabledTest extends MetricsTestBase {
         req.response().end(serverMax);
       }
     });
-    server.listen().onComplete(onSuccess(ar -> {
-      for (int i = 0; i < requests; i++) {
-        Buffer body = i % 2 == 0 ? clientMax : clientMin;
-        client.request(HttpMethod.POST, 8080, "localhost", uri).compose(req ->
-          req
-            .send(body)
-            .compose(HttpClientResponse::body)
-        ).onSuccess(buff -> latch.countDown());
-      }
-    }));
+    server.listen().await(20, TimeUnit.SECONDS);
+    for (int i = 0; i < requests; i++) {
+      Buffer body = i % 2 == 0 ? clientMax : clientMin;
+      client.request(HttpMethod.POST, 8080, "localhost", uri).compose(req ->
+        req
+          .send(body)
+          .compose(HttpClientResponse::body)
+      ).onSuccess(buff -> latch.countDown());
+    }
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
     assertEquals(requests, expected.get());
 
     // Verify http server

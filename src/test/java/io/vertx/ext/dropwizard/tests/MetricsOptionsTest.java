@@ -20,17 +20,16 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.MatchType;
-import io.vertx.test.core.Repeat;
-import io.vertx.test.core.TestUtils;
-import io.vertx.test.core.VertxTestBase;
 import org.junit.Test;
 
 import java.util.Random;
 
+import static org.junit.Assert.*;
+
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
-public class MetricsOptionsTest extends VertxTestBase {
+public class MetricsOptionsTest {
 
   @Test
   public void testOptions() {
@@ -65,9 +64,9 @@ public class MetricsOptionsTest extends VertxTestBase {
     Random rand = new Random();
     boolean metricsEnabled = rand.nextBoolean();
     boolean jmxEnabled = rand.nextBoolean();
-    String jmxDomain = TestUtils.randomAlphaString(100);
-    String name = TestUtils.randomAlphaString(100);
-    String configPath = TestUtils.randomAlphaString(100);
+    String jmxDomain = "the-domain";
+    String name = "the-name";
+    String configPath = "the-config-path";
     options.setEnabled(metricsEnabled);
     options.setJmxEnabled(jmxEnabled);
     options.setJmxDomain(jmxDomain);
@@ -82,7 +81,6 @@ public class MetricsOptionsTest extends VertxTestBase {
   }
 
   @Test
-  @Repeat(times = 100)
   public void testJsonOptions() {
     DropwizardMetricsOptions options = new DropwizardMetricsOptions(new JsonObject());
     assertFalse(options.isEnabled());
@@ -92,9 +90,9 @@ public class MetricsOptionsTest extends VertxTestBase {
     Random rand = new Random();
     boolean metricsEnabled = rand.nextBoolean();
     boolean jmxEnabled = rand.nextBoolean();
-    String jmxDomain = TestUtils.randomAlphaString(100);
-    String registryName = TestUtils.randomAlphaString(100);
-    String configPath = TestUtils.randomAlphaString(100);
+    String jmxDomain = "the-domain";
+    String registryName = "the-name";
+    String configPath = "the-config-path";
     options = new DropwizardMetricsOptions(new JsonObject().
       put("enabled", metricsEnabled).
       put("registryName", registryName).

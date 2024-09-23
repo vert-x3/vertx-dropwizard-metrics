@@ -24,13 +24,16 @@ import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.Match;
 import io.vertx.ext.dropwizard.MatchType;
 import io.vertx.ext.dropwizard.MetricsService;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
 import org.junit.Test;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.vertx.test.core.TestUtils.randomBuffer;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author <a href="mailto:jtakvori@redhat.com">Joel Takvorian</a>
@@ -56,7 +59,7 @@ public class InternalMetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testWebsocketDontProduceEventBusMetrics() throws Exception {
+  public void testWebsocketDontProduceEventBusMetrics(TestContext should) throws Exception {
     Buffer serverMin = randomBuffer(500);
     Buffer serverMax = randomBuffer(1000);
     Buffer clientMax = randomBuffer(300);
@@ -75,28 +78,30 @@ public class InternalMetricsTest extends MetricsTestBase {
           socket.write(serverMin);
         }
       });
-    }).listen().onComplete(onSuccess(ar -> {
-      AtomicBoolean complete = new AtomicBoolean(false);
-      client
-        .connect(8080, "localhost", "/blah")
-        .onComplete(onSuccess(socket -> {
-          JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
-          assertNoInternal(metrics);
-          socket.write(clientMax);
-          socket.handler(buff -> {
-            if (!complete.getAndSet(true)) {
-              socket.write(clientMin);
-            } else {
-              socket.closeHandler(done -> {
-                testComplete();
-              });
-              socket.close();
-            }
-          });
-        }));
-    }));
+    }).listen().await(20, TimeUnit.SECONDS);
 
-    await();
+    Async async = should.async();
+
+    AtomicBoolean complete = new AtomicBoolean(false);
+    client
+      .connect(8080, "localhost", "/blah")
+      .onComplete(should.asyncAssertSuccess(socket -> {
+        JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
+        assertNoInternal(metrics);
+        socket.write(clientMax);
+        socket.handler(buff -> {
+          if (!complete.getAndSet(true)) {
+            socket.write(clientMin);
+          } else {
+            socket.closeHandler(done -> {
+              async.complete();
+            });
+            socket.close();
+          }
+        });
+      }));
+
+    async.awaitSuccess(20_000);
 
     // Make sure there is no eventbus internal metrics
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());

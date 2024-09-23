@@ -24,6 +24,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
@@ -51,9 +54,9 @@ public class ReuseSharedRegistryTest extends MetricsTestBase {
   }
 
   @Override
-  protected void tearDown() throws Exception {
+  public void tearDown() throws Exception {
     super.tearDown();
-    Assert.assertEquals(Collections.singleton("the_name"), SharedMetricRegistries.names());
-    Assert.assertTrue(registry.getNames().size() > 0);
+    assertEquals(Collections.singleton("the_name"), SharedMetricRegistries.names());
+    assertTrue(registry.getNames().size() > 0);
   }
 }

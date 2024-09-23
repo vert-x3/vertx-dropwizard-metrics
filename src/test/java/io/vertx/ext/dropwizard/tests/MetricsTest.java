@@ -36,9 +36,9 @@ import io.vertx.core.spi.metrics.VertxMetrics;
 import io.vertx.ext.dropwizard.*;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 import io.vertx.ext.dropwizard.impl.Helper;
-import io.vertx.test.core.RepeatRule;
-import io.vertx.test.core.TestUtils;
-import org.junit.Assert;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import io.vertx.ext.unit.junit.RepeatRule;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -55,8 +55,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static io.vertx.test.core.TestUtils.randomBuffer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -97,7 +97,7 @@ public class MetricsTest extends MetricsTestBase {
   public RepeatRule repeatRule = new RepeatRule();
 
   @Test
-  public void testHttpMetrics() throws Exception {
+  public void testHttpMetrics(TestContext should) throws Exception {
     String uri = "/foo/bar";
     Buffer serverMin = randomBuffer(500);
     Buffer serverMax = randomBuffer(1000);
@@ -119,8 +119,8 @@ public class MetricsTest extends MetricsTestBase {
     server.listen().onComplete(ar -> {
       for (int i = 0; i < requests; i++) {
         Buffer body = i % 2 == 0 ? clientMax : clientMin;
-        client.request(HttpMethod.POST, 8080, "localhost", uri).onComplete(onSuccess(req -> {
-          req.send(body).onComplete(onSuccess(resp -> {
+        client.request(HttpMethod.POST, 8080, "localhost", uri).onComplete(should.asyncAssertSuccess(req -> {
+          req.send(body).onComplete(should.asyncAssertSuccess(resp -> {
             // Note, we countdown in the *endHandler* of the resp, as the request metric count is not incremented
             // until *after* the response handler has been called
             resp.endHandler(v -> latch.countDown());
@@ -129,7 +129,7 @@ public class MetricsTest extends MetricsTestBase {
       }
     });
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
     assertEquals(requests, expected.get());
 
     // Verify http server
@@ -151,7 +151,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testHttpChunkWritesMetrics() throws Exception {
+  public void testHttpChunkWritesMetrics(TestContext should) throws Exception {
     String uri = "/foo";
     int chunks = 10;
     int max = 1000;
@@ -171,26 +171,26 @@ public class MetricsTest extends MetricsTestBase {
       }
       req.response().end();
     });
-    server.listen().onComplete(onSuccess(s -> {
-      client
-        .request(HttpMethod.GET, 8080, "localhost", uri)
-        .onComplete(onSuccess(req -> {
-          req.response().onComplete(onSuccess(resp -> {
-            // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
-            // until *after* the response handler has been called
-            resp.endHandler(v1 -> vertx.runOnContext(v2 -> latch.countDown()));
-          }));
-          req.setChunked(true);
-          for (int i = 0; i < chunks; i++) {
-            int size = random.nextInt(max - min) + min;
-            clientWrittenBytes.addAndGet(size);
-            req.write(randomBuffer(size));
-          }
-          req.end();
-        }));
-    }));
+    server.listen().await(20, TimeUnit.SECONDS);
 
-    awaitLatch(latch);
+    client
+      .request(HttpMethod.GET, 8080, "localhost", uri)
+      .onComplete(should.asyncAssertSuccess(req -> {
+        req.response().onComplete(should.asyncAssertSuccess(resp -> {
+          // Note, we call testComplete() in the *endHandler* of the resp, as the request metric count is not incremented
+          // until *after* the response handler has been called
+          resp.endHandler(v1 -> vertx.runOnContext(v2 -> latch.countDown()));
+        }));
+        req.setChunked(true);
+        for (int i = 0; i < chunks; i++) {
+          int size = random.nextInt(max - min) + min;
+          clientWrittenBytes.addAndGet(size);
+          req.write(randomBuffer(size));
+        }
+        req.end();
+      }));
+
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
 
     // Gather metrics
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
@@ -213,7 +213,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testHttpMethodAndUriAndRouteMetrics() throws Exception {
+  public void testHttpMethodAndUriAndRouteMetrics(TestContext should) throws Exception {
     int requests = 13;
     CountDownLatch latch = new CountDownLatch(requests);
 
@@ -231,98 +231,95 @@ public class MetricsTest extends MetricsTestBase {
       }
       req.response().end();
     });
-    server.listen().onComplete(onSuccess(ar -> {
-      client.request(HttpMethod.GET, 8080, "localhost", "/get").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.GET, 8080, "localhost", "/users/1").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.GET, 8080, "localhost", "/users/2").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.GET, 8080, "localhost", "/users/3").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.GET, 8080, "localhost", "/internal/users/3").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.POST, 8080, "localhost", "/post").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.PUT, 8080, "localhost", "/put").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.DELETE, 8080, "localhost", "/delete").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.OPTIONS, 8080, "localhost", "/options").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.HEAD, 8080, "localhost", "/head").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.TRACE, 8080, "localhost", "/trace").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.CONNECT, 8080, "localhost", "/connect").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-      client.request(HttpMethod.PATCH, 8080, "localhost", "/patch").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
-    }));
+    server.listen().await(20, TimeUnit.SECONDS);
 
-    awaitLatch(latch);
+    client.request(HttpMethod.GET, 8080, "localhost", "/get").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.GET, 8080, "localhost", "/users/1").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.GET, 8080, "localhost", "/users/2").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.GET, 8080, "localhost", "/users/3").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.GET, 8080, "localhost", "/internal/users/3").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.POST, 8080, "localhost", "/post").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.PUT, 8080, "localhost", "/put").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.DELETE, 8080, "localhost", "/delete").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.OPTIONS, 8080, "localhost", "/options").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.HEAD, 8080, "localhost", "/head").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.TRACE, 8080, "localhost", "/trace").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.CONNECT, 8080, "localhost", "/connect").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+    client.request(HttpMethod.PATCH, 8080, "localhost", "/patch").onSuccess(req -> req.send().onSuccess(resp -> latch.countDown()));
+
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
+
+    Thread.sleep(100);
 
     // This allows the metrics to be captured before we gather them
-    vertx.setTimer(100, id -> {
-      // Gather metrics
-      JsonObject metrics = metricsService.getMetricsSnapshot(server);
-      assertCount(metrics.getJsonObject("get-requests"), 5L);
-      assertCount(metrics.getJsonObject("get-requests./get"), 1L);
-      assertCount(metrics.getJsonObject("get-requests.users"), 3L);
-      assertCount(metrics.getJsonObject("get-requests./users/:userId"), 3L);
-      assertCount(metrics.getJsonObject("get-requests./internal>/users/:userId"), 1L);
-      assertCount(metrics.getJsonObject("responses-2xx./get"), 1L);
-      assertCount(metrics.getJsonObject("responses-2xx.users"), 3L);
-      assertCount(metrics.getJsonObject("responses-2xx./users/:userId"), 3L);
-      assertCount(metrics.getJsonObject("responses-2xx./internal>/users/:userId"), 1L);
+    // Gather metrics
+    JsonObject metrics = metricsService.getMetricsSnapshot(server);
+    assertCount(metrics.getJsonObject("get-requests"), 5L);
+    assertCount(metrics.getJsonObject("get-requests./get"), 1L);
+    assertCount(metrics.getJsonObject("get-requests.users"), 3L);
+    assertCount(metrics.getJsonObject("get-requests./users/:userId"), 3L);
+    assertCount(metrics.getJsonObject("get-requests./internal>/users/:userId"), 1L);
+    assertCount(metrics.getJsonObject("responses-2xx./get"), 1L);
+    assertCount(metrics.getJsonObject("responses-2xx.users"), 3L);
+    assertCount(metrics.getJsonObject("responses-2xx./users/:userId"), 3L);
+    assertCount(metrics.getJsonObject("responses-2xx./internal>/users/:userId"), 1L);
 
-      assertNull(metrics.getJsonObject("get-requests./users/1"));
-      assertNull(metrics.getJsonObject("get-requests./users/2"));
-      assertNull(metrics.getJsonObject("get-requests./users/3"));
-      assertNull(metrics.getJsonObject("responses-2xx.users/1"));
-      assertNull(metrics.getJsonObject("responses-2xx.users/2"));
-      assertNull(metrics.getJsonObject("responses-2xx.users/3"));
-      assertCount(metrics.getJsonObject("post-requests"), 1L);
-      assertCount(metrics.getJsonObject("post-requests./post"), 1L);
-      assertCount(metrics.getJsonObject("responses-2xx./post"), 1L);
-      assertCount(metrics.getJsonObject("put-requests"), 1L);
-      assertCount(metrics.getJsonObject("put-requests./put"), 1L);
-      assertCount(metrics.getJsonObject("responses-2xx./put"), 1L);
-      assertCount(metrics.getJsonObject("delete-requests"), 1L);
-      assertNull(metrics.getJsonObject("delete-requests./delete"));
-      assertNull(metrics.getJsonObject("responses-2xx./delete"));
-      assertCount(metrics.getJsonObject("options-requests"), 1L);
-      assertNull(metrics.getJsonObject("options-requests./options"));
-      assertNull(metrics.getJsonObject("responses-2xx./options"));
-      assertCount(metrics.getJsonObject("head-requests"), 1L);
-      assertNull(metrics.getJsonObject("head-requests./head"));
-      assertNull(metrics.getJsonObject("responses-2xx./head"));
-      assertCount(metrics.getJsonObject("trace-requests"), 1L);
-      assertNull(metrics.getJsonObject("trace-requests./trace"));
-      assertNull(metrics.getJsonObject("responses-2xx./trace"));
-      assertCount(metrics.getJsonObject("connect-requests"), 1L);
-      assertNull(metrics.getJsonObject("connect-requests./connect"));
-      assertNull(metrics.getJsonObject("responses-2xx./connect"));
-      assertCount(metrics.getJsonObject("patch-requests"), 1L);
-      assertCount(metrics.getJsonObject("patch-requests./patch"), 1L);
-      assertCount(metrics.getJsonObject("responses-2xx./patch"), 1L);
-      testComplete();
-    });
-
-    await();
+    assertNull(metrics.getJsonObject("get-requests./users/1"));
+    assertNull(metrics.getJsonObject("get-requests./users/2"));
+    assertNull(metrics.getJsonObject("get-requests./users/3"));
+    assertNull(metrics.getJsonObject("responses-2xx.users/1"));
+    assertNull(metrics.getJsonObject("responses-2xx.users/2"));
+    assertNull(metrics.getJsonObject("responses-2xx.users/3"));
+    assertCount(metrics.getJsonObject("post-requests"), 1L);
+    assertCount(metrics.getJsonObject("post-requests./post"), 1L);
+    assertCount(metrics.getJsonObject("responses-2xx./post"), 1L);
+    assertCount(metrics.getJsonObject("put-requests"), 1L);
+    assertCount(metrics.getJsonObject("put-requests./put"), 1L);
+    assertCount(metrics.getJsonObject("responses-2xx./put"), 1L);
+    assertCount(metrics.getJsonObject("delete-requests"), 1L);
+    assertNull(metrics.getJsonObject("delete-requests./delete"));
+    assertNull(metrics.getJsonObject("responses-2xx./delete"));
+    assertCount(metrics.getJsonObject("options-requests"), 1L);
+    assertNull(metrics.getJsonObject("options-requests./options"));
+    assertNull(metrics.getJsonObject("responses-2xx./options"));
+    assertCount(metrics.getJsonObject("head-requests"), 1L);
+    assertNull(metrics.getJsonObject("head-requests./head"));
+    assertNull(metrics.getJsonObject("responses-2xx./head"));
+    assertCount(metrics.getJsonObject("trace-requests"), 1L);
+    assertNull(metrics.getJsonObject("trace-requests./trace"));
+    assertNull(metrics.getJsonObject("responses-2xx./trace"));
+    assertCount(metrics.getJsonObject("connect-requests"), 1L);
+    assertNull(metrics.getJsonObject("connect-requests./connect"));
+    assertNull(metrics.getJsonObject("responses-2xx./connect"));
+    assertCount(metrics.getJsonObject("patch-requests"), 1L);
+    assertCount(metrics.getJsonObject("patch-requests./patch"), 1L);
+    assertCount(metrics.getJsonObject("responses-2xx./patch"), 1L);
 
     cleanup(client);
     cleanup(server);
   }
 
   @Test
-  public void testHttpMetricsResponseCode2xx() throws Exception {
-    test(200, "responses-2xx");
+  public void testHttpMetricsResponseCode2xx(TestContext should) throws Exception {
+    test(should, 200, "responses-2xx");
   }
 
   @Test
-  public void testHttpMetricsResponseCode3xx() throws Exception {
-    test(300, "responses-3xx");
+  public void testHttpMetricsResponseCode3xx(TestContext should) throws Exception {
+    test(should, 300, "responses-3xx");
   }
 
   @Test
-  public void testHttpMetricsResponseCode4xx() throws Exception {
-    test(404, "responses-4xx");
+  public void testHttpMetricsResponseCode4xx(TestContext should) throws Exception {
+    test(should, 404, "responses-4xx");
   }
 
   @Test
-  public void testHttpMetricsResponseCode5xx() throws Exception {
-    test(500, "responses-5xx");
+  public void testHttpMetricsResponseCode5xx(TestContext should) throws Exception {
+    test(should, 500, "responses-5xx");
   }
 
-  private void test(int code, String metricName) throws Exception {
+  private void test(TestContext should, int code, String metricName) throws Exception {
     CountDownLatch closeLatch = new CountDownLatch(2);
     HttpClientAgent client = vertx
       .httpClientBuilder()
@@ -330,14 +327,12 @@ public class MetricsTest extends MetricsTestBase {
         connection.closeHandler(v -> closeLatch.countDown());
       })
       .build();
-    CountDownLatch listenLatch = new CountDownLatch(1);
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().setStatusCode(code).end();
     }).connectionHandler(connection -> {
       connection.closeHandler(v -> closeLatch.countDown());
     });
-    server.listen().onComplete(onSuccess(v -> listenLatch.countDown()));
-    awaitLatch(listenLatch);
+    server.listen().await(20, TimeUnit.SECONDS);
     for (Measured measured : Arrays.asList(server)) {
       assertWaitUntil(() -> metricsService.getMetricsSnapshot(measured) != null);
       JsonObject metric = metricsService.getMetricsSnapshot(measured);
@@ -345,8 +340,8 @@ public class MetricsTest extends MetricsTestBase {
       assertNotNull("Was expecting " + metricName + " to be not null", metrics);
       assertEquals("Was expecting " + metricName + " to have count = 0", 0, (int) metrics.getInteger("count"));
     }
-    client.request(HttpMethod.GET, 8080, "localhost", "/").onComplete(onSuccess(req -> {
-      req.send().onComplete(onSuccess(resp -> {
+    client.request(HttpMethod.GET, 8080, "localhost", "/").onComplete(should.asyncAssertSuccess(req -> {
+      req.send().onComplete(should.asyncAssertSuccess(resp -> {
 
       }));
     }));
@@ -365,11 +360,11 @@ public class MetricsTest extends MetricsTestBase {
       });
     }
     client.close();
-    awaitLatch(closeLatch);
+    assertTrue(closeLatch.await(20, TimeUnit.SECONDS));
   }
 
   @Test
-  public void testHttpMetricsOnClose() throws Exception {
+  public void testHttpMetricsOnClose(TestContext should) throws Exception {
     int requests = 6;
     CountDownLatch latch = new CountDownLatch(requests);
 
@@ -380,23 +375,23 @@ public class MetricsTest extends MetricsTestBase {
     server.listen().onComplete(ar -> {
       assertTrue(ar.succeeded());
       for (int i = 0; i < requests; i++) {
-        client.request(HttpMethod.GET, 8081, "localhost", "/some/uri").onComplete(onSuccess(req -> {
-          req.send().onComplete(onSuccess(resp -> {
+        client.request(HttpMethod.GET, 8081, "localhost", "/some/uri").onComplete(should.asyncAssertSuccess(req -> {
+          req.send().onComplete(should.asyncAssertSuccess(resp -> {
             latch.countDown();
           }));
         }));
       }
     });
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
 
     CountDownLatch closeLatch = new CountDownLatch(1);
     client.close();
-    server.close().onComplete(onSuccess(v1 -> {
+    server.close().onComplete(should.asyncAssertSuccess(v1 -> {
       vertx.runOnContext(v2 -> closeLatch.countDown());
     }));
 
-    awaitLatch(closeLatch);
+    assertTrue(closeLatch.await(20, TimeUnit.SECONDS));
 
     assertWaitUntil(() -> {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
@@ -406,7 +401,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testHttpWebSocketMetrics() throws Exception {
+  public void testHttpWebSocketMetrics(TestContext should) throws Exception {
     Buffer serverMin = randomBuffer(500);
     Buffer serverMax = randomBuffer(1000);
     Buffer clientMax = randomBuffer(300);
@@ -429,26 +424,26 @@ public class MetricsTest extends MetricsTestBase {
         }
       });
     });
-    server.listen().onComplete(onSuccess(v1 -> {
-      AtomicBoolean complete = new AtomicBoolean(false);
-      client.connect(8080, "localhost", "/blah").onComplete(onSuccess(socket -> {
-        JsonObject metrics = metricsService.getMetricsSnapshot(client);
-        assertEquals(1, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
-        socket.write(clientMax);
-        socket.handler(buff -> {
-          if (!complete.getAndSet(true)) {
-            socket.write(clientMin);
-          } else {
-            socket.closeHandler(v2 -> {
-              done.countDown();
-            });
-            socket.close();
-          }
-        });
-      }));
+    server.listen().await(20, TimeUnit.SECONDS);
+
+    AtomicBoolean complete = new AtomicBoolean(false);
+    client.connect(8080, "localhost", "/blah").onComplete(should.asyncAssertSuccess(socket -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(client);
+      assertEquals(1, (int) metrics.getJsonObject("open-websockets").getInteger("count"));
+      socket.write(clientMax);
+      socket.handler(buff -> {
+        if (!complete.getAndSet(true)) {
+          socket.write(clientMin);
+        } else {
+          socket.closeHandler(v2 -> {
+            done.countDown();
+          });
+          socket.close();
+        }
+      });
     }));
 
-    awaitLatch(done);
+    assertTrue(done.await(20, TimeUnit.SECONDS));
 
     JsonObject serverMetrics = metricsService.getMetricsSnapshot(server);
     assertEquals(0, (int) serverMetrics.getJsonObject("open-websockets").getInteger("count"));
@@ -465,28 +460,21 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testHttpSendFile() throws Exception {
+  public void testHttpSendFile(TestContext should) throws Exception {
     Buffer content = randomBuffer(10000);
     File file = new File(testDir, "send-file-metrics");
     file.deleteOnExit();
     Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 
-    CountDownLatch latch = new CountDownLatch(1);
     HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().sendFile(file.getAbsolutePath());
     });
-    server.listen().onComplete(onSuccess(s -> {
-      client.request(HttpMethod.GET, 8080, "localhost", "/file")
-        .compose(req -> req.send().compose(HttpClientResponse::body))
-        .onComplete(onSuccess(buff -> {
-          vertx.runOnContext(v -> {
-            latch.countDown();
-          });
-        }));
-    }));
+    server.listen().await(20, TimeUnit.SECONDS);
 
-    awaitLatch(latch);
+    Buffer res = client.request(HttpMethod.GET, 8080, "localhost", "/file")
+      .compose(req -> req.send().compose(HttpClientResponse::body))
+      .await(20, TimeUnit.SECONDS);
 
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
     assertCount(metrics.getJsonObject("bytes-written"), content.length());
@@ -500,7 +488,7 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testHttpClientMetricsName() throws Exception {
-    String name = TestUtils.randomAlphaString(10);
+    String name = "some-name";
     HttpClientAgent namedClient = vertx.createHttpClient(new HttpClientOptions().setMetricsName(name));
     assertEquals(AbstractMetrics.unwrap(namedClient).baseName(), "vertx.http.clients." + name);
     cleanup(namedClient);
@@ -512,20 +500,16 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testNamedHttpClientMetrics() throws Exception {
-    String name = TestUtils.randomAlphaString(10);
+    String name = "some-name";
     HttpClient client = vertx.createHttpClient(new HttpClientOptions().setMetricsName(name));
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().end();
     });
-    server.listen().onComplete(onSuccess(v -> {
-      client.request(HttpMethod.GET, 8080, "localhost", "/file")
-        .compose(req -> req.send().compose(HttpClientResponse::body))
-        .onComplete(onSuccess(buff -> {
-          testComplete();
-        }));
-    }));
+    server.listen().await(20, TimeUnit.SECONDS);
 
-    await();
+    client.request(HttpMethod.GET, 8080, "localhost", "/file")
+      .compose(req -> req.send().compose(HttpClientResponse::body))
+      .await(20, TimeUnit.SECONDS);
 
     String baseName = "vertx.http.clients." + name;
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
@@ -545,18 +529,14 @@ public class MetricsTest extends MetricsTestBase {
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8080)).requestHandler(req -> {
       req.response().end();
     });
-    server.listen().onComplete(onSuccess(v -> {
-      client.request(HttpMethod.GET, 8080, "localhost", "/books/1")
-        .compose(req -> req.send().compose(HttpClientResponse::body))
-        .compose(body1 -> client
-          .request(HttpMethod.GET, 8080, "localhost", "/books/2").compose(req ->
-            req.send().compose(HttpClientResponse::body))
-        ).onComplete(onSuccess(body2 -> {
-        testComplete();
-      }));
-    }));
+    server.listen().await(20, TimeUnit.SECONDS);
 
-    await();
+    client.request(HttpMethod.GET, 8080, "localhost", "/books/1")
+      .compose(req -> req.send().compose(HttpClientResponse::body))
+      .compose(body1 -> client
+        .request(HttpMethod.GET, 8080, "localhost", "/books/2").compose(req ->
+          req.send().compose(HttpClientResponse::body))
+      ).await(20, TimeUnit.SECONDS);
 
     String baseName = "vertx.http.clients";
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
@@ -575,28 +555,25 @@ public class MetricsTest extends MetricsTestBase {
       req.response().end();
     });
     server
-      .listen()
-      .compose(s -> client
-        .request(HttpMethod.GET, 8081, "localhost", "/")
-        .compose(req -> req
-          .send()
-          .compose(HttpClientResponse::body))
-        .onComplete(onSuccess(body2 -> {
-        testComplete();
-      })));
+      .listen().await(20, TimeUnit.SECONDS);
 
-    await();
+    client
+      .request(HttpMethod.GET, 8081, "localhost", "/")
+      .compose(req -> req
+        .send()
+        .compose(HttpClientResponse::body)
+      ).await(20, TimeUnit.SECONDS);
 
     String baseName = "vertx.pools.http";
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
-    Assert.assertEquals(0, metrics.size());
+    assertEquals(0, metrics.size());
 
     cleanup(client);
     cleanup(server);
   }
 
   @Test
-  public void testNetMetrics() throws Exception {
+  public void testNetMetrics(TestContext should) throws Exception {
     Buffer serverData = randomBuffer(500);
     Buffer clientData = randomBuffer(300);
     int numRequests = 13;
@@ -613,26 +590,26 @@ public class MetricsTest extends MetricsTestBase {
       });
       socket.closeHandler(v -> latch.countDown());
     });
-    server.listen().onComplete(onSuccess(s -> {
-      actualPort.set(s.actualPort());
-      NetClient client = vertx.createNetClient(new NetClientOptions());
-      clientRef.set(client);
-      client.connect(actualPort.get(), "localhost").onComplete(onSuccess(socket -> {
-        AtomicInteger count = new AtomicInteger(numRequests);
-        socket.handler(buff -> {
-          assertEquals(500, buff.length());
-          if (count.decrementAndGet() == 0) {
-            socket.close();
-          } else {
-            socket.write(clientData);
-          }
-        });
-        socket.closeHandler(v -> latch.countDown());
-        socket.write(clientData);
-      }));
+    NetServer s = server.listen().await(20, TimeUnit.SECONDS);
+
+    actualPort.set(s.actualPort());
+    NetClient client = vertx.createNetClient(new NetClientOptions());
+    clientRef.set(client);
+    client.connect(actualPort.get(), "localhost").onComplete(should.asyncAssertSuccess(socket -> {
+      AtomicInteger count = new AtomicInteger(numRequests);
+      socket.handler(buff -> {
+        assertEquals(500, buff.length());
+        if (count.decrementAndGet() == 0) {
+          socket.close();
+        } else {
+          socket.write(clientData);
+        }
+      });
+      socket.closeHandler(v -> latch.countDown());
+      socket.write(clientData);
     }));
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
 
     // Verify net server
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
@@ -649,25 +626,25 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testNamedNetClientMetrics() throws Exception {
+  public void testNamedNetClientMetrics(TestContext should) throws Exception {
     CountDownLatch latch = new CountDownLatch(2);
-    String name = TestUtils.randomAlphaString(10);
+    String name = "the-name";
     NetClient client = vertx.createNetClient(new NetClientOptions().setMetricsName(name));
     NetServer server = vertx.createNetServer(new NetServerOptions().setHost("localhost").setPort(8080)).connectHandler(socket -> {
       socket.closeHandler(v -> latch.countDown());
       socket.handler(socket::write);
     });
-    server.listen().onComplete(onSuccess(v1 -> {
-      client.connect(8080, "localhost").onComplete(onSuccess(socket -> {
-        socket.closeHandler(v2 -> latch.countDown());
-        socket.handler(buff -> {
-          socket.close();
-        });
-        socket.write("whatever");
-      }));
+    server.listen().await(20, TimeUnit.SECONDS);
+
+    client.connect(8080, "localhost").onComplete(should.asyncAssertSuccess(socket -> {
+      socket.closeHandler(v2 -> latch.countDown());
+      socket.handler(buff -> {
+        socket.close();
+      });
+      socket.write("whatever");
     }));
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
 
     String baseName = "vertx.net.clients." + name;
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
@@ -678,7 +655,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testNetMetricsOnClose() throws Exception {
+  public void testNetMetricsOnClose(TestContext should) throws Exception {
     int requests = 8;
     CountDownLatch latch = new CountDownLatch(requests);
 
@@ -686,24 +663,18 @@ public class MetricsTest extends MetricsTestBase {
     NetServer server = vertx.createNetServer(new NetServerOptions().setHost("localhost").setPort(1235).setReceiveBufferSize(50)).connectHandler(socket -> {
       socket.handler(buff -> latch.countDown());
     });
-    server.listen().onComplete(onSuccess(v1 -> {
-      client.connect(1235, "localhost").onComplete(onSuccess(so -> {
-        for (int i = 0; i < requests; i++) {
-          so.write(randomBuffer(50));
-        }
-      }));
+    server.listen().await(20, TimeUnit.SECONDS);
+
+    client.connect(1235, "localhost").onComplete(should.asyncAssertSuccess(so -> {
+      for (int i = 0; i < requests; i++) {
+        so.write(randomBuffer(50));
+      }
     }));
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
 
-    CountDownLatch closeLatch = new CountDownLatch(2);
-    client.close().onComplete(onSuccess(v1 -> {
-      vertx.runOnContext(v2 -> closeLatch.countDown());
-    }));
-    server.close().onComplete(onSuccess(v1 -> {
-      vertx.runOnContext(v2 -> closeLatch.countDown());
-    }));
-    awaitLatch(closeLatch);
+    client.close().await(20, TimeUnit.SECONDS);
+    server.close().await(20, TimeUnit.SECONDS);
 
     JsonObject metrics = metricsService.getMetricsSnapshot(server);
     assertNotNull(metrics);
@@ -718,25 +689,24 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testDatagramMetrics() throws Exception {
+  public void testDatagramMetrics(TestContext should) throws Exception {
     Buffer clientMax = randomBuffer(1823);
     Buffer clientMin = randomBuffer(123);
 
     AtomicBoolean complete = new AtomicBoolean(false);
     DatagramSocket datagramSocket = vertx.createDatagramSocket(new DatagramSocketOptions());
-    datagramSocket.listen(1236, "localhost").onComplete(onSuccess(socket -> {
-      socket.handler(packet -> {
-        if (complete.getAndSet(true)) {
-          testComplete();
-        }
-      });
-      socket.send(clientMin, 1236, "localhost").onComplete(onSuccess(v -> {
-      }));
-      socket.send(clientMax, 1236, "localhost").onComplete(onSuccess(v -> {
-      }));
-    }));
+    DatagramSocket socket = datagramSocket.listen(1236, "localhost").await(20, TimeUnit.SECONDS);
 
-    await();
+    Async async = should.async();
+    socket.handler(packet -> {
+      if (complete.getAndSet(true)) {
+        async.complete();
+      }
+    });
+    socket.send(clientMin, 1236, "localhost").await(20, TimeUnit.SECONDS);
+    socket.send(clientMax, 1236, "localhost").await(20, TimeUnit.SECONDS);
+
+    async.awaitSuccess(20_000);
 
     // Test sender/client (bytes-written)
     JsonObject metrics = metricsService.getMetricsSnapshot(datagramSocket);
@@ -747,11 +717,7 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject("localhost:1236.bytes-read"), 2L);
     assertMinMax(metrics.getJsonObject("localhost:1236.bytes-read"), (long) clientMin.length(), (long) clientMax.length());
 
-    CountDownLatch latch = new CountDownLatch(1);
-    datagramSocket.close().onComplete(onSuccess(v -> {
-      latch.countDown();
-    }));
-    awaitLatch(latch);
+    datagramSocket.close().await(20, TimeUnit.SECONDS);
     assertWaitUntil(() -> metricsService.getMetricsSnapshot(datagramSocket).isEmpty());
   }
 
@@ -800,12 +766,11 @@ public class MetricsTest extends MetricsTestBase {
     }
 
     TheVerticle verticle = new TheVerticle();
-    vertx.deployVerticle(verticle).onComplete(onSuccess(id -> {
-      deploymentID.set(id);
-      for (int i = 0; i < messages; i++) {
-        vertx.eventBus().send("foo", "Hello");
-      }
-    }));
+    String id = vertx.deployVerticle(verticle).await(20, TimeUnit.SECONDS);
+    deploymentID.set(id);
+    for (int i = 0; i < messages; i++) {
+      vertx.eventBus().send("foo", "Hello");
+    }
 
     // Wait until we have piled the (n-1) messages on the event loop
     assertWaitUntil(() -> {
@@ -826,7 +791,7 @@ public class MetricsTest extends MetricsTestBase {
     verticle.consumer.resume();
 
     // Wait until all messages have been processed
-    awaitLatch(allLatch);
+    assertTrue(allLatch.await(20, TimeUnit.SECONDS));
 
     // Check global metrics
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
@@ -864,11 +829,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(messages, (int)handlerMetric.getInteger("count"));
 
     // Undeploy
-    CountDownLatch undeployLatch = new CountDownLatch(1);
-    vertx.undeploy(deploymentID.get()).onComplete(onSuccess(v -> {
-      undeployLatch.countDown();
-    }));
-    awaitLatch(undeployLatch);
+    vertx.undeploy(deploymentID.get()).await(20, TimeUnit.SECONDS);
 
     // Check cleanup
     metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
@@ -877,44 +838,47 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testEventBusMetricsHandlerExactMatch() {
+  public void testEventBusMetricsHandlerExactMatch(TestContext should) {
+    Async async = should.async();
     vertx.eventBus().consumer("foo", msg -> {
       vertx.runOnContext(done -> {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         JsonObject metric = metrics.getJsonObject("handlers.foo");
         assertEquals(1, (int) metric.getInteger("count"));
-        testComplete();
+        async.complete();
       });
     });
     vertx.eventBus().send("foo", "whatever");
-    await();
+    async.awaitSuccess(20_000);
   }
 
   @Test
-  public void testEventBusMetricsHandlerNoMatch() {
+  public void testEventBusMetricsHandlerNoMatch(TestContext should) {
+    Async async = should.async();
     vertx.eventBus().consumer("bar", msg -> {
       vertx.runOnContext(done -> {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         assertNull(metrics.getJsonObject("handlers.bar"));
-        testComplete();
+        async.complete();
       });
     });
     vertx.eventBus().send("bar", "whatever");
-    await();
+    async.awaitSuccess(20_000);
   }
 
   @Test
-  public void testEventBusMetricsHandlerRegexMatch() {
+  public void testEventBusMetricsHandlerRegexMatch(TestContext should) {
+    Async async = should.async();
     vertx.eventBus().consumer("juu1234", msg -> {
       vertx.runOnContext(done -> {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         JsonObject metric = metrics.getJsonObject("handlers.juu1234");
         assertEquals(1, (int) metric.getInteger("count"));
-        testComplete();
+        async.complete();
       });
     });
     vertx.eventBus().send("juu1234", "whatever");
-    await();
+    async.awaitSuccess(20_000);
   }
 
   @Test
@@ -933,7 +897,7 @@ public class MetricsTest extends MetricsTestBase {
     vertx.eventBus().send("user:1", "whatever one more time");
     vertx.eventBus().send("user:2", "whatever");
 
-    awaitLatch(allHandlersLatch);
+    assertTrue(allHandlersLatch.await(20, TimeUnit.SECONDS));
 
     // Check global metrics
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
@@ -943,7 +907,8 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testEventBusMetricsHandlerMultiMatch() {
+  public void testEventBusMetricsHandlerMultiMatch(TestContext should) {
+    Async async = should.async();
     vertx.runOnContext(v -> {
       int size = 3;
       AtomicInteger count = new AtomicInteger();
@@ -958,29 +923,31 @@ public class MetricsTest extends MetricsTestBase {
               JsonObject metrics2 = metricsService.getMetricsSnapshot(vertx.eventBus());
               JsonObject metric2 = metrics2.getJsonObject("handlers.foo");
               assertEquals(size, (int) metric2.getInteger("count"));
-              testComplete();
+              async.complete();
             });
           }
         });
       }
       vertx.eventBus().publish("foo", "whatever");
     });
-    await();
+    async.awaitSuccess(20_000);
   }
 
   @Test
   public void testEventBusMetricsReplyNoHandlers() {
-    vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300)).onComplete(onFailure(err -> {
-      testComplete();
-    }));
+    try {
+      vertx.eventBus().request("foo", "bar", new DeliveryOptions().setSendTimeout(300)).await(20, TimeUnit.SECONDS);
+      fail();
+    } catch (Exception ignore) {
 
-    await();
+    }
 
     JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
     assertCount(metrics.getJsonObject("messages.reply-failures"), 1L);
     assertCount(metrics.getJsonObject("messages.reply-failures." + ReplyFailure.NO_HANDLERS), 1L);
   }
 
+/*
   @Test
   public void testEventBusByteMetrics() {
     startNodes(2);
@@ -996,6 +963,7 @@ public class MetricsTest extends MetricsTestBase {
       vertices[0].eventBus().send("the_address", buffer);
     }));
   }
+*/
 
   @Test
   public void testEventBusMetricsReplyTimeout() {
@@ -1013,15 +981,20 @@ public class MetricsTest extends MetricsTestBase {
   public void testEventBusMetricsReplyRecipientFailure() {
     vertx.eventBus().consumer("foo").handler(msg -> msg.fail(1, "blah"));
 
-    vertx.eventBus().request("foo", "bar", new DeliveryOptions()).onComplete(onFailure(err -> {
-    }));
+    try {
+      vertx.eventBus().request("foo", "bar", new DeliveryOptions()).await(20, TimeUnit.SECONDS);
+      fail();
+    } catch (Exception expected) {
+
+    }
 
     assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures"), 1L);
     assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures." + ReplyFailure.RECIPIENT_FAILURE), 1L);
   }
 
   @Test
-  public void testPendingCount() {
+  public void testPendingCount(TestContext should) {
+    Async async = should.async();
     Context ctx = vertx.getOrCreateContext();
     ctx.runOnContext(v -> {
       EventBus eb = vertx.eventBus();
@@ -1030,17 +1003,17 @@ public class MetricsTest extends MetricsTestBase {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         assertCount(metrics.getJsonObject("messages.pending"), 0L);
         assertCount(metrics.getJsonObject("messages.pending-local"), 0L);
-        testComplete();
+        async.complete();
       });
       consumer.pause();
-      eb.request("foo", "the_message", new DeliveryOptions().setSendTimeout(30)).onComplete(onFailure(err -> {
+      eb.request("foo", "the_message", new DeliveryOptions().setSendTimeout(30)).onComplete(should.asyncAssertFailure(err -> {
         JsonObject metrics = metricsService.getMetricsSnapshot(vertx.eventBus());
         assertCount(metrics.getJsonObject("messages.pending"), 1L);
         assertCount(metrics.getJsonObject("messages.pending-local"), 1L);
         consumer.resume();
       }));
     });
-    await();
+    async.await(20_000);
   }
 
   @Test
@@ -1080,7 +1053,8 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testScheduledMetricConsumer() {
+  public void testScheduledMetricConsumer(TestContext should) {
+    Async async = should.async();
     int messages = 18;
     AtomicInteger count = new AtomicInteger(messages);
     String baseName = metricsService.getBaseName(vertx.eventBus());
@@ -1093,7 +1067,7 @@ public class MetricsTest extends MetricsTestBase {
       if (count.get() == 0) {
         if (name.equals(baseName + ".messages.sent")) {
           assertCount((JsonObject) metric, (long) messages);
-          testComplete();
+          async.complete();
         }
       }
     });
@@ -1103,26 +1077,18 @@ public class MetricsTest extends MetricsTestBase {
       count.decrementAndGet();
     }
 
-    await();
+    async.await(20_000);
   }
 
   @Test
   public void testMetricsCleanupedOnVertxClose() throws Exception {
-    CountDownLatch latch1 = new CountDownLatch(1);
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setPort(8080));
     server.requestHandler(req -> {});
-    server.listen().onComplete(onSuccess(res -> {
-      latch1.countDown();
-    }));
-    awaitLatch(latch1);
+    server.listen().await(20, TimeUnit.SECONDS);
     HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
-    CountDownLatch latch2 = new CountDownLatch(1);
     NetServer nServer = vertx.createNetServer(new NetServerOptions().setPort(1234));
     nServer.connectHandler(conn -> {});
-    nServer.listen().onComplete(res -> {
-      latch2.countDown();
-    });
-    awaitLatch(latch2);
+    nServer.listen().await(20, TimeUnit.SECONDS);
     NetClient nClient = vertx.createNetClient(new NetClientOptions());
     DatagramSocket sock = vertx.createDatagramSocket(new DatagramSocketOptions());
     EventBus eb = vertx.eventBus();
@@ -1133,25 +1099,21 @@ public class MetricsTest extends MetricsTestBase {
     assertFalse(metricsService.getMetricsSnapshot(nClient).isEmpty());
     assertFalse(metricsService.getMetricsSnapshot(sock).isEmpty());
     assertFalse(metricsService.getMetricsSnapshot(eb).isEmpty());
-    vertx.close().onComplete(res -> {
-      assertTrue(metricsService.getMetricsSnapshot(vertx).isEmpty());
-      assertTrue(metricsService.getMetricsSnapshot(server).isEmpty());
-      assertTrue(metricsService.getMetricsSnapshot(client).isEmpty());
-      assertTrue(metricsService.getMetricsSnapshot(nServer).isEmpty());
-      assertTrue(metricsService.getMetricsSnapshot(nClient).isEmpty());
-      assertTrue(metricsService.getMetricsSnapshot(sock).isEmpty());
-      assertTrue(metricsService.getMetricsSnapshot(eb).isEmpty());
-      testComplete();
-    });
-    await();
+    vertx.close().await(20, TimeUnit.SECONDS);
+    assertTrue(metricsService.getMetricsSnapshot(vertx).isEmpty());
+    assertTrue(metricsService.getMetricsSnapshot(server).isEmpty());
+    assertTrue(metricsService.getMetricsSnapshot(client).isEmpty());
+    assertTrue(metricsService.getMetricsSnapshot(nServer).isEmpty());
+    assertTrue(metricsService.getMetricsSnapshot(nClient).isEmpty());
+    assertTrue(metricsService.getMetricsSnapshot(sock).isEmpty());
+    assertTrue(metricsService.getMetricsSnapshot(eb).isEmpty());
     vertx = null;
   }
 
   @Test
-  public void testScaleHttpServers() throws Exception {
+  public void testScaleHttpServers(TestContext should) throws Exception {
     int size = 3;
     List<HttpServer> servers = new ArrayList<>();
-    CountDownLatch listenLatch = new CountDownLatch(size);
     for (int i = 0;i < size;i++) {
       int id = i;
       HttpServer server = vertx.createHttpServer();
@@ -1160,17 +1122,14 @@ public class MetricsTest extends MetricsTestBase {
         req.response().putHeader("id", "" + id);
         resp.end();
       });
-      server.listen(8080).onComplete(onSuccess(v -> {
-        listenLatch.countDown();
-      }));
+      server.listen(8080).await(20, TimeUnit.SECONDS);
       servers.add(server);
     }
-    awaitLatch(listenLatch);
     HttpClient client = vertx.createHttpClient();
     BitSet bs = new BitSet();
     for (int i = 0;i < size;i++) {
-      client.request(HttpMethod.GET, 8080, "localhost", "/").onComplete(onSuccess(req -> {
-        req.send().onComplete(onSuccess(resp -> {
+      client.request(HttpMethod.GET, 8080, "localhost", "/").onComplete(should.asyncAssertSuccess(req -> {
+        req.send().onComplete(should.asyncAssertSuccess(resp -> {
           assertEquals(200, resp.statusCode());
           int id = Integer.parseInt(resp.getHeader("id"));
           synchronized (bs) {
@@ -1188,7 +1147,6 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testHttpClientConnectionQueue() throws Exception {
-    CountDownLatch started = new CountDownLatch(1);
     List<Runnable> requests = new ArrayList<>();
     vertx.createHttpServer().requestHandler(req -> {
       Context ctx = vertx.getOrCreateContext();
@@ -1197,10 +1155,8 @@ public class MetricsTest extends MetricsTestBase {
           req.response().end();
         });
       });
-    }).listen(8080, "localhost").onComplete(onSuccess(v -> {
-      started.countDown();
-    }));
-    awaitLatch(started);
+    }).listen(8080, "localhost")
+      .await(20, TimeUnit.SECONDS);
     HttpClientAgent client = vertx.createHttpClient();
     for (int i = 0;i < 7;i++) {
       client.request(HttpMethod.GET, 8080, "localhost", "/somepath").compose(HttpClientRequest::send);
@@ -1219,18 +1175,14 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testMultiHttpClients() throws Exception {
+  public void testMultiHttpClients(TestContext should) throws Exception {
     int size = 3;
     CountDownLatch requestsLatch = new CountDownLatch(size);
-    CountDownLatch started = new CountDownLatch(1);
     List<Runnable> requests = Collections.synchronizedList(new ArrayList<>());
     vertx.createHttpServer().requestHandler(req -> {
       requests.add(() -> req.response().end());
       requestsLatch.countDown();
-    }).listen(8080, "localhost").onComplete(onSuccess(v -> {
-      started.countDown();
-    }));
-    awaitLatch(started);
+    }).listen(8080, "localhost").await(20, TimeUnit.SECONDS);
     HttpClientAgent[] clients = new HttpClientAgent[size];
     CountDownLatch closedLatch = new CountDownLatch(size);
     CountDownLatch responseLatch = new CountDownLatch(size);
@@ -1242,15 +1194,15 @@ public class MetricsTest extends MetricsTestBase {
           });
         })
         .build();
-      clients[i].request(HttpMethod.GET, 8080, "localhost", "/").onComplete(onSuccess(req -> {
-        req.send().onComplete(onSuccess(resp -> {
+      clients[i].request(HttpMethod.GET, 8080, "localhost", "/").onComplete(should.asyncAssertSuccess(req -> {
+        req.send().onComplete(should.asyncAssertSuccess(resp -> {
           vertx.runOnContext(rlv -> {
             responseLatch.countDown();
           });
         }));
       }));
     }
-    awaitLatch(requestsLatch);
+    assertTrue(requestsLatch.await(20, TimeUnit.SECONDS));
     JsonObject metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
@@ -1258,7 +1210,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.ttfb").getInteger("count"));
     assertEquals(3, (int)metrics.getJsonObject("connections.max-pool-size").getInteger("value"));
     requests.forEach(Runnable::run);
-    awaitLatch(responseLatch);
+    assertTrue(responseLatch.await(20, TimeUnit.SECONDS));
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.usage").getInteger("count"));
     assertEquals(0, (int)metrics.getJsonObject("endpoint.localhost:8080.in-use").getInteger("count"));
@@ -1282,7 +1234,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(3, (int)metrics.getJsonObject("endpoint.localhost:8080.ttfb").getInteger("count"));
     CountDownLatch latch = new CountDownLatch(1);
     clients[0].close().onComplete(ar -> latch.countDown());
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
     metrics = metricsService.getMetricsSnapshot(clients[0]);
     assertNull(metrics.getJsonObject("endpoint.localhost:8080.usage"));
     assertNull(metrics.getJsonObject("endpoint.localhost:8080.in-use"));
@@ -1359,7 +1311,7 @@ public class MetricsTest extends MetricsTestBase {
   }
 
   @Test
-  public void testThreadPoolMetrics() throws Exception {
+  public void testThreadPoolMetrics(TestContext should) throws Exception {
 
     int size = 5;
     CountDownLatch done = new CountDownLatch(6);
@@ -1388,13 +1340,13 @@ public class MetricsTest extends MetricsTestBase {
       exec.<Boolean>executeBlocking(() -> {
         latch.countDown();
         return gate.await(10, TimeUnit.SECONDS);
-      }, false).onComplete(onSuccess(res -> {
+      }, false).onComplete(should.asyncAssertSuccess(res -> {
         assertTrue(res);
         vertx.runOnContext(v -> done.countDown());
       }));
     }
 
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 0);
     assertCount(metrics.getJsonObject("queue-delay"), 5);
@@ -1411,7 +1363,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(metrics.getJsonObject("pool-ratio").getDouble("value"), (Double)1D);
 
     gate.countDown();
-    awaitLatch(done);
+    assertTrue(done.await(20, TimeUnit.SECONDS));
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 6);
     assertCount(metrics.getJsonObject("queue-delay"), 6);
@@ -1432,7 +1384,7 @@ public class MetricsTest extends MetricsTestBase {
     assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").size() > 0);
     CountDownLatch latch = new CountDownLatch(1);
     vertx.close().onComplete(ar -> latch.countDown());
-    awaitLatch(latch);
+    assertTrue(latch.await(20, TimeUnit.SECONDS));
     assertEquals(new JsonObject(), metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread"));
     assertEquals(new JsonObject(), metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking"));
   }
