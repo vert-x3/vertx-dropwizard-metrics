@@ -19,7 +19,7 @@ package io.vertx.ext.dropwizard;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.file.impl.FileResolverImpl;
+import io.vertx.core.file.FileSystemOptions;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.internal.logging.Logger;
@@ -78,7 +78,7 @@ public class DropwizardVertxMetricsFactory implements VertxMetricsFactory {
     }
     // Check to see if a config file name has been set, and if it has load it and create new options file from it
     if (metricsOptions.getConfigPath() != null && !metricsOptions.getConfigPath().isEmpty()) {
-      FileResolver resolver = new FileResolverImpl();
+      FileResolver resolver = FileResolver.fileResolver(new FileSystemOptions());
       JsonObject loadedFromFile;
       try {
         loadedFromFile = loadOptionsFile(metricsOptions.getConfigPath(), resolver);
