@@ -14,207 +14,115 @@
   ~
   ~  You may elect to redistribute this code under either of these licenses.
   --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-      
-    <modelVersion>4.0.0</modelVersion>
-      
-    <parent>
-            
-        <groupId>io.vertx</groupId>
-            
-        <artifactId>vertx-ext-parent</artifactId>
-            
-        <version>38</version>
-          
-    </parent>
-      
-    <artifactId>vertx-dropwizard-metrics</artifactId>
-      
-    <version>4.5.11-SNAPSHOT</version>
-      
-    <name>Vert.x Dropwizard Metrics</name>
-      
-    <properties>
-            
-        <stack.version>4.5.11-SNAPSHOT</stack.version>
-            
-        <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
-          
-    </properties>
-      
-    <dependencyManagement>
-            
-        <dependencies>
-                  
-            <dependency>
-                        
-                <groupId>io.vertx</groupId>
-                        
-                <artifactId>vertx-dependencies</artifactId>
-                        
-                <version>${stack.version}</version>
-                        
-                <type>pom</type>
-                        
-                <scope>import</scope>
-                      
-            </dependency>
-                
-        </dependencies>
-          
-    </dependencyManagement>
-      
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>io.vertx</groupId>
+    <artifactId>vertx-ext-parent</artifactId>
+    <version>38</version>
+  </parent>
+
+  <artifactId>vertx-dropwizard-metrics</artifactId>
+  <version>4.5.11-SNAPSHOT</version>
+
+  <name>Vert.x Dropwizard Metrics</name>
+
+  <properties>
+    <stack.version>4.5.11-SNAPSHOT</stack.version>
+    <jar.manifest>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</jar.manifest>
+  </properties>
+
+  <dependencyManagement>
     <dependencies>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-core</artifactId>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-shell</artifactId>
-                  
-            <optional>true</optional>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.dropwizard.metrics</groupId>
-                  
-            <artifactId>metrics-core</artifactId>
-                  
-            <version>4.2.15</version>
-                  
-            <exclusions>
-                        
-                <!-- do not use slf4j from metrics-core, as the version may differ from the one used by vert.x -->
-                        
-                <exclusion>
-                              
-                    <groupId>org.slf4j</groupId>
-                              
-                    <artifactId>slf4j-api</artifactId>
-                            
-                </exclusion>
-                      
-            </exclusions>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-codegen</artifactId>
-                  
-            <scope>provided</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-docgen</artifactId>
-                  
-            <scope>provided</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-core</artifactId>
-                  
-            <type>test-jar</type>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>junit</groupId>
-                  
-            <artifactId>junit</artifactId>
-                  
-            <scope>test</scope>
-                  
-            <version>4.13.1</version>
-                
-        </dependency>
-            
-        <dependency>
-                  
-            <groupId>io.vertx</groupId>
-                  
-            <artifactId>vertx-service-factory</artifactId>
-                  
-            <scope>test</scope>
-                
-        </dependency>
-          
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-dependencies</artifactId>
+        <version>${stack.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
     </dependencies>
-      
-    <build>
-            
-        <pluginManagement>
-                  
-            <plugins>
-                        
-                <!-- Execute with mvn java:exec -->
-                        
-                <plugin>
-                              
-                    <groupId>org.codehaus.mojo</groupId>
-                              
-                    <artifactId>exec-maven-plugin</artifactId>
-                              
-                    <version>1.4.0</version>
-                              
-                    <configuration>
-                                    
-                        <executable>java</executable>
-                                    
-                        <classpathScope>test</classpathScope>
-                                    
-                        <arguments>
-                                          
-                            <!--<argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</argument>-->
-                                          
-                            <argument>-classpath</argument>
-                                          
-                            <classpath/>
-                                          
-                            <argument>-Dvertx.metrics.options.enabled=true</argument>
-                                          
-                            <argument>io.vertx.core.Launcher</argument>
-                                          
-                            <argument>run</argument>
-                                          
-                            <argument>-conf</argument>
-                                          
-                            <argument>{"telnetOptions":{"port":5000}}</argument>
-                                          
-                            <argument>service:io.vertx.ext.shell</argument>
-                                        
-                        </arguments>
-                                  
-                    </configuration>
-                            
-                </plugin>
-                      
-            </plugins>
-                
-        </pluginManagement>
-          
-    </build>
-    
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-shell</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+      <version>4.2.15</version>
+      <exclusions>
+        <!-- do not use slf4j from metrics-core, as the version may differ from the one used by vert.x -->
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-codegen</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-docgen</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-core</artifactId>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+      <version>4.13.1</version>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-service-factory</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- Execute with mvn java:exec -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.4.0</version>
+          <configuration>
+            <executable>java</executable>
+            <classpathScope>test</classpathScope>
+            <arguments>
+              <!--<argument>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</argument>-->
+              <argument>-classpath</argument>
+              <classpath/>
+              <argument>-Dvertx.metrics.options.enabled=true</argument>
+              <argument>io.vertx.core.Launcher</argument>
+              <argument>run</argument>
+              <argument>-conf</argument>
+              <argument>{"telnetOptions":{"port":5000}}</argument>
+              <argument>service:io.vertx.ext.shell</argument>
+            </arguments>
+          </configuration>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+  </build>
+
 </project>
