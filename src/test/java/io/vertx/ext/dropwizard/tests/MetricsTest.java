@@ -746,21 +746,23 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch allLatch = new CountDownLatch((int) messages);
     AtomicReference<String> deploymentID = new AtomicReference<>();
 
-    class TheVerticle extends AbstractVerticle {
+    class TheVerticle extends VerticleBase {
 
       MessageConsumer<Object> consumer;
 
       @Override
-      public void start() {
+      public Future<?> start() throws Exception {
         consumer = vertx.eventBus().consumer("foo").handler(msg -> {
           vertx.runOnContext(v -> allLatch.countDown());
         });
         consumer.pause();
+        return super.start();
       }
 
       @Override
-      public void stop() {
+      public Future<?> stop() throws Exception {
         consumer.unregister();
+        return super.stop();
       }
     }
 
