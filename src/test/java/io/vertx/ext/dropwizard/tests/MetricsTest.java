@@ -450,7 +450,7 @@ public class MetricsTest extends MetricsTestBase {
     // 3 frames : 2 data + 1 close frame (2 bytes)
     assertCount(serverMetrics.getJsonObject("bytes-read"), 402L);
 
-    assertEquals(0, (int) metricsService.getMetricsSnapshot(client).getJsonObject("open-websockets").getInteger("count"));
+    assertWaitUntil(() -> metricsService.getMetricsSnapshot(client).getJsonObject("open-websockets").getInteger("count") == 0);
     assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("bytes-written"), 402L);
     assertCount(() -> metricsService.getMetricsSnapshot(client).getJsonObject("bytes-read"), 1502L);
 

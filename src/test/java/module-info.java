@@ -4,4 +4,5 @@ open module io.vertx.metrics.dropwizard.tests {
   requires io.vertx.metrics.dropwizard;
   requires java.management;
   requires junit;
+  requires com.codahale.metrics;
 }
