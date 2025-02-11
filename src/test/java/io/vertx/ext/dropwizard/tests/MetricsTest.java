@@ -22,10 +22,7 @@ import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.datagram.DatagramSocketOptions;
-import io.vertx.core.eventbus.DeliveryOptions;
-import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.eventbus.MessageConsumer;
-import io.vertx.core.eventbus.ReplyFailure;
+import io.vertx.core.eventbus.*;
 import io.vertx.core.http.*;
 import io.vertx.core.internal.VertxInternal;
 import io.vertx.core.json.JsonObject;
@@ -1021,8 +1018,9 @@ public class MetricsTest extends MetricsTestBase {
   public void testDiscardMessage() {
     int num = 10;
     EventBus eb = vertx.eventBus();
-    MessageConsumer<Object> consumer = eb.consumer("foo");
-    consumer.setMaxBufferedMessages(num);
+    MessageConsumer<Object> consumer = eb.consumer(new MessageConsumerOptions()
+      .setAddress("foo")
+      .setMaxBufferedMessages(num));
     consumer.pause();
     consumer.handler(msg -> {
       fail("should not be called");
