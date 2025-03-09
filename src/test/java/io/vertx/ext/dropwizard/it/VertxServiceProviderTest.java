@@ -16,7 +16,7 @@ public class VertxServiceProviderTest {
   @Test
   public void testEnabled() {
     Vertx vertx = Vertx.vertx(new VertxOptions().setMetricsOptions(new MetricsOptions().setEnabled(true)));
-    VertxMetrics spi = ((VertxInternal) vertx).metricsSPI();
+    VertxMetrics spi = ((VertxInternal) vertx).metrics();
     assertNotNull(spi);
     assertTrue(spi instanceof VertxMetricsImpl);
   }

@@ -1391,7 +1391,7 @@ public class MetricsTest extends MetricsTestBase {
   @Test
   public void testClientMetricsReporting() {
     SocketAddress address = SocketAddress.inetSocketAddress(8080, "localhost");
-    ClientMetrics metrics = ((VertxInternal) vertx).metricsSPI().createClientMetrics(address, "backend", null);
+    ClientMetrics metrics = ((VertxInternal) vertx).metrics().createClientMetrics(address, "backend", null);
 
     // Request
     Object request = new Object();
@@ -1408,7 +1408,7 @@ public class MetricsTest extends MetricsTestBase {
 
   @Test
   public void testClientMetricsLifecycle() {
-    VertxMetrics spi = ((VertxInternal) vertx).metricsSPI();
+    VertxMetrics spi = ((VertxInternal) vertx).metrics();
     SocketAddress address = SocketAddress.inetSocketAddress(8080, "localhost");
     ClientMetrics[] metrics = new ClientMetrics[2];
     for (int i = 0;i < metrics.length;i++) {

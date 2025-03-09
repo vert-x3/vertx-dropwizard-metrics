@@ -45,7 +45,7 @@ public class MetricRegistryTest {
       .build();
     try {
       assertNotNull(vertx);
-      VertxMetricsImpl metrics = (VertxMetricsImpl) ((VertxInternal)vertx).metricsSPI();
+      VertxMetricsImpl metrics = (VertxMetricsImpl) ((VertxInternal)vertx).metrics();
       assertSame(metricRegistry, metrics.registry());
     } finally {
       vertx.close();

@@ -109,7 +109,7 @@ public class DropwizardVertxMetricsFactory implements VertxMetricsFactory {
   }
 
   private JsonObject loadOptionsFile(String configPath, FileResolver fileResolver) {
-    File file = fileResolver.resolveFile(configPath);
+    File file = fileResolver.resolve(configPath);
     try (Scanner scanner = new Scanner(file)) {
       scanner.useDelimiter("\\A");
       String metricsConfigString = scanner.next();
