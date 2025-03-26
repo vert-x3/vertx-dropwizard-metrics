@@ -2,11 +2,7 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.http.HttpClientResponse;
-import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.ClientMetrics;
-import io.vertx.core.spi.metrics.HttpClientMetrics;
 import io.vertx.core.spi.observability.HttpRequest;
 import io.vertx.core.spi.observability.HttpResponse;
 
@@ -60,7 +56,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, T
 
   @Override
   public void requestReset(HttpClientRequestMetric requestMetric) {
-    inUse.inc();
+    inUse.dec();
   }
 
   @Override

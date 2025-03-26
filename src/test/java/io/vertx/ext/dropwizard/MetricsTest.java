@@ -16,8 +16,8 @@
 
 package io.vertx.ext.dropwizard;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
@@ -558,6 +558,39 @@ public class MetricsTest extends MetricsTestBase {
     assertCount(metrics.getJsonObject(baseName + ".get-requests.books"), 2L);
     assertNull(metrics.getJsonObject(baseName + ".get-requests./books/1"));
     assertNull(metrics.getJsonObject(baseName + ".get-requests./books/2"));
+
+    cleanup(client);
+    cleanup(server);
+  }
+
+  @Test
+  public void testHttpClientMetricsInUseDecreasedOnReset() throws Exception {
+    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+
+    HttpServerOptions serverOptions = new HttpServerOptions()
+      .setHost("localhost")
+      .setPort(8080)
+      .setSoLinger(0); // Force RST
+    HttpServer server = vertx.createHttpServer(serverOptions).requestHandler(req -> {
+      req.connection().close();
+    });
+
+    server.listen().onComplete(onSuccess(srv -> {
+      client
+        .request(HttpMethod.GET, 8080, "localhost", "/")
+        .compose(req -> req
+          .send()
+          .compose(HttpClientResponse::body)
+        ).onComplete(onFailure(t -> testComplete()));
+    }));
+
+    await();
+
+    assertWaitUntil(() -> {
+      String metricName = "vertx.http.clients.endpoint.localhost:8080.in-use";
+      JsonObject metric = metricsService.getMetricsSnapshot(metricName);
+      return metric.getJsonObject(metricName).getInteger("count").equals(0);
+    });
 
     cleanup(client);
     cleanup(server);
