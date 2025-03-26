@@ -42,7 +42,7 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, H
 
   @Override
   public void requestReset(HttpClientRequestMetric requestMetric) {
-    inUse.inc();
+    inUse.dec();
   }
 
   @Override

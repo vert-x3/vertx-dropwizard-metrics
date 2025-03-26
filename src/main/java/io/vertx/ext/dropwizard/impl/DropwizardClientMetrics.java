@@ -65,7 +65,7 @@ public class DropwizardClientMetrics<Req, Resp> extends AbstractMetrics implemen
 
   @Override
   public void requestReset(RequestMetric requestMetric) {
-    inUse.inc();
+    inUse.dec();
   }
 
   @Override

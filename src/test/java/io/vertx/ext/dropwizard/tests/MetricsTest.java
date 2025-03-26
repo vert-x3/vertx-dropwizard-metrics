@@ -16,8 +16,8 @@
 
 package io.vertx.ext.dropwizard.tests;
 
-import com.codahale.metrics.Timer;
 import com.codahale.metrics.*;
+import com.codahale.metrics.Timer;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
@@ -40,6 +40,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -53,6 +54,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.*;
 
 /**
@@ -563,6 +565,39 @@ public class MetricsTest extends MetricsTestBase {
     String baseName = "vertx.pools.http";
     JsonObject metrics = metricsService.getMetricsSnapshot(baseName);
     assertEquals(0, metrics.size());
+
+    cleanup(client);
+    cleanup(server);
+  }
+
+  @Test
+  public void testHttpClientMetricsInUseDecreasedOnReset() throws Exception {
+    HttpClient client = vertx.createHttpClient(new HttpClientOptions());
+    HttpServerOptions serverOptions = new HttpServerOptions()
+      .setHost("localhost")
+      .setPort(8080)
+      .setSoLinger(0); // Force RST
+    HttpServer server = vertx.createHttpServer(serverOptions).requestHandler(req -> {
+      req.connection().close();
+    });
+    server.listen().await(20, TimeUnit.SECONDS);
+
+    try {
+      client
+        .request(HttpMethod.GET, 8080, "localhost", "/")
+        .compose(req -> req
+          .send()
+          .compose(HttpClientResponse::body)
+        ).await(20, SECONDS);
+      fail("Should have thrown an exception");
+    } catch (Exception ignore) {
+    }
+
+    assertWaitUntil(() -> {
+      String metricName = "vertx.http.clients.endpoint.localhost:8080.in-use";
+      JsonObject metric = metricsService.getMetricsSnapshot(metricName);
+      return metric.getJsonObject(metricName).getInteger("count").equals(0);
+    });
 
     cleanup(client);
     cleanup(server);
