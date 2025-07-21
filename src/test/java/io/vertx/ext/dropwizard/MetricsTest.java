@@ -707,11 +707,12 @@ public class MetricsTest extends MetricsTestBase {
     }));
     awaitLatch(closeLatch);
 
-    JsonObject metrics = metricsService.getMetricsSnapshot(server);
-    assertNotNull(metrics);
-    assertTrue(metrics.isEmpty());
+    assertWaitUntil(() -> {
+      JsonObject metrics = metricsService.getMetricsSnapshot(server);
+      return metrics != null && metrics.isEmpty();
+    });
 
-    metrics = metricsService.getMetricsSnapshot(client);
+    JsonObject metrics = metricsService.getMetricsSnapshot(client);
     assertNotNull(metrics);
     assertTrue(metrics.isEmpty());
 
