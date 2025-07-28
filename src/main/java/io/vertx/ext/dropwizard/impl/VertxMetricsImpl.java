@@ -57,7 +57,7 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     if (monitoredHttpClientEndpoint != null) {
       monitoredHttpClientMatcher = new Matcher(monitoredHttpClientEndpoint);
     } else {
-      monitoredHttpClientMatcher = null;
+      monitoredHttpClientMatcher = new Matcher(List.of(new Match().setValue(".*")));
     }
 
     this.options = metricsOptions;
