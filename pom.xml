@@ -69,7 +69,7 @@
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
       <artifactId>metrics-core</artifactId>
-      <version>4.2.27</version>
+      <version>4.2.36</version>
       <exclusions>
         <!-- do not use slf4j from metrics-core, as the version may differ from the one used by vert.x -->
         <exclusion>
