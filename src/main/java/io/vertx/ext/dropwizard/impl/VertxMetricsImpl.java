@@ -27,7 +27,6 @@ import io.vertx.core.net.NetClientOptions;
 import io.vertx.core.net.NetServerOptions;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.*;
-import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
 import io.vertx.ext.dropwizard.Match;
 
@@ -36,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.vertx.ext.dropwizard.MatchType.REGEX;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
@@ -57,7 +58,7 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
     if (monitoredHttpClientEndpoint != null) {
       monitoredHttpClientMatcher = new Matcher(monitoredHttpClientEndpoint);
     } else {
-      monitoredHttpClientMatcher = new Matcher(List.of(new Match().setValue(".*")));
+      monitoredHttpClientMatcher = new Matcher(List.of(new Match().setType(REGEX).setValue(".*")));
     }
 
     this.options = metricsOptions;
@@ -92,7 +93,7 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   @Override
   public synchronized ClientMetrics<?, ?, ?> createClientMetrics(SocketAddress remoteAddress, String type, String namespace) {
     String baseName;
-    if (namespace != null && namespace.length() > 0) {
+    if (namespace != null && !namespace.isEmpty()) {
       baseName = MetricRegistry.name(nameOf(type, "clients", namespace, remoteAddress.toString()));
     } else {
       baseName = MetricRegistry.name(nameOf(type, "clients", remoteAddress.toString()));
@@ -110,7 +111,7 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   public HttpClientMetrics<?, ?, ?> createHttpClientMetrics(HttpClientOptions options) {
     String name = options.getMetricsName();
     String baseName;
-    if (name != null && name.length() > 0) {
+    if (name != null && !name.isEmpty()) {
       baseName = nameOf("http.clients", name);
     } else {
       baseName = nameOf("http.clients");
