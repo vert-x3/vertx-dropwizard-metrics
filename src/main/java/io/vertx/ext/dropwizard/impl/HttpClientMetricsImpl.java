@@ -21,6 +21,7 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
+import io.vertx.core.spi.metrics.TCPMetrics;
 import io.vertx.core.spi.observability.HttpRequest;
 import io.vertx.core.spi.observability.HttpResponse;
 import io.vertx.ext.dropwizard.Match;
@@ -30,7 +31,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long>, TCPMetrics<Long> {
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
