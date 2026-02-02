@@ -17,18 +17,17 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.Counter;
-import com.codahale.metrics.Histogram;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import io.vertx.core.net.SocketAddress;
-import io.vertx.core.spi.metrics.TCPMetrics;
+import io.vertx.core.spi.metrics.TransportMetrics;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class TCPMetricsImpl extends AbstractMetrics implements TCPMetrics<Long> {
+class TCPMetricsImpl extends AbstractMetrics implements TransportMetrics<Long> {
 
   private Counter openConnections;
   private Timer connections;
