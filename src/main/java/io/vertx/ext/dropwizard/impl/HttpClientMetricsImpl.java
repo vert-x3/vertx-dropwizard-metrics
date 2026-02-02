@@ -16,12 +16,12 @@
 
 package io.vertx.ext.dropwizard.impl;
 
-import io.vertx.core.http.HttpClientOptions;
+import io.vertx.core.http.HttpClientConfig;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
-import io.vertx.core.spi.metrics.TCPMetrics;
+import io.vertx.core.spi.metrics.TransportMetrics;
 import io.vertx.core.spi.observability.HttpRequest;
 import io.vertx.core.spi.observability.HttpResponse;
 import io.vertx.ext.dropwizard.Match;
@@ -31,14 +31,14 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long>, TCPMetrics<Long> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long>, TransportMetrics<Long> {
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
   private final Matcher monitoredEndpoints;
   final HttpClientReporter clientReporter;
 
-  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientOptions options, List<Match> monitoredUris, Matcher monitoredEndpoints) {
+  HttpClientMetricsImpl(VertxMetricsImpl owner, HttpClientReporter clientReporter, HttpClientConfig config, List<Match> monitoredUris, Matcher monitoredEndpoints) {
     super(clientReporter.registry, clientReporter.baseName);
     this.owner = owner;
     this.clientReporter = clientReporter;
