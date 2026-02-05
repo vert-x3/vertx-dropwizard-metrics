@@ -22,9 +22,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.datagram.DatagramSocketOptions;
 import io.vertx.core.http.HttpClientConfig;
-import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.http.HttpServerConfig;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.*;
 import io.vertx.core.spi.metrics.*;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
@@ -85,8 +83,8 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public HttpServerMetrics<?, ?, ?> createHttpServerMetrics(HttpServerConfig config, SocketAddress localAddress) {
-    String baseName = MetricRegistry.name(nameOf("http.servers"), TCPMetricsImpl.addressName(localAddress));
+  public HttpServerMetrics<?, ?> createHttpServerMetrics(HttpServerConfig config, SocketAddress localAddress) {
+    String baseName = MetricRegistry.name(nameOf("http.servers"), TcpTransportMetrics.addressName(localAddress));
     return new HttpServerMetricsImpl(registry, baseName, this.options.getMonitoredHttpServerUris(), this.options.getMonitoredHttpServerRoutes(), localAddress);
   }
 
@@ -108,7 +106,7 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public HttpClientMetrics<?, ?, ?> createHttpClientMetrics(HttpClientConfig config) {
+  public HttpClientMetrics<?, ?> createHttpClientMetrics(HttpClientConfig config) {
     String name = config.getMetricsName();
     String baseName;
     if (name != null && !name.isEmpty()) {
@@ -141,20 +139,33 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
   }
 
   @Override
-  public TransportMetrics<?> createTcpServerMetrics(TcpServerConfig config, SocketAddress localAddress) {
-    String baseName = MetricRegistry.name(nameOf("net.servers"), TCPMetricsImpl.addressName(localAddress));
-    return new TCPMetricsImpl(registry, baseName);
+  public TransportMetrics<?> createTcpServerMetrics(TcpServerConfig config, String protocol, SocketAddress localAddress) {
+    if (protocol == null) {
+      protocol = "net";
+    }
+    String baseName = MetricRegistry.name(nameOf(protocol + ".servers"), TcpTransportMetrics.addressName(localAddress));
+    return new TcpTransportMetrics(registry, baseName);
   }
 
   @Override
-  public TransportMetrics<?> createTcpClientMetrics(TcpClientConfig config) {
+  public TransportMetrics<?> createQuicEndpointMetrics(QuicEndpointConfig config, String protocol, SocketAddress localAddress) {
+    String name = config instanceof QuicClientConfig ? "quic.clients" : "quic.servers";
+    String baseName = MetricRegistry.name(nameOf(name), TcpTransportMetrics.addressName(localAddress));
+    return new QuicTransportMetrics(registry, baseName);
+  }
+
+  @Override
+  public TransportMetrics<?> createTcpClientMetrics(TcpClientConfig config, String protocol) {
+    if (protocol == null) {
+      protocol = "net";
+    }
     String baseName;
     if (config.getMetricsName() != null) {
-      baseName = nameOf("net.clients", config.getMetricsName());
+      baseName = nameOf(protocol + ".clients", config.getMetricsName());
     } else {
-     baseName = nameOf("net.clients");
+     baseName = nameOf(protocol + "net.clients");
     }
-    return new TCPMetricsImpl(registry, baseName);
+    return new TcpTransportMetrics(registry, baseName);
   }
 
   @Override

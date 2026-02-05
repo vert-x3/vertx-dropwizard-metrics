@@ -27,19 +27,21 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class TCPMetricsImpl extends AbstractMetrics implements TransportMetrics<Long> {
+class QuicTransportMetrics extends AbstractMetrics implements TransportMetrics<Long> {
 
   private Counter openConnections;
+  private Counter openStreams;
   private Timer connections;
   private Counter bytesRead;
   private Counter bytesWritten;
   private Counter exceptions;
   protected volatile boolean closed;
 
-  TCPMetricsImpl(MetricRegistry registry, String baseName) {
+  QuicTransportMetrics(MetricRegistry registry, String baseName) {
     super(registry, baseName);
 
-    this.openConnections = counter("open-netsockets");
+    this.openConnections = counter("open-connections");
+    this.openStreams = counter("open-streams");
     this.connections = timer("connections");
     this.exceptions = counter("exceptions");
     this.bytesRead = counter("bytes-read");
@@ -96,6 +98,16 @@ class TCPMetricsImpl extends AbstractMetrics implements TransportMetrics<Long> {
   }
 
   @Override
+  public void streamOpened(Long metric) {
+    openStreams.inc();
+  }
+
+  @Override
+  public void streamClosed(Long metric) {
+    openStreams.dec();
+  }
+
+  @Override
   public void bytesRead(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
     if (numberOfBytes > 0L) {
       bytesRead.inc(numberOfBytes);
@@ -114,15 +126,4 @@ class TCPMetricsImpl extends AbstractMetrics implements TransportMetrics<Long> {
     exceptions.inc();
   }
 
-  protected long connections() {
-    if (openConnections == null) return 0;
-
-    return openConnections.getCount();
-  }
-
-  static String addressName(SocketAddress address) {
-    if (address == null) return null;
-
-    return address.host() + ":" + address.port();
-  }
 }
