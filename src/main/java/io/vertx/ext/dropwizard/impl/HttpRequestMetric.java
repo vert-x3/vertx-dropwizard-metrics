@@ -5,14 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.spi.observability.HttpRequest;
 
 /**
 * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
 */
 class HttpRequestMetric {
 
-  final HttpMethod method;
-  final String uri;
+  HttpMethod method;
+  String uri;
   long requestBegin;
 
   // a string for a single route, a list of string for multiple
@@ -20,10 +21,14 @@ class HttpRequestMetric {
   // tracks length of resulting routes string
   private int routesLength = 0;
 
-  HttpRequestMetric(HttpMethod method, String uri) {
+  HttpRequestMetric() {
+  }
+
+  HttpRequestMetric init(HttpMethod method, String uri) {
     this.method = method;
     this.uri = uri;
-    requestBegin = System.nanoTime();
+    this.requestBegin = System.nanoTime();
+    return this;
   }
 
   String getRoute() {

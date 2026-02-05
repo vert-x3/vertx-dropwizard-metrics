@@ -43,7 +43,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public HttpRequestMetric requestBegin(SocketAddress remoteAddress, HttpRequest request) {
-    return new HttpRequestMetric(request.method(), request.uri());
+    return new HttpRequestMetric().init(request.method(), request.uri());
   }
 
   @Override
@@ -66,7 +66,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
 
   @Override
   public HttpRequestMetric responsePushed(SocketAddress remoteAddress, HttpMethod method, String uri, HttpResponse response) {
-    return new HttpRequestMetric(method, uri);
+    return new HttpRequestMetric().init(method, uri);
   }
 
   @Override

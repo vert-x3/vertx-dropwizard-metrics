@@ -12,8 +12,7 @@ public class HttpClientRequestMetric extends HttpRequestMetric {
   HttpResponse response;
   long requestEnd;
 
-  public HttpClientRequestMetric(EndpointMetrics endpointMetric, HttpMethod method, String uri) {
-    super(method, uri);
+  public HttpClientRequestMetric(EndpointMetrics endpointMetric) {
     this.endpointMetric = endpointMetric;
   }
 }

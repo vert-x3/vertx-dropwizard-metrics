@@ -30,9 +30,14 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, H
   }
 
   @Override
-  public HttpClientRequestMetric requestBegin(String uri, HttpRequest request) {
+  public HttpClientRequestMetric init() {
+    return new HttpClientRequestMetric(this);
+  }
+
+  @Override
+  public void requestBegin(HttpClientRequestMetric requestMetric, String uri, HttpRequest request) {
     inUse.inc();
-    return new HttpClientRequestMetric(this, request.method(), request.uri());
+    requestMetric.init(request.method(), request.uri());
   }
 
   @Override
@@ -57,5 +62,15 @@ public class EndpointMetrics implements ClientMetrics<HttpClientRequestMetric, H
     long duration = reporter.end(requestMetric, requestMetric.response.statusCode(), uriMatcher, null);
     inUse.dec();
     usage.update(duration, TimeUnit.NANOSECONDS);
+  }
+
+  @Override
+  public void connected() {
+    openConnections.inc();
+  }
+
+  @Override
+  public void disconnected() {
+    openConnections.dec();
   }
 }

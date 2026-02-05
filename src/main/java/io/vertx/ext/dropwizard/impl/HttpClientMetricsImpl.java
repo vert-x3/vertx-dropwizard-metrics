@@ -56,20 +56,6 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public void endpointConnected(ClientMetrics<HttpClientRequestMetric, ?, ?> endpointMetric) {
-    if (endpointMetric instanceof EndpointMetrics) {
-      ((EndpointMetrics)endpointMetric).openConnections.inc();
-    }
-  }
-
-  @Override
-  public void endpointDisconnected(ClientMetrics<HttpClientRequestMetric, ?, ?> endpointMetric) {
-    if (endpointMetric instanceof EndpointMetrics) {
-      ((EndpointMetrics)endpointMetric).openConnections.dec();
-    }
-  }
-
-  @Override
   public WebSocketMetric connected(HttpRequest request) {
     return clientReporter.createWebSocketMetric();
   }
