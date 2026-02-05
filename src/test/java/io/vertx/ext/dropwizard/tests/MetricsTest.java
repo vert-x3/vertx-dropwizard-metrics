@@ -36,6 +36,7 @@ import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RepeatRule;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -1209,6 +1210,7 @@ public class MetricsTest extends MetricsTestBase {
     assertEquals(7, (int)metrics.getJsonObject("vertx.pools.http.localhost:8080.queue-delay").getInteger("count"));
   }
 
+  @Ignore("Enable when vertx-core regression is fixed")
   @Test
   public void testMultiHttpClients(TestContext should) throws Exception {
     int size = 3;
@@ -1221,17 +1223,18 @@ public class MetricsTest extends MetricsTestBase {
     HttpClientAgent[] clients = new HttpClientAgent[size];
     CountDownLatch closedLatch = new CountDownLatch(size);
     CountDownLatch responseLatch = new CountDownLatch(size);
+    Vertx vx = vertx;
     for (int i = 0;i < size;i++) {
       clients[i] = vertx.httpClientBuilder()
         .withConnectHandler(conn -> {
           conn.closeHandler(v -> {
-            vertx.runOnContext(clv -> closedLatch.countDown());
+            vx.runOnContext(clv -> closedLatch.countDown());
           });
         })
         .build();
       clients[i].request(HttpMethod.GET, 8080, "localhost", "/").onComplete(should.asyncAssertSuccess(req -> {
         req.send().onComplete(should.asyncAssertSuccess(resp -> {
-          vertx.runOnContext(rlv -> {
+          vx.runOnContext(rlv -> {
             responseLatch.countDown();
           });
         }));

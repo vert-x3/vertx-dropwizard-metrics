@@ -17,11 +17,9 @@
 package io.vertx.ext.dropwizard.impl;
 
 import io.vertx.core.http.HttpClientConfig;
-import io.vertx.core.http.WebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.ClientMetrics;
 import io.vertx.core.spi.metrics.HttpClientMetrics;
-import io.vertx.core.spi.metrics.TransportMetrics;
 import io.vertx.core.spi.observability.HttpRequest;
 import io.vertx.core.spi.observability.HttpResponse;
 import io.vertx.ext.dropwizard.Match;
@@ -31,7 +29,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric, Long>, TransportMetrics<Long> {
+class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics<HttpClientRequestMetric, WebSocketMetric> {
 
   private final VertxMetricsImpl owner;
   private final Matcher uriMatcher;
@@ -72,38 +70,13 @@ class HttpClientMetricsImpl extends AbstractMetrics implements HttpClientMetrics
   }
 
   @Override
-  public WebSocketMetric connected(WebSocket webSocket) {
+  public WebSocketMetric connected(HttpRequest request) {
     return clientReporter.createWebSocketMetric();
   }
 
   @Override
   public void disconnected(WebSocketMetric webSocketMetric) {
     clientReporter.disconnect(webSocketMetric);
-  }
-
-  @Override
-  public Long connected(SocketAddress remoteAddress, String remoteName) {
-    return clientReporter.connected(remoteAddress, remoteName);
-  }
-
-  @Override
-  public void disconnected(Long socketMetric, SocketAddress remoteAddress) {
-    clientReporter.disconnected(socketMetric, remoteAddress);
-  }
-
-  @Override
-  public void bytesRead(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    clientReporter.bytesRead(socketMetric, remoteAddress, numberOfBytes);
-  }
-
-  @Override
-  public void bytesWritten(Long socketMetric, SocketAddress remoteAddress, long numberOfBytes) {
-    clientReporter.bytesWritten(socketMetric, remoteAddress, numberOfBytes);
-  }
-
-  @Override
-  public void exceptionOccurred(Long socketMetric, SocketAddress remoteAddress, Throwable t) {
-    clientReporter.exceptionOccurred(socketMetric, remoteAddress, t);
   }
 
   @Override

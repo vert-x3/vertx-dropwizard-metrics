@@ -17,14 +17,14 @@ class HttpClientReporter extends HttpMetricsImpl {
     // max pool size gauge
     gauge(() -> totalMaxPoolSize, "connections", "max-pool-size");
 
-    // connection pool ratio
-    RatioGauge gauge = new RatioGauge() {
-      @Override
-      protected Ratio getRatio() {
-        return Ratio.of(connections(), totalMaxPoolSize);
-      }
-    };
-    gauge(gauge, "connections", "pool-ratio");
+//    // connection pool ratio
+//    RatioGauge gauge = new RatioGauge() {
+//      @Override
+//      protected Ratio getRatio() {
+//        return Ratio.of(connections(), totalMaxPoolSize);
+//      }
+//    };
+//    gauge(gauge, "connections", "pool-ratio");
   }
 
   void incMaxPoolSize(int maxPoolSize) {

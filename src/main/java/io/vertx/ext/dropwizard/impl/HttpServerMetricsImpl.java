@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<HttpRequestMetric, WebSocketMetric, Long> {
+class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics<HttpRequestMetric, WebSocketMetric> {
 
   private final Matcher uriMatcher;
   private final Matcher routeMatcher;
@@ -42,7 +42,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public HttpRequestMetric requestBegin(Long socketMetric, HttpRequest request) {
+  public HttpRequestMetric requestBegin(SocketAddress remoteAddress, HttpRequest request) {
     return new HttpRequestMetric(request.method(), request.uri());
   }
 
@@ -51,7 +51,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public WebSocketMetric connected(Long socketMetric, HttpRequestMetric requestMetric, ServerWebSocket serverWebSocket) {
+  public WebSocketMetric connected(HttpRequest request) {
     return createWebSocketMetric();
   }
 
@@ -65,7 +65,7 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   }
 
   @Override
-  public HttpRequestMetric responsePushed(Long socketMetric, HttpMethod method, String uri, HttpResponse response) {
+  public HttpRequestMetric responsePushed(SocketAddress remoteAddress, HttpMethod method, String uri, HttpResponse response) {
     return new HttpRequestMetric(method, uri);
   }
 

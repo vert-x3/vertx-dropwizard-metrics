@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:nscavell@redhat.com">Nick Scavelli</a>
  */
-abstract class HttpMetricsImpl extends TCPMetricsImpl {
+abstract class HttpMetricsImpl extends AbstractMetrics {
 
   private ThroughputTimer requests;
   private ThroughputMeter[] responses;
@@ -73,9 +73,6 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
    * @param uriMatcher the Matcher instance
    */
   protected long end(HttpRequestMetric metric, int statusCode, Matcher uriMatcher, Matcher routeMatcher) {
-    if (closed) {
-      return 0;
-    }
     String uriMatch = null;
     String routeMatch = null;
     if (uriMatcher != null && metric.uri != null) {
@@ -124,9 +121,6 @@ abstract class HttpMetricsImpl extends TCPMetricsImpl {
   }
 
   protected void disconnect(WebSocketMetric metric) {
-    if (closed) {
-      return;
-    }
     openWebSockets.dec();
   }
 }
