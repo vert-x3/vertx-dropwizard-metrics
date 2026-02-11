@@ -18,6 +18,7 @@ package io.vertx.ext.dropwizard.tests;
 
 import com.codahale.metrics.*;
 import com.codahale.metrics.Timer;
+import io.netty.util.internal.PlatformDependent;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.datagram.DatagramSocket;
@@ -36,6 +37,8 @@ import io.vertx.ext.dropwizard.impl.Helper;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.RepeatRule;
+import io.vertx.test.tls.Cert;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -148,6 +151,17 @@ public class MetricsTest extends MetricsTestBase {
 
     cleanup(client);
     cleanup(server);
+  }
+
+  @Test
+  public void testHttpServerMetricsName() {
+    HttpServer server = vertx.createHttpServer(new HttpServerOptions()
+      .setMetricsName("the-name")
+    ).requestHandler(req -> {
+    });
+    server.listen(8080, "localhost").await();
+    Set<String> names = metricsService.metricsNames();
+    assertTrue(names.contains("vertx.http.servers.the-name.get-requests"));
   }
 
   @Test
@@ -602,6 +616,66 @@ public class MetricsTest extends MetricsTestBase {
 
     cleanup(client);
     cleanup(server);
+  }
+
+  @Test
+  public void testHTTP3Metrics() {
+    Assume.assumeFalse(PlatformDependent.isWindows());
+    HttpServer server = vertx.createHttpServer(new HttpServerConfig()
+      .setSslOptions(new ServerSSLOptions().setKeyCertOptions(Cert.SERVER_JKS.get()))
+      .setVersions(Set.of(HttpVersion.HTTP_3)));
+    server.requestHandler(request -> {
+      vertx.setTimer(50, id -> {
+        request.response().end("Hello");
+      });
+    });
+    server.listen(8080, "localhost").await();
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientConfig()
+      .setSslOptions(new ClientSSLOptions().setTrustAll(true))
+      .setVersions(List.of(HttpVersion.HTTP_3)));
+    Buffer resp = client
+      .request(HttpMethod.GET, 8080, "localhost", "/")
+      .compose(request -> request.send().compose(response -> response.body()))
+      .await();
+    JsonObject serverMetrics = metricsService.getMetricsSnapshot(server);
+    JsonObject clientMetrics = metricsService.getMetricsSnapshot(client);
+    assertEquals(1, (int)serverMetrics.getJsonObject("get-requests").getInteger("count"));
+    assertEquals(1, (int)clientMetrics.getJsonObject("get-requests").getInteger("count"));
+  }
+
+  @Test
+  public void testHybridHttpMetrics() {
+    Assume.assumeFalse(PlatformDependent.isWindows());
+    HttpServer server = vertx.createHttpServer(new HttpServerConfig()
+      .setSslOptions(new ServerSSLOptions().setKeyCertOptions(Cert.SERVER_JKS.get()))
+      .setVersions(Set.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)));
+    server.requestHandler(request -> {
+      vertx.setTimer(50, id -> {
+        request.response().end("Hello");
+      });
+    });
+    server.listen(8080, "localhost").await();
+    HttpClientAgent client = vertx.createHttpClient(new HttpClientConfig()
+      .setSslOptions(new ClientSSLOptions().setTrustAll(true))
+      .setVersions(List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)));
+    for (HttpVersion version : List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)) {
+      RequestOptions options = new RequestOptions()
+        .setPort(8080)
+        .setHost("localhost")
+        .setProtocolVersion(version);
+      Buffer resp = client
+        .request(options)
+        .compose(request -> request.send().compose(response -> response.body()))
+        .await();
+    }
+    JsonObject serverMetrics = metricsService.getMetricsSnapshot(server);
+    JsonObject clientMetrics = metricsService.getMetricsSnapshot(client);
+    assertEquals(2, (int)serverMetrics.getJsonObject("get-requests").getInteger("count"));
+    assertEquals(2, (int)clientMetrics.getJsonObject("get-requests").getInteger("count"));
+    JsonObject quicServerMetrics = metricsService.getMetricsSnapshot("vertx.quic.servers.localhost:8080");
+    JsonObject tcpServerMetrics = metricsService.getMetricsSnapshot("vertx.http.servers.localhost:8080");
+    assertEquals(1, (int) quicServerMetrics.getJsonObject("vertx.quic.servers.localhost:8080.open-connections").getInteger("count"));
+    assertEquals(1, (int) tcpServerMetrics.getJsonObject("vertx.http.servers.localhost:8080.open-connections.127.0.0.1").getInteger("count"));
   }
 
   @Test

@@ -19,7 +19,6 @@ package io.vertx.ext.dropwizard.impl;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.net.SocketAddress;
 import io.vertx.ext.dropwizard.ThroughputMeter;
 import io.vertx.ext.dropwizard.ThroughputTimer;
 
@@ -38,7 +37,7 @@ abstract class HttpMetricsImpl extends AbstractMetrics {
 
   private final Map<HttpMethod, ThroughputTimer> methodRequests;
 
-  public HttpMetricsImpl(MetricRegistry registry, String baseName, SocketAddress localAddress) {
+  public HttpMetricsImpl(MetricRegistry registry, String baseName) {
     super(registry, baseName);
     openWebSockets = counter("open-websockets");
     requests = throughputTimer("requests");

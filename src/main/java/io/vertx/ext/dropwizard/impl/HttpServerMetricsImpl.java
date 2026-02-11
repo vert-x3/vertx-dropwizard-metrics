@@ -18,7 +18,6 @@ package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.MetricRegistry;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.net.SocketAddress;
 import io.vertx.core.spi.metrics.HttpServerMetrics;
 import io.vertx.core.spi.observability.HttpRequest;
@@ -35,8 +34,8 @@ class HttpServerMetricsImpl extends HttpMetricsImpl implements HttpServerMetrics
   private final Matcher uriMatcher;
   private final Matcher routeMatcher;
 
-  HttpServerMetricsImpl(MetricRegistry registry, String baseName, List<Match> monitoredUris, List<Match> monitoredRoutes, SocketAddress localAddress) {
-    super(registry, baseName, localAddress);
+  HttpServerMetricsImpl(MetricRegistry registry, String baseName, List<Match> monitoredUris, List<Match> monitoredRoutes) {
+    super(registry, baseName);
     uriMatcher = monitoredUris == null ? null : new Matcher(monitoredUris);
     routeMatcher = monitoredRoutes == null ? null : new Matcher(monitoredRoutes);
   }

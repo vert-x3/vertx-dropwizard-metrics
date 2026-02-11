@@ -1,7 +1,6 @@
 package io.vertx.ext.dropwizard.impl;
 
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.RatioGauge;
 import io.vertx.core.net.SocketAddress;
 
 /**
@@ -12,7 +11,7 @@ class HttpClientReporter extends HttpMetricsImpl {
   int totalMaxPoolSize;
 
   public HttpClientReporter(MetricRegistry registry, String baseName, SocketAddress localAdress) {
-    super(registry, baseName, localAdress);
+    super(registry, baseName);
 
     // max pool size gauge
     gauge(() -> totalMaxPoolSize, "connections", "max-pool-size");
