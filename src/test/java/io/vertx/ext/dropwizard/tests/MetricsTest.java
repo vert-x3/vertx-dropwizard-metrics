@@ -621,18 +621,18 @@ public class MetricsTest extends MetricsTestBase {
   @Test
   public void testHTTP3Metrics() {
     Assume.assumeFalse(PlatformDependent.isWindows());
-    HttpServer server = vertx.createHttpServer(new HttpServerConfig()
-      .setSslOptions(new ServerSSLOptions().setKeyCertOptions(Cert.SERVER_JKS.get()))
-      .setVersions(Set.of(HttpVersion.HTTP_3)));
+    HttpServer server = vertx.createHttpServer(
+      new HttpServerConfig().setVersions(Set.of(HttpVersion.HTTP_3)),
+      new ServerSSLOptions().setKeyCertOptions(Cert.SERVER_JKS.get()));
     server.requestHandler(request -> {
       vertx.setTimer(50, id -> {
         request.response().end("Hello");
       });
     });
     server.listen(8080, "localhost").await();
-    HttpClientAgent client = vertx.createHttpClient(new HttpClientConfig()
-      .setSslOptions(new ClientSSLOptions().setTrustAll(true))
-      .setVersions(List.of(HttpVersion.HTTP_3)));
+    HttpClientAgent client = vertx.createHttpClient(
+      new HttpClientConfig().setVersions(List.of(HttpVersion.HTTP_3)),
+      new ClientSSLOptions().setTrustAll(true));
     Buffer resp = client
       .request(HttpMethod.GET, 8080, "localhost", "/")
       .compose(request -> request.send().compose(response -> response.body()))
@@ -646,18 +646,20 @@ public class MetricsTest extends MetricsTestBase {
   @Test
   public void testHybridHttpMetrics() {
     Assume.assumeFalse(PlatformDependent.isWindows());
-    HttpServer server = vertx.createHttpServer(new HttpServerConfig()
-      .setSslOptions(new ServerSSLOptions().setKeyCertOptions(Cert.SERVER_JKS.get()))
-      .setVersions(Set.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)));
+    HttpServer server = vertx.createHttpServer(
+      new HttpServerConfig()
+        .setVersions(Set.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)),
+      new ServerSSLOptions()
+        .setKeyCertOptions(Cert.SERVER_JKS.get()));
     server.requestHandler(request -> {
       vertx.setTimer(50, id -> {
         request.response().end("Hello");
       });
     });
     server.listen(8080, "localhost").await();
-    HttpClientAgent client = vertx.createHttpClient(new HttpClientConfig()
-      .setSslOptions(new ClientSSLOptions().setTrustAll(true))
-      .setVersions(List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)));
+    HttpClientConfig clientCfg = new HttpClientConfig();
+    HttpClientAgent client = vertx.createHttpClient(clientCfg
+      .setVersions(List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)), new ClientSSLOptions().setTrustAll(true));
     for (HttpVersion version : List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)) {
       RequestOptions options = new RequestOptions()
         .setPort(8080)

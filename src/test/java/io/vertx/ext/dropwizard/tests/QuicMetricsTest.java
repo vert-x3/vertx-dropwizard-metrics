@@ -32,7 +32,7 @@ public class QuicMetricsTest extends MetricsTestBase {
 
   @Test
   public void testSimple() {
-    QuicServer server = QuicServer.create(vertx, new QuicServerConfig(), new ServerSSLOptions()
+    QuicServer server = vertx.createQuicServer(new QuicServerConfig(), new ServerSSLOptions()
       .setKeyCertOptions(Cert.SERVER_JKS.get())
       .setApplicationLayerProtocols(List.of("test-protocol")));
     server.handler(connection -> {
@@ -42,7 +42,7 @@ public class QuicMetricsTest extends MetricsTestBase {
     });
     server.listen(1234, "localhost").await();
 
-    QuicClient client = QuicClient.create(vertx, new QuicClientConfig(), new ClientSSLOptions()
+    QuicClient client = vertx.createQuicClient(new QuicClientConfig(), new ClientSSLOptions()
       .setTrustAll(true).setApplicationLayerProtocols(List.of("test-protocol")));
     MetricsService metricsService = MetricsService.create(vertx);
     QuicConnection connection = client.connect(SocketAddress.inetSocketAddress(1234, "localhost")).await();

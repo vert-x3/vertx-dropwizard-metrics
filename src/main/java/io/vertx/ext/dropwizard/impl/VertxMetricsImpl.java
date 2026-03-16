@@ -23,6 +23,7 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.datagram.DatagramSocketOptions;
 import io.vertx.core.http.HttpClientConfig;
 import io.vertx.core.http.HttpServerConfig;
+import io.vertx.core.http.ObservabilityConfig;
 import io.vertx.core.net.*;
 import io.vertx.core.spi.metrics.*;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
@@ -84,7 +85,11 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public HttpServerMetrics<?, ?> createHttpServerMetrics(HttpServerConfig config, SocketAddress tcpLocalAddress, SocketAddress udpLocalAddress) {
-    String metricsName = config.getMetricsName();
+    String metricsName = null;
+    ObservabilityConfig obsCfg = config.getObservabilityConfig();
+    if (obsCfg != null) {
+      metricsName = obsCfg.getMetricsName();
+    }
     if (metricsName == null || metricsName.isEmpty()) {
       if (tcpLocalAddress != null) {
         metricsName = TcpTransportMetrics.addressName(tcpLocalAddress);
@@ -115,10 +120,14 @@ public class VertxMetricsImpl extends AbstractMetrics implements VertxMetrics {
 
   @Override
   public HttpClientMetrics<?, ?> createHttpClientMetrics(HttpClientConfig config) {
-    String name = config.getMetricsName();
+    String metricsName = null;
+    ObservabilityConfig obsCfg = config.getObservabilityConfig();
+    if (obsCfg != null) {
+      metricsName = obsCfg.getMetricsName();
+    }
     String baseName;
-    if (name != null && !name.isEmpty()) {
-      baseName = nameOf("http.clients", name);
+    if (metricsName != null && !metricsName.isEmpty()) {
+      baseName = nameOf("http.clients", metricsName);
     } else {
       baseName = nameOf("http.clients");
     }
