@@ -35,10 +35,7 @@ public class QuicMetricsTest extends MetricsTestBase {
     QuicServer server = vertx.createQuicServer(new QuicServerConfig(), new ServerSSLOptions()
       .setKeyCertOptions(Cert.SERVER_JKS.get())
       .setApplicationLayerProtocols(List.of("test-protocol")));
-    server.handler(connection -> {
-      connection.handler(stream -> {
-
-      });
+    server.streamHandler(stream -> {
     });
     server.listen(1234, "localhost").await();
 
