@@ -15,7 +15,6 @@
  */
 package io.vertx.ext.dropwizard.tests;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.*;
 import io.vertx.ext.dropwizard.MetricsService;
 import io.vertx.test.core.LinuxOrOsx;
@@ -24,8 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 @RunWith(LinuxOrOsx.class)
 public class QuicMetricsTest extends MetricsTestBase {
@@ -39,8 +36,12 @@ public class QuicMetricsTest extends MetricsTestBase {
     });
     server.listen(1234, "localhost").await();
 
-    QuicClient client = vertx.createQuicClient(new QuicClientConfig(), new ClientSSLOptions()
-      .setTrustAll(true).setApplicationLayerProtocols(List.of("test-protocol")));
+    QuicClient client = vertx.createQuicClient(
+      new QuicClientConfig(),
+      new ClientSSLOptions()
+        .setTrustAll(true)
+        .setHostnameVerificationAlgorithm("")
+        .setApplicationLayerProtocols(List.of("test-protocol")));
     MetricsService metricsService = MetricsService.create(vertx);
     QuicConnection connection = client.connect(SocketAddress.inetSocketAddress(1234, "localhost")).await();
     QuicStream stream = connection.openStream().await();
