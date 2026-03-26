@@ -44,7 +44,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
-import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
@@ -631,7 +630,10 @@ public class MetricsTest extends MetricsTestBase {
     });
     server.listen(8080, "localhost").await();
     HttpClientAgent client = vertx.createHttpClient(
-      new HttpClientConfig().setVersions(List.of(HttpVersion.HTTP_3)),
+      new HttpClientConfig()
+        .setVersions(List.of(HttpVersion.HTTP_3))
+        .setSsl(true)
+        .setVerifyHost(false),
       new ClientSSLOptions().setTrustAll(true));
     Buffer resp = client
       .request(HttpMethod.GET, 8080, "localhost", "/")
@@ -659,7 +661,9 @@ public class MetricsTest extends MetricsTestBase {
     server.listen(8080, "localhost").await();
     HttpClientConfig clientCfg = new HttpClientConfig();
     HttpClientAgent client = vertx.createHttpClient(clientCfg
-      .setVersions(List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)), new ClientSSLOptions().setTrustAll(true));
+      .setVersions(List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3))
+      .setSsl(true)
+      .setVerifyHost(false), new ClientSSLOptions().setTrustAll(true));
     for (HttpVersion version : List.of(HttpVersion.HTTP_1_1, HttpVersion.HTTP_3)) {
       RequestOptions options = new RequestOptions()
         .setPort(8080)
