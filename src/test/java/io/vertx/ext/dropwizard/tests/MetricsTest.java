@@ -382,6 +382,7 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch latch = new CountDownLatch(requests);
 
     HttpClientAgent client = vertx.createHttpClient(new HttpClientOptions());
+    String clientBaseName = metricsService.getBaseName(client);
     HttpServer server = vertx.createHttpServer(new HttpServerOptions().setHost("localhost").setPort(8081)).requestHandler(req -> {
       req.response().end();
     });
@@ -410,7 +411,11 @@ public class MetricsTest extends MetricsTestBase {
       JsonObject metrics = metricsService.getMetricsSnapshot(server);
       return metrics != null && metrics.isEmpty();
     });
-    assertWaitUntil(() -> metricsService.getMetricsSnapshot(client).getJsonObject("connections.max-pool-size") == null);
+    assertWaitUntil(() -> {
+      // Use the clientBaseName because metricsService.getMetricsSnapshot(client) could throw an ISE
+      // If the cleanable client is no longer able to reach the actual client
+      return metricsService.getMetricsSnapshot(clientBaseName).getJsonObject("connections.max-pool-size") == null;
+    });
   }
 
   @Test
@@ -772,6 +777,7 @@ public class MetricsTest extends MetricsTestBase {
     CountDownLatch latch = new CountDownLatch(requests);
 
     NetClient client = vertx.createNetClient(new NetClientOptions());
+    String clientBaseName = metricsService.getBaseName(client);
     NetServer server = vertx.createNetServer(new NetServerOptions().setHost("localhost").setPort(1235).setReceiveBufferSize(50)).connectHandler(socket -> {
       socket.handler(buff -> latch.countDown());
     });
@@ -793,7 +799,9 @@ public class MetricsTest extends MetricsTestBase {
       return metrics != null && metrics.isEmpty();
     });
 
-    JsonObject metrics = metricsService.getMetricsSnapshot(client);
+    // Use the clientBaseName because metricsService.getMetricsSnapshot(client) could throw an ISE
+    // If the cleanable client is no longer able to reach the actual client
+    JsonObject metrics = metricsService.getMetricsSnapshot(clientBaseName);
     assertNotNull(metrics);
     assertTrue(metrics.isEmpty());
 
