@@ -19,7 +19,6 @@ import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import io.vertx.core.VertxOptions;
 import io.vertx.ext.dropwizard.DropwizardMetricsOptions;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;

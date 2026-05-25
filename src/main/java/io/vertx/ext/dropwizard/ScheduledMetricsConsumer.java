@@ -17,7 +17,6 @@
 package io.vertx.ext.dropwizard;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.Measured;
 import io.vertx.ext.dropwizard.impl.AbstractMetrics;
 

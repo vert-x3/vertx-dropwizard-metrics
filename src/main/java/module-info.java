@@ -1,4 +1,3 @@
-import io.vertx.core.spi.VertxServiceProvider;
 
 module io.vertx.metrics.dropwizard {
 

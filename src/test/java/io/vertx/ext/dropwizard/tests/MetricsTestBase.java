@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 
 import java.util.Objects;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;

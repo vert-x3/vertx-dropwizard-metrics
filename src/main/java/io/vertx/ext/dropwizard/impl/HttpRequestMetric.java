@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.spi.observability.HttpRequest;
 
 /**
 * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
