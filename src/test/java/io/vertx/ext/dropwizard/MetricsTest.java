@@ -1430,6 +1430,10 @@ public class MetricsTest extends MetricsTestBase {
 
     gate.countDown();
     awaitLatch(done);
+    assertWaitUntil(() -> {
+      JsonObject metric = metricsService.getMetricsSnapshot(exec).getJsonObject("usage");
+      return Long.valueOf(6L).equals(getCount(metric));
+    });
     metrics = metricsService.getMetricsSnapshot(exec);
     assertCount(metrics.getJsonObject("usage"), 6);
     assertCount(metrics.getJsonObject("queue-delay"), 6);
