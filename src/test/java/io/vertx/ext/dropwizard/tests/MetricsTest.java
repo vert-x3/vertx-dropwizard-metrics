@@ -1111,6 +1111,10 @@ public class MetricsTest extends MetricsTestBase {
 
     }
 
+    assertWaitUntil(() -> {
+      JsonObject metric = metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures");
+      return Long.valueOf(1L).equals(getCount(metric));
+    });
     assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures"), 1L);
     assertCount(() -> metricsService.getMetricsSnapshot(vertx.eventBus()).getJsonObject("messages.reply-failures." + ReplyFailure.RECIPIENT_FAILURE), 1L);
   }
