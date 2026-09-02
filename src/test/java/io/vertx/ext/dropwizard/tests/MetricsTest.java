@@ -1509,13 +1509,13 @@ public class MetricsTest extends MetricsTestBase {
   @Test
   public void testThreadPoolMetricsOnClose() throws Exception {
     WorkerExecutor exec = vertx.createSharedWorkerExecutor("the-executor", 10);
-    assertTrue(metricsService.getMetricsSnapshot(exec).size() > 0);
-    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread").size() > 0);
-    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").size() > 0);
+    assertFalse(metricsService.getMetricsSnapshot(exec).isEmpty());
+    assertFalse(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread").isEmpty());
+    assertFalse(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").isEmpty());
     exec.close();
-    assertTrue(metricsService.getMetricsSnapshot(exec).size() == 0);
-    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread").size() > 0);
-    assertTrue(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").size() > 0);
+    assertWaitUntil(() -> metricsService.getMetricsSnapshot("vertx.pools.worker.the-executor").isEmpty());
+    assertFalse(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-worker-thread").isEmpty());
+    assertFalse(metricsService.getMetricsSnapshot("vertx.pools.worker.vert.x-internal-blocking").isEmpty());
     CountDownLatch latch = new CountDownLatch(1);
     vertx.close().onComplete(ar -> latch.countDown());
     assertTrue(latch.await(20, TimeUnit.SECONDS));
